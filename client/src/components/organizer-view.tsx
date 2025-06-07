@@ -2,6 +2,7 @@ import { Search, ClipboardList, TrendingUp, Calendar, Users, ArrowRight } from "
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 
 export default function OrganizerView() {
   return (
@@ -9,51 +10,63 @@ export default function OrganizerView() {
       {/* Hero Section */}
       <section className="mb-12">
         <div className="text-center">
-          <h2 className="text-4xl font-bold text-slate-800 mb-4">
+          <h2 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-4">
             Plan & Execute Unforgettable Events
           </h2>
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto mb-8">
             Connect with top hospitality professionals and streamline your event planning process with our comprehensive platform.
           </p>
-          <Button 
-            size="lg" 
-            className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-200"
-          >
-            Start Planning Your Event
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/professionals">
+              <Button 
+                size="lg" 
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                <Search className="mr-2 h-4 w-4" />
+                Browse Professionals
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+            <Button 
+              size="lg" 
+              variant="outline"
+              className="px-8 py-3 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
+              Start Planning Your Event
+            </Button>
+          </div>
         </div>
       </section>
 
       {/* Features Grid */}
       <section className="grid md:grid-cols-3 gap-8 mb-12">
-        <Card className="hover:shadow-md transition-shadow duration-200">
+        <Card className="hover:shadow-md transition-shadow duration-200 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
           <CardContent className="p-6">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-              <Search className="h-6 w-6 text-blue-600" />
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
+              <Search className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">Find Professionals</h3>
-            <p className="text-slate-600">Search and connect with verified hospitality professionals in your area.</p>
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">Find Professionals</h3>
+            <p className="text-slate-600 dark:text-slate-400">Search and connect with verified hospitality professionals in your area.</p>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-md transition-shadow duration-200">
+        <Card className="hover:shadow-md transition-shadow duration-200 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
           <CardContent className="p-6">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-              <ClipboardList className="h-6 w-6 text-green-600" />
+            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-4">
+              <ClipboardList className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">Manage Projects</h3>
-            <p className="text-slate-600">Organize timelines, tasks, and communications all in one place.</p>
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">Manage Projects</h3>
+            <p className="text-slate-600 dark:text-slate-400">Organize timelines, tasks, and communications all in one place.</p>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-md transition-shadow duration-200">
+        <Card className="hover:shadow-md transition-shadow duration-200 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
           <CardContent className="p-6">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-              <TrendingUp className="h-6 w-6 text-purple-600" />
+            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-4">
+              <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">Track Success</h3>
-            <p className="text-slate-600">Monitor event performance and gather valuable insights for future planning.</p>
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">Track Success</h3>
+            <p className="text-slate-600 dark:text-slate-400">Monitor event performance and gather valuable insights for future planning.</p>
           </CardContent>
         </Card>
       </section>
