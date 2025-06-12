@@ -107,51 +107,7 @@ export default function ProfessionalView() {
         </Card>
       </section>
 
-      {/* Recent Inquiries */}
-      <section>
-        <Card>
-          <CardContent className="p-8">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-slate-800">Recent Inquiries</h3>
-              <Button variant="ghost" className="text-primary hover:text-primary/80">
-                View All <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors duration-200 cursor-pointer">
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                    <Mail className="h-5 w-5 text-indigo-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-800">Wedding Catering Services</h4>
-                    <p className="text-sm text-slate-500">From Sarah Johnson</p>
-                  </div>
-                </div>
-                <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-                  Pending
-                </Badge>
-              </div>
-              
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors duration-200 cursor-pointer">
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
-                    <Camera className="h-5 w-5 text-teal-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-800">Corporate Event Photography</h4>
-                    <p className="text-sm text-slate-500">From TechCorp Events</p>
-                  </div>
-                </div>
-                <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100">
-                  Responded
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
+      
     </div>
   );
 }
