@@ -48,15 +48,6 @@ export default function Navigation({ userType, onUserTypeChange }: NavigationPro
                 Browse Professionals
               </Button>
             </Link>
-            <Link href="/create-profile">
-              <Button 
-                variant={location === "/create-profile" ? "secondary" : "ghost"}
-                size="sm"
-                className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-              >
-                Create Profile
-              </Button>
-            </Link>
           </div>
 
           {/* User Type Toggle */}

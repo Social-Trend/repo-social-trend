@@ -9,7 +9,6 @@ import {
   Flower,
   Mail
 } from "lucide-react";
-import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -26,15 +25,13 @@ export default function ProfessionalView() {
           <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
             Connect with event organizers seeking your expertise and manage your service offerings through our professional platform.
           </p>
-          <Link href="/create-profile">
-            <Button 
-              size="lg" 
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-200"
-            >
-              Create Professional Profile
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+          <Button 
+            size="lg" 
+            className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            Create Professional Profile
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
         </div>
       </section>
 
