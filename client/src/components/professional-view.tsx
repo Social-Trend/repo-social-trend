@@ -7,28 +7,67 @@ import {
   Camera, 
   Music, 
   Flower,
-  Mail
+  Mail,
+  Plus,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import CreateProfessionalForm from "@/components/create-professional-form";
+import { useState } from "react";
+import type { Professional } from "@shared/schema";
 
 export default function ProfessionalView() {
+  const [showCreateForm, setShowCreateForm] = useState(false);
+
+  const handleFormSuccess = (professional: Professional) => {
+    setShowCreateForm(false);
+    // Could add success notification or redirect here
+  };
+
+  const handleFormCancel = () => {
+    setShowCreateForm(false);
+  };
+
+  if (showCreateForm) {
+    return (
+      <div className="fade-in max-w-4xl mx-auto">
+        <div className="mb-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => setShowCreateForm(false)}
+            className="mb-4"
+          >
+            <ArrowRight className="h-4 w-4 mr-2 rotate-180" />
+            Back to Professional Dashboard
+          </Button>
+        </div>
+        <CreateProfessionalForm 
+          onSuccess={handleFormSuccess}
+          onCancel={handleFormCancel}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="fade-in" role="tabpanel" aria-labelledby="professional-btn">
       {/* Hero Section */}
       <section className="mb-12">
         <div className="text-center">
-          <h2 className="text-4xl font-bold text-slate-800 mb-4">
+          <h2 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-4">
             Grow Your Hospitality Business
           </h2>
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto mb-8">
             Connect with event organizers seeking your expertise and manage your service offerings through our professional platform.
           </p>
           <Button 
             size="lg" 
+            onClick={() => setShowCreateForm(true)}
             className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-200"
           >
+            <Plus className="mr-2 h-4 w-4" />
             Create Professional Profile
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
