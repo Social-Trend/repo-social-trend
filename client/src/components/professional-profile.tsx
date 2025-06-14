@@ -134,11 +134,18 @@ export default function ProfessionalProfile({
           {/* Action Buttons */}
           <div className="flex gap-2">
             <Button 
+              variant="outline"
+              className="flex-1 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
+              <User className="h-4 w-4 mr-2" />
+              View Profile
+            </Button>
+            <Button 
               onClick={onContact} 
               className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <Mail className="h-4 w-4 mr-2" />
-              Contact Professional
+              Contact
             </Button>
             <Button 
               variant="outline" 
