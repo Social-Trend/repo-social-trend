@@ -1,4 +1,17 @@
-import { users, professionals, type User, type InsertUser, type Professional, type InsertProfessional } from "@shared/schema";
+import { 
+  users, 
+  professionals, 
+  conversations, 
+  messages,
+  type User, 
+  type InsertUser, 
+  type Professional, 
+  type InsertProfessional,
+  type Conversation,
+  type InsertConversation,
+  type Message,
+  type InsertMessage
+} from "@shared/schema";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -8,22 +21,41 @@ export interface IStorage {
   getProfessionals(): Promise<Professional[]>;
   createProfessional(professional: InsertProfessional): Promise<Professional>;
   updateProfessional(id: number, professional: Partial<InsertProfessional>): Promise<Professional | undefined>;
+  
+  // Messaging methods
+  getConversations(professionalId?: number, organizerEmail?: string): Promise<Conversation[]>;
+  getConversation(id: number): Promise<Conversation | undefined>;
+  createConversation(conversation: InsertConversation): Promise<Conversation>;
+  updateConversationStatus(id: number, status: string): Promise<Conversation | undefined>;
+  
+  getMessages(conversationId: number): Promise<Message[]>;
+  createMessage(message: InsertMessage): Promise<Message>;
+  markMessagesAsRead(conversationId: number, senderType: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private professionals: Map<number, Professional>;
+  private conversations: Map<number, Conversation>;
+  private messages: Map<number, Message>;
   private currentUserId: number;
   private currentProfessionalId: number;
+  private currentConversationId: number;
+  private currentMessageId: number;
 
   constructor() {
     this.users = new Map();
     this.professionals = new Map();
+    this.conversations = new Map();
+    this.messages = new Map();
     this.currentUserId = 1;
     this.currentProfessionalId = 1;
+    this.currentConversationId = 1;
+    this.currentMessageId = 1;
     
     // Add sample professionals
     this.seedProfessionals();
+    this.seedConversations();
   }
 
   private seedProfessionals() {
@@ -187,6 +219,162 @@ export class MemStorage implements IStorage {
     const updated: Professional = { ...existing, ...updates };
     this.professionals.set(id, updated);
     return updated;
+  }
+
+  // Messaging methods implementation
+  async getConversations(professionalId?: number, organizerEmail?: string): Promise<Conversation[]> {
+    const allConversations = Array.from(this.conversations.values());
+    
+    if (professionalId) {
+      return allConversations.filter(conv => conv.professionalId === professionalId);
+    }
+    
+    if (organizerEmail) {
+      return allConversations.filter(conv => conv.organizerEmail === organizerEmail);
+    }
+    
+    return allConversations;
+  }
+
+  async getConversation(id: number): Promise<Conversation | undefined> {
+    return this.conversations.get(id);
+  }
+
+  async createConversation(insertConversation: InsertConversation): Promise<Conversation> {
+    const id = this.currentConversationId++;
+    const conversation: Conversation = {
+      ...insertConversation,
+      id,
+      createdAt: new Date()
+    };
+    this.conversations.set(id, conversation);
+    return conversation;
+  }
+
+  async updateConversationStatus(id: number, status: string): Promise<Conversation | undefined> {
+    const existing = this.conversations.get(id);
+    if (!existing) return undefined;
+    
+    const updated: Conversation = { ...existing, status };
+    this.conversations.set(id, updated);
+    return updated;
+  }
+
+  async getMessages(conversationId: number): Promise<Message[]> {
+    return Array.from(this.messages.values())
+      .filter(msg => msg.conversationId === conversationId)
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  }
+
+  async createMessage(insertMessage: InsertMessage): Promise<Message> {
+    const id = this.currentMessageId++;
+    const message: Message = {
+      ...insertMessage,
+      id,
+      timestamp: new Date(),
+      isRead: false
+    };
+    this.messages.set(id, message);
+    return message;
+  }
+
+  async markMessagesAsRead(conversationId: number, senderType: string): Promise<void> {
+    Array.from(this.messages.values())
+      .filter(msg => msg.conversationId === conversationId && msg.senderType !== senderType)
+      .forEach(msg => {
+        const updated = { ...msg, isRead: true };
+        this.messages.set(msg.id, updated);
+      });
+  }
+
+  private seedConversations() {
+    const sampleConversations = [
+      {
+        organizerName: "Jennifer Smith",
+        organizerEmail: "jennifer@eventpro.com",
+        professionalId: 1,
+        eventTitle: "Corporate Annual Gala",
+        eventDate: "2024-07-15",
+        eventLocation: "San Francisco Convention Center",
+        eventDescription: "Annual company celebration with 300 guests, requiring photography and catering services.",
+        status: "active"
+      },
+      {
+        organizerName: "Michael Johnson",
+        organizerEmail: "michael@weddingdreams.com",
+        professionalId: 2,
+        eventTitle: "Summer Wedding Reception",
+        eventDate: "2024-08-20",
+        eventLocation: "Napa Valley Vineyard",
+        eventDescription: "Elegant outdoor wedding reception for 150 guests, need full catering service with wine pairing.",
+        status: "active"
+      },
+      {
+        organizerName: "Sarah Wilson",
+        organizerEmail: "sarah@creativevents.com",
+        professionalId: 5,
+        eventTitle: "Product Launch Party",
+        eventDate: "2024-06-30",
+        eventLocation: "Downtown Rooftop Venue",
+        eventDescription: "Tech company product launch with cocktail service for 200 attendees.",
+        status: "active"
+      }
+    ];
+
+    sampleConversations.forEach(conv => {
+      const id = this.currentConversationId++;
+      const conversation: Conversation = {
+        ...conv,
+        id,
+        createdAt: new Date()
+      };
+      this.conversations.set(id, conversation);
+
+      // Add sample messages for each conversation
+      this.seedMessagesForConversation(id, conv.organizerName);
+    });
+  }
+
+  private seedMessagesForConversation(conversationId: number, organizerName: string) {
+    const conversation = this.conversations.get(conversationId);
+    if (!conversation) return;
+
+    const professional = this.professionals.get(conversation.professionalId);
+    if (!professional) return;
+
+    const sampleMessages = [
+      {
+        conversationId,
+        senderType: "organizer",
+        senderName: organizerName,
+        content: `Hi ${professional.name}! I'm interested in your services for our upcoming event. Could you provide more details about your availability and pricing?`,
+        isRead: true
+      },
+      {
+        conversationId,
+        senderType: "professional",
+        senderName: professional.name,
+        content: `Hello ${organizerName}! Thank you for reaching out. I'd be happy to help with your event. Could you tell me more about the date, guest count, and specific requirements?`,
+        isRead: true
+      },
+      {
+        conversationId,
+        senderType: "organizer",
+        senderName: organizerName,
+        content: "The event details are in the initial request. We're looking at approximately " + (conversationId === 1 ? "300" : conversationId === 2 ? "150" : "200") + " guests. What would be your estimated cost for this event?",
+        isRead: false
+      }
+    ];
+
+    sampleMessages.forEach(msg => {
+      const id = this.currentMessageId++;
+      const message: Message = {
+        ...msg,
+        id,
+        timestamp: new Date(Date.now() - (sampleMessages.length - sampleMessages.indexOf(msg)) * 60000)
+      };
+      this.messages.set(id, message);
+    });
   }
 }
 
