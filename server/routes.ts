@@ -68,6 +68,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Conversation routes
+  app.get("/api/conversations", async (req, res) => {
+    try {
+      const { professionalId, organizerEmail } = req.query;
+      const conversations = await storage.getConversations(
+        professionalId ? parseInt(professionalId as string) : undefined,
+        organizerEmail as string
+      );
+      res.json(conversations);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch conversations" });
+    }
+  });
+
+  app.get("/api/conversations/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid conversation ID" });
+      }
+      
+      const conversation = await storage.getConversation(id);
+      if (!conversation) {
+        return res.status(404).json({ error: "Conversation not found" });
+      }
+      
+      res.json(conversation);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch conversation" });
+    }
+  });
+
+  app.post("/api/conversations", async (req, res) => {
+    try {
+      const validatedData = insertConversationSchema.parse(req.body);
+      const conversation = await storage.createConversation(validatedData);
+      res.status(201).json(conversation);
+    } catch (error) {
+      if (error instanceof Error && error.name === "ZodError") {
+        return res.status(400).json({ error: "Invalid conversation data", details: error });
+      }
+      res.status(500).json({ error: "Failed to create conversation" });
+    }
+  });
+
+  // Message routes
+  app.get("/api/conversations/:id/messages", async (req, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      if (isNaN(conversationId)) {
+        return res.status(400).json({ error: "Invalid conversation ID" });
+      }
+      
+      const messages = await storage.getMessages(conversationId);
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch messages" });
+    }
+  });
+
+  app.post("/api/conversations/:id/messages", async (req, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      if (isNaN(conversationId)) {
+        return res.status(400).json({ error: "Invalid conversation ID" });
+      }
+      
+      const messageData = { ...req.body, conversationId };
+      const validatedData = insertMessageSchema.parse(messageData);
+      const message = await storage.createMessage(validatedData);
+      res.status(201).json(message);
+    } catch (error) {
+      if (error instanceof Error && error.name === "ZodError") {
+        return res.status(400).json({ error: "Invalid message data", details: error });
+      }
+      res.status(500).json({ error: "Failed to create message" });
+    }
+  });
+
+  app.patch("/api/conversations/:id/read", async (req, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const { senderType } = req.body;
+      
+      if (isNaN(conversationId) || !senderType) {
+        return res.status(400).json({ error: "Invalid request data" });
+      }
+      
+      await storage.markMessagesAsRead(conversationId, senderType);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to mark messages as read" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
