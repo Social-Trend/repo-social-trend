@@ -8,10 +8,12 @@ import {
   DollarSign,
   User
 } from "lucide-react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import ContactModal from "./contact-modal";
 import type { Professional } from "@shared/schema";
 
 interface ProfessionalProfileProps {
@@ -25,6 +27,13 @@ export default function ProfessionalProfile({
   onContact, 
   onBookmark 
 }: ProfessionalProfileProps) {
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
+  const handleContactClick = () => {
+    setIsContactModalOpen(true);
+    onContact?.();
+  };
+
   const formatRate = (rate: string | null) => {
     if (!rate) return "Rate upon request";
     return `$${rate}/hour`;
@@ -116,22 +125,8 @@ export default function ProfessionalProfile({
           </div>
         </div>
 
-        {/* Contact Information */}
+        {/* Action Buttons */}
         <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
-          <div className="grid sm:grid-cols-2 gap-3 mb-4">
-            <div className="flex items-center text-sm text-slate-600 dark:text-slate-400">
-              <Mail className="h-4 w-4 mr-2 flex-shrink-0" />
-              <span className="truncate">{professional.email}</span>
-            </div>
-            {professional.phone && (
-              <div className="flex items-center text-sm text-slate-600 dark:text-slate-400">
-                <Phone className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span>{professional.phone}</span>
-              </div>
-            )}
-          </div>
-          
-          {/* Action Buttons */}
           <div className="flex gap-2">
             <Button 
               variant="outline"
@@ -141,7 +136,7 @@ export default function ProfessionalProfile({
               View Profile
             </Button>
             <Button 
-              onClick={onContact} 
+              onClick={handleContactClick} 
               className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <Mail className="h-4 w-4 mr-2" />
@@ -156,6 +151,13 @@ export default function ProfessionalProfile({
             </Button>
           </div>
         </div>
+
+        {/* Contact Modal */}
+        <ContactModal
+          professional={professional}
+          isOpen={isContactModalOpen}
+          onClose={() => setIsContactModalOpen(false)}
+        />
       </CardContent>
     </Card>
   );
