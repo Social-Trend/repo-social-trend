@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import ContactModal from "./contact-modal";
+import ContactProfessionalForm from "@/components/messaging/contact-professional-form";
 import type { Professional } from "@shared/schema";
 
 interface ProfessionalProfileProps {
@@ -27,10 +27,7 @@ export default function ProfessionalProfile({
   onContact, 
   onBookmark 
 }: ProfessionalProfileProps) {
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-
   const handleContactClick = () => {
-    setIsContactModalOpen(true);
     onContact?.();
   };
 
@@ -135,13 +132,15 @@ export default function ProfessionalProfile({
               <User className="h-4 w-4 mr-2" />
               View Profile
             </Button>
-            <Button 
-              onClick={handleContactClick} 
-              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              <Mail className="h-4 w-4 mr-2" />
-              Contact
-            </Button>
+            <ContactProfessionalForm 
+              professional={professional}
+              trigger={
+                <Button className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground">
+                  <Mail className="h-4 w-4 mr-2" />
+                  Contact
+                </Button>
+              }
+            />
             <Button 
               variant="outline" 
               onClick={onBookmark}
