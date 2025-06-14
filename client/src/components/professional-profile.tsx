@@ -151,12 +151,7 @@ export default function ProfessionalProfile({
           </div>
         </div>
 
-        {/* Contact Modal */}
-        <ContactModal
-          professional={professional}
-          isOpen={isContactModalOpen}
-          onClose={() => setIsContactModalOpen(false)}
-        />
+
       </CardContent>
     </Card>
   );
