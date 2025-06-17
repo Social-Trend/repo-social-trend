@@ -14,8 +14,6 @@ import { useToast } from "@/hooks/use-toast";
 import type { Professional, Conversation } from "@shared/schema";
 
 const contactFormSchema = z.object({
-  organizerName: z.string().min(2, "Name must be at least 2 characters"),
-  organizerEmail: z.string().email("Please enter a valid email address"),
   eventTitle: z.string().min(5, "Event title must be at least 5 characters"),
   eventDate: z.string().optional(),
   eventLocation: z.string().optional(),
@@ -43,8 +41,6 @@ export default function ContactProfessionalForm({
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
-      organizerName: "",
-      organizerEmail: "",
       eventTitle: "",
       eventDate: "",
       eventLocation: "",
@@ -60,8 +56,8 @@ export default function ContactProfessionalForm({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          organizerName: data.organizerName,
-          organizerEmail: data.organizerEmail,
+          organizerName: "Anonymous Organizer",
+          organizerEmail: "organizer@example.com",
           professionalId: professional.id,
           eventTitle: data.eventTitle,
           eventDate: data.eventDate || null,
@@ -83,7 +79,7 @@ export default function ContactProfessionalForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           senderType: "organizer",
-          senderName: data.organizerName,
+          senderName: "Anonymous Organizer",
           content: data.initialMessage
         })
       });
@@ -141,40 +137,7 @@ export default function ContactProfessionalForm({
           <CardContent className="p-6">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                {/* Organizer Information */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">Your Information</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="organizerName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Your Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter your full name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="organizerEmail"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email Address</FormLabel>
-                          <FormControl>
-                            <Input type="email" placeholder="your.email@example.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
+                
 
                 {/* Event Information */}
                 <div className="space-y-4">
