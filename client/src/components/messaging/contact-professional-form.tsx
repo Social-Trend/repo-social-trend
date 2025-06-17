@@ -139,6 +139,29 @@ export default function ContactProfessionalForm({
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 
 
+                {/* Initial Message */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">Initial Message</h3>
+                  
+                  <FormField
+                    control={form.control}
+                    name="initialMessage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Message to {professional.name}</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Your message to the professional..."
+                            className="min-h-[80px]"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 {/* Event Information */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">Event Details</h3>
@@ -203,29 +226,6 @@ export default function ContactProfessionalForm({
                           <Textarea 
                             placeholder="Describe your event, guest count, specific requirements, and any other relevant details..."
                             className="min-h-[100px]"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Initial Message */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">Initial Message</h3>
-                  
-                  <FormField
-                    control={form.control}
-                    name="initialMessage"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Message to {professional.name}</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Your message to the professional..."
-                            className="min-h-[80px]"
                             {...field} 
                           />
                         </FormControl>
