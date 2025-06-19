@@ -1,6 +1,7 @@
 import { Calendar, Users, Building, Search, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "wouter";
+import GoogleAuthButton from "@/components/google-auth-button";
 import type { UserType } from "@/pages/home";
 
 interface NavigationProps {
@@ -60,8 +61,9 @@ export default function Navigation({ userType, onUserTypeChange }: NavigationPro
             </Link>
           </div>
 
-          {/* User Type Toggle */}
+          {/* User Type Toggle and Auth */}
           <div className="flex items-center space-x-4">
+            <GoogleAuthButton />
             <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-lg flex" role="tablist" aria-label="User type selection">
               <Button
                 variant={userType === "organizer" ? "default" : "ghost"}
