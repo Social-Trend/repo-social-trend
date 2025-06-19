@@ -26,9 +26,14 @@ export const professionals = pgTable("professionals", {
   verified: boolean("verified").default(false),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export const insertUserSchema = createInsertSchema(users).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const upsertUserSchema = createInsertSchema(users).omit({
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const conversations = pgTable("conversations", {
@@ -69,6 +74,7 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpsertUser = z.infer<typeof upsertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertProfessional = z.infer<typeof insertProfessionalSchema>;
 export type Professional = typeof professionals.$inferSelect;

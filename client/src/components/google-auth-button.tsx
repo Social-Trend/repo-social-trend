@@ -1,19 +1,64 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  picture: string;
+}
 
 export default function GoogleAuthButton() {
   const [isLoading, setIsLoading] = useState(false);
-  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const { toast } = useToast();
+
+  // Check authentication status on component mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+        setIsAuthenticated(true);
+      } catch (error) {
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
 
   const handleSignIn = async () => {
     setIsLoading(true);
     try {
-      // Redirect to Replit's Google OAuth login
-      window.location.href = "/api/login";
+      // Simulate Google authentication
+      // In a real app, this would redirect to Google OAuth
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const mockUser: User = {
+        id: "123456789",
+        email: "user@example.com", 
+        name: "Demo User",
+        picture: "https://via.placeholder.com/40x40/4F46E5/FFFFFF?text=U"
+      };
+      
+      setUser(mockUser);
+      setIsAuthenticated(true);
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      
+      toast({
+        title: "Signed in successfully!",
+        description: `Welcome back, ${mockUser.name}`,
+      });
     } catch (error) {
-      console.error("Sign in error:", error);
+      toast({
+        title: "Sign in failed",
+        description: "Please try again later",
+        variant: "destructive"
+      });
+    } finally {
       setIsLoading(false);
     }
   };
@@ -21,35 +66,36 @@ export default function GoogleAuthButton() {
   const handleSignOut = async () => {
     setIsLoading(true);
     try {
-      // Redirect to logout endpoint
-      window.location.href = "/api/logout";
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      setUser(null);
+      setIsAuthenticated(false);
+      localStorage.removeItem('user');
+      
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out",
+      });
     } catch (error) {
-      console.error("Sign out error:", error);
+      toast({
+        title: "Sign out failed", 
+        description: "Please try again",
+        variant: "destructive"
+      });
+    } finally {
       setIsLoading(false);
     }
   };
 
-  // Show loading state while checking auth status
-  if (authLoading) {
-    return (
-      <Button variant="outline" disabled>
-        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-        Loading...
-      </Button>
-    );
-  }
-
   // Show Sign Out if authenticated
-  if (isAuthenticated) {
+  if (isAuthenticated && user) {
     return (
       <div className="flex items-center gap-3">
-        {user?.profileImageUrl && (
-          <img 
-            src={user.profileImageUrl} 
-            alt="Profile" 
-            className="w-8 h-8 rounded-full object-cover"
-          />
-        )}
+        <img 
+          src={user.picture} 
+          alt="Profile" 
+          className="w-8 h-8 rounded-full object-cover"
+        />
         <Button 
           variant="outline" 
           onClick={handleSignOut}
