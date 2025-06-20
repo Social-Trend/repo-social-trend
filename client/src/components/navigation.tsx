@@ -1,15 +1,10 @@
-import { Calendar, Users, Building, Search, MessageCircle } from "lucide-react";
+import { Calendar, Search, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "wouter";
-import GoogleAuthButton from "@/components/google-auth-button";
-import type { UserType } from "@/pages/home";
 
-interface NavigationProps {
-  userType: UserType;
-  onUserTypeChange: (type: UserType) => void;
-}
+interface NavigationProps {}
 
-export default function Navigation({ userType, onUserTypeChange }: NavigationProps) {
+export default function Navigation({}: NavigationProps) {
   const [location] = useLocation();
 
   return (
@@ -61,39 +56,21 @@ export default function Navigation({ userType, onUserTypeChange }: NavigationPro
             </Link>
           </div>
 
-          {/* User Type Toggle and Auth */}
-          <div className="flex items-center space-x-2">
-            <Button
-              variant={userType === "organizer" ? "default" : "ghost"}
+          {/* Auth Buttons */}
+          <div className="flex items-center space-x-3">
+            <Button 
+              variant="ghost" 
               size="sm"
-              onClick={() => onUserTypeChange("organizer")}
-              className={`
-                px-3 py-2 text-sm font-medium rounded-md transition-all duration-200
-                ${userType === "organizer" 
-                  ? "bg-primary text-primary-foreground shadow-sm" 
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700"
-                }
-              `}
+              className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
             >
-              <Users className="h-4 w-4 mr-2" />
-              Event Organizer
+              Sign up/ Log in
             </Button>
-            <Button
-              variant={userType === "professional" ? "default" : "ghost"}
+            <Button 
               size="sm"
-              onClick={() => onUserTypeChange("professional")}
-              className={`
-                px-3 py-2 text-sm font-medium rounded-md transition-all duration-200
-                ${userType === "professional" 
-                  ? "bg-primary text-primary-foreground shadow-sm" 
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700"
-                }
-              `}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
-              <Building className="h-4 w-4 mr-2" />
-              Professional
+              Become a Tender
             </Button>
-            <GoogleAuthButton />
           </div>
         </div>
       </div>

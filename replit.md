@@ -72,6 +72,12 @@ SocialTend is a full-stack web application that connects event organizers with h
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+- January 19, 2025: Updated navigation bar to replace user type toggles and auth button with "Sign up/ Log in" and "Become a Tender" buttons per user request
+- Simplified home page to default to organizer view
+- Removed user type switching functionality
+
 ## Changelog
 
 Changelog:
