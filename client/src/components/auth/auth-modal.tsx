@@ -49,11 +49,10 @@ export default function AuthModal({ children, defaultTab = "login" }: AuthModalP
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginUser) => {
-      const response = await apiRequest("/api/auth/login", {
+      return await apiRequest("/api/auth/login", {
         method: "POST",
         body: JSON.stringify(data),
       });
-      return response;
     },
     onSuccess: (data) => {
       localStorage.setItem("token", data.token);
@@ -78,11 +77,10 @@ export default function AuthModal({ children, defaultTab = "login" }: AuthModalP
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterUser) => {
-      const response = await apiRequest("/api/auth/register", {
+      return await apiRequest("/api/auth/register", {
         method: "POST",
         body: JSON.stringify(data),
       });
-      return response;
     },
     onSuccess: (data) => {
       localStorage.setItem("token", data.token);
