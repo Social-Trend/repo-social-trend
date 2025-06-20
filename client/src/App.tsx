@@ -12,27 +12,22 @@ import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/professionals" component={Professionals} />
-        <Route path="/messages" component={Messages} />
-        <Route component={NotFound} />
-      </Switch>
-    </div>
+    <Switch>
+      <Route path="/" component={Home} />
+      <Route path="/professionals" component={Professionals} />
+      <Route path="/messages" component={Messages} />
+      <Route component={NotFound} />
+    </Switch>
   );
 }
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Router />
-          <Toaster />
-        </TooltipProvider>
-      </AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Router />
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }
