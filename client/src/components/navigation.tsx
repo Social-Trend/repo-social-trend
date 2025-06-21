@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/auth-context";
+import { useProfile } from "@/hooks/useProfile";
 import AuthModal from "@/components/auth/auth-modal";
 
 interface NavigationProps {}
@@ -11,6 +12,7 @@ interface NavigationProps {}
 export default function Navigation({}: NavigationProps) {
   const [location] = useLocation();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { hasProfile, profileCompletion } = useProfile();
 
   const getUserInitials = (user: any) => {
     if (user?.firstName && user?.lastName) {

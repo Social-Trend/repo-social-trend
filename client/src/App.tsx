@@ -8,6 +8,7 @@ import Navigation from "@/components/navigation";
 import Home from "@/pages/home";
 import Professionals from "@/pages/professionals";
 import Messages from "@/pages/messages";
+import Onboarding from "@/pages/onboarding";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +19,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/professionals" component={Professionals} />
         <Route path="/messages" component={Messages} />
+        <Route path="/onboarding" component={Onboarding} />
         <Route component={NotFound} />
       </Switch>
     </div>

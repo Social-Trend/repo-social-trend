@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   const loginForm = useForm<LoginUser>({
     resolver: zodResolver(loginUserSchema),
@@ -93,7 +95,8 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       });
       setOpen(false);
       registerForm.reset();
-      window.location.reload();
+      // Redirect to onboarding for profile creation
+      setLocation("/onboarding");
     },
     onError: (error: any) => {
       toast({
