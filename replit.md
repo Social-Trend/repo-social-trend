@@ -74,6 +74,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- June 21, 2025: **COMPLETED** cleanup of dual professional workflow
+  - ✓ Removed legacy professional system causing duplicate profile prompts
+  - ✓ Unified all professional functionality to use single profile system
+  - ✓ Professional dashboard now properly redirects to unified onboarding flow
+  - ✓ Role switching triggers single profile completion check only
+  - ✓ Eliminated duplicate API endpoints and storage methods for professionals
+
 - June 21, 2025: **COMPLETED** in-app service request system
   - ✓ Built service request form for organizers to contact professionals directly within the app
   - ✓ Created service request management dashboard with accept/decline functionality for professionals
