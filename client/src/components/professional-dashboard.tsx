@@ -122,64 +122,49 @@ export default function ProfessionalDashboard() {
           Professional Dashboard
         </h1>
         <p className="text-xl text-slate-600 dark:text-slate-400">
-          Welcome back, {user?.firstName || 'Professional'}! Manage your service requests and bookings.
+          Welcome back, {user?.firstName || 'Professional'}! Manage your communications and bookings in one place.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {/* Pending Requests Card */}
-        <Card className="border-orange-200 dark:border-orange-800">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg text-orange-700 dark:text-orange-400 flex items-center">
-              <AlertCircle className="h-5 w-5 mr-2" />
-              Pending Requests
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-orange-600 dark:text-orange-400 mb-2">
-              {pendingRequests.length}
-            </div>
-            <CardDescription>
-              New service requests awaiting your response
-            </CardDescription>
-          </CardContent>
-        </Card>
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <Link href="/messages">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer border-orange-200 dark:border-orange-800">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                  <AlertCircle className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Pending Requests</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    {pendingRequests.length} new requests awaiting your response
+                  </p>
+                </div>
+                <ArrowRight className="h-5 w-5 text-slate-400 ml-auto" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
-        {/* Accepted Bookings Card */}
-        <Card className="border-green-200 dark:border-green-800">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg text-green-700 dark:text-green-400 flex items-center">
-              <CheckCircle className="h-5 w-5 mr-2" />
-              Confirmed Events
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
-              {acceptedRequests.length}
-            </div>
-            <CardDescription>
-              Upcoming events you've confirmed
-            </CardDescription>
-          </CardContent>
-        </Card>
-
-        {/* Total Requests Card */}
-        <Card className="border-blue-200 dark:border-blue-800">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg text-blue-700 dark:text-blue-400 flex items-center">
-              <MessageSquare className="h-5 w-5 mr-2" />
-              Total Requests
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-              {requests.length}
-            </div>
-            <CardDescription>
-              All service requests received
-            </CardDescription>
-          </CardContent>
-        </Card>
+        <Link href="/messages">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer border-green-200 dark:border-green-800">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                  <MessageSquare className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Active Conversations</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    {acceptedRequests.length} confirmed bookings to coordinate
+                  </p>
+                </div>
+                <ArrowRight className="h-5 w-5 text-slate-400 ml-auto" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       {/* Service Requests Section */}

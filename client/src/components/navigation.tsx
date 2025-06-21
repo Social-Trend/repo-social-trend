@@ -57,44 +57,17 @@ export default function Navigation({}: NavigationProps) {
               </Button>
             </Link>
             
-            {/* Role-Adaptive Bookings Button */}
-            {isAuthenticated && user ? (
-              user.role === 'professional' ? (
-                <Link href="/requests">
-                  <Button 
-                    variant={location === "/requests" ? "secondary" : "ghost"}
-                    size="sm"
-                    className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-                  >
-                    <FileText className="h-4 w-4 mr-2" />
-                    My Requests
-                  </Button>
-                </Link>
-              ) : (
-                <Link href="/professionals">
-                  <Button 
-                    variant={location === "/professionals" ? "secondary" : "ghost"}
-                    size="sm"
-                    className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-                  >
-                    <Search className="h-4 w-4 mr-2" />
-                    Find Professionals
-                  </Button>
-                </Link>
-              )
-            ) : (
-              // Default for non-authenticated users
-              <Link href="/professionals">
-                <Button 
-                  variant={location === "/professionals" ? "secondary" : "ghost"}
-                  size="sm"
-                  className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-                >
-                  <Search className="h-4 w-4 mr-2" />
-                  Find Professionals
-                </Button>
-              </Link>
-            )}
+            {/* Role-Adaptive Middle Button - Always Find Professionals */}
+            <Link href="/professionals">
+              <Button 
+                variant={location === "/professionals" ? "secondary" : "ghost"}
+                size="sm"
+                className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+              >
+                <Search className="h-4 w-4 mr-2" />
+                Find Professionals
+              </Button>
+            </Link>
             
             <Link href="/messages">
               <Button 

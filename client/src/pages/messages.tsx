@@ -1,18 +1,227 @@
-import { useState } from "react";
-import MessagingInterface from "@/components/messaging/messaging-interface";
+import { useAuth } from "@/contexts/auth-context";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { MessageCircle, Calendar, Clock, CheckCircle, XCircle, User } from "lucide-react";
+import type { ServiceRequest, Conversation } from "@shared/schema";
 
 export default function Messages() {
-  // For demo purposes, using static user data
-  // In a real app, this would come from authentication context
-  const [userType] = useState<"organizer" | "professional">("organizer");
-  const [userName] = useState("Demo User");
-  const [userEmail] = useState("demo@example.com");
+  const { user, isAuthenticated } = useAuth();
+
+  // Fetch service requests (now part of unified communication)
+  const { data: serviceRequests = [], isLoading: requestsLoading } = useQuery({
+    queryKey: ["/api/service-requests", { userId: user?.id, role: user?.role }],
+    queryFn: () => apiRequest(`/api/service-requests?role=${user?.role}`),
+    enabled: isAuthenticated && !!user,
+  });
+
+  // Fetch conversations
+  const { data: conversations = [], isLoading: conversationsLoading } = useQuery({
+    queryKey: ["/api/conversations", { userId: user?.id }],
+    queryFn: () => apiRequest("/api/conversations"),
+    enabled: isAuthenticated && !!user,
+  });
+
+  const statusColors = {
+    pending: "bg-yellow-100 text-yellow-800",
+    accepted: "bg-green-100 text-green-800",
+    declined: "bg-red-100 text-red-800",
+    expired: "bg-gray-100 text-gray-800",
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'pending': return <Clock className="h-3 w-3" />;
+      case 'accepted': return <CheckCircle className="h-3 w-3" />;
+      case 'declined': return <XCircle className="h-3 w-3" />;
+      default: return <MessageCircle className="h-3 w-3" />;
+    }
+  };
+
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <Card>
+          <CardContent className="py-12">
+            <div className="text-center">
+              <MessageCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Sign in to view messages</h3>
+              <p className="text-gray-500">
+                Connect with professionals and manage your communications.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <MessagingInterface
-      userType={userType}
-      userName={userName}
-      userEmail={userEmail}
-    />
+    <div className="max-w-6xl mx-auto p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+          Messages & Requests
+        </h1>
+        <p className="text-lg text-slate-600 dark:text-slate-400">
+          All your communications in one place - manage conversations and service requests
+        </p>
+      </div>
+
+      {/* Service Requests Section */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
+            {user.role === 'professional' ? 'Incoming Requests' : 'My Requests'}
+          </h2>
+          <Badge variant="secondary" className="text-sm">
+            {serviceRequests.length} total
+          </Badge>
+        </div>
+
+        {requestsLoading ? (
+          <div className="text-center py-8">Loading requests...</div>
+        ) : serviceRequests.length === 0 ? (
+          <Card>
+            <CardContent className="py-8">
+              <div className="text-center">
+                <MessageCircle className="mx-auto h-10 w-10 text-gray-400 mb-3" />
+                <p className="text-gray-500">
+                  {user.role === 'professional' 
+                    ? 'No service requests yet. Your profile will appear to organizers looking for professionals.'
+                    : 'No requests sent yet. Browse professionals to start connecting.'
+                  }
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4 mb-8">
+            {serviceRequests.map((request: ServiceRequest) => (
+              <Card key={request.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-semibold text-slate-800 dark:text-slate-100">
+                          {request.eventTitle}
+                        </h3>
+                        <Badge className={`${statusColors[request.status as keyof typeof statusColors]} flex items-center gap-1`}>
+                          {getStatusIcon(request.status)}
+                          {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                        </Badge>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        {request.eventDate && (
+                          <div className="flex items-center text-sm text-gray-600">
+                            <Calendar className="h-4 w-4 mr-2" />
+                            <span>{new Date(request.eventDate).toLocaleDateString()}</span>
+                          </div>
+                        )}
+                        
+                        <p className="text-gray-600 text-sm line-clamp-2">{request.requestMessage}</p>
+                        
+                        {request.responseMessage && (
+                          <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg mt-3">
+                            <p className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-1">
+                              {user.role === 'professional' ? 'Your Response:' : 'Professional Response:'}
+                            </p>
+                            <p className="text-gray-600 dark:text-gray-400 text-sm">{request.responseMessage}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="text-xs text-gray-500 ml-4">
+                      {new Date(request.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons for Professionals */}
+                  {user.role === 'professional' && request.status === 'pending' && (
+                    <div className="flex gap-2 mt-4">
+                      <Button size="sm" variant="default">
+                        Accept & Message
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        Decline
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {/* Message Button for Accepted Requests */}
+                  {request.status === 'accepted' && (
+                    <div className="mt-4">
+                      <Button size="sm" variant="outline" className="flex items-center gap-2">
+                        <MessageCircle className="h-4 w-4" />
+                        Continue Conversation
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Conversations Section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
+            Ongoing Conversations
+          </h2>
+          <Badge variant="secondary" className="text-sm">
+            {conversations.length} active
+          </Badge>
+        </div>
+
+        {conversationsLoading ? (
+          <div className="text-center py-8">Loading conversations...</div>
+        ) : conversations.length === 0 ? (
+          <Card>
+            <CardContent className="py-8">
+              <div className="text-center">
+                <User className="mx-auto h-10 w-10 text-gray-400 mb-3" />
+                <p className="text-gray-500">
+                  No active conversations. Start by sending a service request or responding to incoming requests.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4">
+            {conversations.map((conversation: Conversation) => (
+              <Card key={conversation.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-slate-800 dark:text-slate-100 mb-1">
+                        {user.role === 'professional' 
+                          ? `${conversation.organizerName} - ${conversation.eventTitle}`
+                          : `Professional ID ${conversation.professionalId} - ${conversation.eventTitle}`
+                        }
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                        {conversation.status}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Created: {new Date(conversation.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Button size="sm" variant="outline">
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      Open Chat
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
