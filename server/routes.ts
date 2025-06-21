@@ -8,7 +8,8 @@ import {
   insertOrganizerProfileSchema,
   insertProfessionalSchema, 
   insertConversationSchema, 
-  insertMessageSchema 
+  insertMessageSchema,
+  insertServiceRequestSchema 
 } from "@shared/schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -441,6 +442,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating service request:", error);
       res.status(500).json({ message: "Failed to update service request" });
+    }
+  });
+
+  // Payment routes (Stripe integration)
+  app.post("/api/create-payment-intent", authenticateToken, async (req, res) => {
+    try {
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(500).json({ error: "Stripe configuration missing" });
+      }
+
+      const { serviceRequestId, amount } = req.body;
+      
+      if (!serviceRequestId || !amount) {
+        return res.status(400).json({ error: "Service request ID and amount required" });
+      }
+
+      // Get service request details
+      const serviceRequest = await storage.getServiceRequest(serviceRequestId);
+      if (!serviceRequest) {
+        return res.status(404).json({ error: "Service request not found" });
+      }
+
+      // Verify user owns this request
+      if (serviceRequest.organizerId !== req.user.id) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      // For now, return success - will be implemented when Stripe keys are provided
+      res.json({
+        clientSecret: "payment_intent_placeholder",
+        message: "Payment processing will be activated once Stripe keys are configured"
+      });
+    } catch (error) {
+      console.error("Payment intent creation error:", error);
+      res.status(500).json({ error: "Failed to create payment intent" });
+    }
+  });
+
+  app.post("/api/confirm-payment", authenticateToken, async (req, res) => {
+    try {
+      const { serviceRequestId, paymentIntentId } = req.body;
+      
+      const serviceRequest = await storage.getServiceRequest(serviceRequestId);
+      if (!serviceRequest) {
+        return res.status(404).json({ error: "Service request not found" });
+      }
+
+      // Update service request with payment info
+      const updatedRequest = await storage.updateServiceRequestPayment(
+        serviceRequestId,
+        paymentIntentId,
+        'paid'
+      );
+
+      res.json({
+        success: true,
+        serviceRequest: updatedRequest
+      });
+    } catch (error) {
+      console.error("Payment confirmation error:", error);
+      res.status(500).json({ error: "Failed to confirm payment" });
     }
   });
 

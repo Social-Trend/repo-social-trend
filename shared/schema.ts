@@ -151,11 +151,36 @@ export const serviceRequests = pgTable("service_requests", {
   eventLocation: text("event_location"),
   eventDescription: text("event_description"),
   requestMessage: text("request_message").notNull(),
-  status: text("status").notNull().default("pending"), // pending, accepted, declined, expired
+  status: text("status").notNull().default("pending"), // pending, accepted, declined, expired, paid, completed
   responseMessage: text("response_message"),
   respondedAt: timestamp("responded_at"),
   expiresAt: timestamp("expires_at"),
+  
+  // Payment fields
+  depositAmount: integer("deposit_amount"), // Amount in cents
+  totalAmount: integer("total_amount"), // Amount in cents
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  paymentStatus: text("payment_status").default("unpaid"), // unpaid, pending, paid, refunded
+  paidAt: timestamp("paid_at"),
+  
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Payments table for tracking transactions
+export const payments = pgTable("payments", {
+  id: serial("id").primaryKey(),
+  serviceRequestId: integer("service_request_id").notNull().references(() => serviceRequests.id),
+  organizerId: integer("organizer_id").notNull().references(() => users.id),
+  professionalId: integer("professional_id").notNull().references(() => users.id),
+  amount: integer("amount").notNull(), // Amount in cents
+  stripePaymentIntentId: text("stripe_payment_intent_id").notNull(),
+  stripeChargeId: text("stripe_charge_id"),
+  status: text("status").notNull().default("pending"), // pending, succeeded, failed, refunded
+  type: text("type").notNull(), // deposit, final_payment, refund
+  platformFee: integer("platform_fee").default(0), // Platform commission in cents
+  professionalEarnings: integer("professional_earnings"), // Amount professional receives
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const insertProfessionalSchema = createInsertSchema(professionals).omit({
@@ -176,6 +201,15 @@ export const insertServiceRequestSchema = createInsertSchema(serviceRequests).om
   id: true,
   createdAt: true,
   respondedAt: true,
+  expiresAt: true,
+  stripePaymentIntentId: true,
+  paidAt: true,
+});
+
+export const insertPaymentSchema = createInsertSchema(payments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -190,6 +224,8 @@ export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
 export type InsertServiceRequest = z.infer<typeof insertServiceRequestSchema>;
 export type ServiceRequest = typeof serviceRequests.$inferSelect;
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+export type Payment = typeof payments.$inferSelect;
 
 // New profile types
 export type InsertProfessionalProfile = z.infer<typeof insertProfessionalProfileSchema>;

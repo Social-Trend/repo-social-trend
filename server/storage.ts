@@ -62,6 +62,12 @@ export interface IStorage {
   getServiceRequest(id: number): Promise<ServiceRequest | undefined>;
   createServiceRequest(request: InsertServiceRequest): Promise<ServiceRequest>;
   updateServiceRequestStatus(id: number, status: string, responseMessage?: string): Promise<ServiceRequest | undefined>;
+  updateServiceRequestPayment(id: number, paymentIntentId: string, paymentStatus: string): Promise<ServiceRequest | undefined>;
+  
+  // Payment methods
+  getPayments(serviceRequestId?: number): Promise<Payment[]>;
+  createPayment(payment: InsertPayment): Promise<Payment>;
+  updatePaymentStatus(id: number, status: string): Promise<Payment | undefined>;
 }
 
 export class MemStorage implements IStorage {
