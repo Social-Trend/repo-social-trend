@@ -156,13 +156,41 @@ export default function Messages() {
                     </div>
                   )}
                   
-                  {/* Message Button for Accepted Requests */}
+                  {/* Payment and Message Actions for Accepted Requests */}
                   {request.status === 'accepted' && (
-                    <div className="mt-4">
+                    <div className="flex gap-2 mt-4">
+                      {user.role === 'organizer' && request.paymentStatus !== 'paid' && (
+                        <PaymentButton 
+                          serviceRequest={request}
+                          onPaymentSuccess={() => {
+                            // Refresh the requests list after payment
+                            window.location.reload();
+                          }}
+                          size="sm"
+                        />
+                      )}
                       <Button size="sm" variant="outline" className="flex items-center gap-2">
                         <MessageCircle className="h-4 w-4" />
                         Continue Conversation
                       </Button>
+                    </div>
+                  )}
+                  
+                  {/* Payment Status Display */}
+                  {request.paymentStatus === 'paid' && (
+                    <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                        <DollarSign className="h-4 w-4" />
+                        <span className="text-sm font-medium">Payment Confirmed</span>
+                      </div>
+                      {request.depositAmount && (
+                        <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                          Deposit: ${(request.depositAmount / 100).toFixed(2)}
+                          {request.totalAmount && (
+                            <span> | Total: ${(request.totalAmount / 100).toFixed(2)}</span>
+                          )}
+                        </p>
+                      )}
                     </div>
                   )}
                 </CardContent>

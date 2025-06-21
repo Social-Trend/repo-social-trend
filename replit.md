@@ -74,6 +74,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- June 21, 2025: **IN PROGRESS** Stripe payment integration for booking deposits
+  - ✓ Payment schema added with deposit amounts, total amounts, and payment status tracking
+  - ✓ Server-side payment processing endpoints with Stripe infrastructure
+  - ✓ Payment storage methods for transaction history and status management
+  - ✓ PaymentForm component with deposit calculation and payment confirmation
+  - ✓ PaymentButton component integrated into service request workflow
+  - ✓ Messages page enhanced with payment status display and payment actions
+  - ✓ StripeCheckout component for secure payment processing
+  - → Waiting for user's Stripe API keys to activate live payment processing
+  - → Payment system ready for testing once API keys are configured
+
 - June 21, 2025: **COMPLETED** advanced search and filtering system for professional marketplace
   - ✓ Added comprehensive service type dropdown with predefined categories (Photography, DJ Services, Event Planning, Catering, etc.)
   - ✓ Implemented custom service input field for services not in predefined list
