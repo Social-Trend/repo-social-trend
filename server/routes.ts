@@ -1,12 +1,19 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { loginUserSchema, registerUserSchema } from "@shared/schema";
+import { 
+  loginUserSchema, 
+  registerUserSchema, 
+  insertProfessionalProfileSchema,
+  insertOrganizerProfileSchema,
+  insertProfessionalSchema, 
+  insertConversationSchema, 
+  insertMessageSchema 
+} from "@shared/schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-jwt-secret-key";
-import { insertProfessionalSchema, insertConversationSchema, insertMessageSchema } from "@shared/schema";
 
 // Authentication middleware
 const authenticateToken = (req: any, res: any, next: any) => {
@@ -126,6 +133,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get user error:", error);
       res.status(500).json({ message: "Failed to get user" });
+    }
+  });
+
+  // Profile routes
+  app.get("/api/profiles/professional/:userId", authenticateToken, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      const profile = await storage.getProfessionalProfile(userId);
+      if (!profile) {
+        return res.status(404).json({ message: "Professional profile not found" });
+      }
+
+      res.json(profile);
+    } catch (error) {
+      console.error("Error fetching professional profile:", error);
+      res.status(500).json({ message: "Failed to fetch professional profile" });
+    }
+  });
+
+  app.post("/api/profiles/professional", authenticateToken, async (req: any, res) => {
+    try {
+      const result = insertProfessionalProfileSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ errors: result.error.issues });
+      }
+
+      const profile = await storage.createProfessionalProfile(result.data);
+      res.status(201).json(profile);
+    } catch (error) {
+      console.error("Error creating professional profile:", error);
+      res.status(500).json({ message: "Failed to create professional profile" });
+    }
+  });
+
+  app.put("/api/profiles/professional/:userId", authenticateToken, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      const result = insertProfessionalProfileSchema.partial().safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ errors: result.error.issues });
+      }
+
+      const profile = await storage.updateProfessionalProfile(userId, result.data);
+      if (!profile) {
+        return res.status(404).json({ message: "Professional profile not found" });
+      }
+
+      res.json(profile);
+    } catch (error) {
+      console.error("Error updating professional profile:", error);
+      res.status(500).json({ message: "Failed to update professional profile" });
+    }
+  });
+
+  app.get("/api/profiles/organizer/:userId", authenticateToken, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      const profile = await storage.getOrganizerProfile(userId);
+      if (!profile) {
+        return res.status(404).json({ message: "Organizer profile not found" });
+      }
+
+      res.json(profile);
+    } catch (error) {
+      console.error("Error fetching organizer profile:", error);
+      res.status(500).json({ message: "Failed to fetch organizer profile" });
+    }
+  });
+
+  app.post("/api/profiles/organizer", authenticateToken, async (req: any, res) => {
+    try {
+      const result = insertOrganizerProfileSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ errors: result.error.issues });
+      }
+
+      const profile = await storage.createOrganizerProfile(result.data);
+      res.status(201).json(profile);
+    } catch (error) {
+      console.error("Error creating organizer profile:", error);
+      res.status(500).json({ message: "Failed to create organizer profile" });
+    }
+  });
+
+  app.put("/api/profiles/organizer/:userId", authenticateToken, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      const result = insertOrganizerProfileSchema.partial().safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ errors: result.error.issues });
+      }
+
+      const profile = await storage.updateOrganizerProfile(userId, result.data);
+      if (!profile) {
+        return res.status(404).json({ message: "Organizer profile not found" });
+      }
+
+      res.json(profile);
+    } catch (error) {
+      console.error("Error updating organizer profile:", error);
+      res.status(500).json({ message: "Failed to update organizer profile" });
     }
   });
 
