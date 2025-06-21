@@ -17,7 +17,7 @@ export default function Navigation({}: NavigationProps) {
   const [location] = useLocation();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const { hasProfile, profileCompletion } = useProfile();
-  const { unreadCount, hasUnreadMessages } = useUnreadMessages();
+  const { unreadCount, hasUnreadMessages, resetNotifications } = useUnreadMessages();
 
   const getUserInitials = (user: any) => {
     if (user?.firstName && user?.lastName) {
@@ -145,6 +145,14 @@ export default function Navigation({}: NavigationProps) {
                     <span>
                       {hasProfile ? "Edit Profile" : "Create Profile"}
                     </span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem onClick={() => {
+                    resetNotifications();
+                    console.log('Notifications reset');
+                  }}>
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    <span>Reset Notifications</span>
                   </DropdownMenuItem>
 
                   <DropdownMenuItem onClick={logout}>
