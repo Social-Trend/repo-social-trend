@@ -294,59 +294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/professionals/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "Invalid professional ID" });
-      }
-      
-      const professional = await storage.getProfessional(id);
-      if (!professional) {
-        return res.status(404).json({ error: "Professional not found" });
-      }
-      
-      res.json(professional);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch professional" });
-    }
-  });
 
-  app.post("/api/professionals", async (req, res) => {
-    try {
-      const validatedData = insertProfessionalSchema.parse(req.body);
-      const professional = await storage.createProfessional(validatedData);
-      res.status(201).json(professional);
-    } catch (error) {
-      if (error instanceof Error && error.name === "ZodError") {
-        return res.status(400).json({ error: "Invalid professional data", details: error });
-      }
-      res.status(500).json({ error: "Failed to create professional" });
-    }
-  });
-
-  app.patch("/api/professionals/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "Invalid professional ID" });
-      }
-      
-      const updates = insertProfessionalSchema.partial().parse(req.body);
-      const professional = await storage.updateProfessional(id, updates);
-      
-      if (!professional) {
-        return res.status(404).json({ error: "Professional not found" });
-      }
-      
-      res.json(professional);
-    } catch (error) {
-      if (error instanceof Error && error.name === "ZodError") {
-        return res.status(400).json({ error: "Invalid professional data", details: error });
-      }
-      res.status(500).json({ error: "Failed to update professional" });
-    }
-  });
 
   // Conversation routes
   app.get("/api/conversations", async (req, res) => {

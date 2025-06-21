@@ -45,11 +45,7 @@ export interface IStorage {
   createOrganizerProfile(profile: InsertOrganizerProfile): Promise<OrganizerProfile>;
   updateOrganizerProfile(userId: number, updates: Partial<InsertOrganizerProfile>): Promise<OrganizerProfile | undefined>;
   
-  // Legacy professional methods (to maintain compatibility)
-  getProfessional(id: number): Promise<Professional | undefined>;
-  getProfessionals(): Promise<Professional[]>;
-  createProfessional(professional: InsertProfessional): Promise<Professional>;
-  updateProfessional(id: number, professional: Partial<InsertProfessional>): Promise<Professional | undefined>;
+
   
   // Messaging methods
   getConversations(professionalId?: number, organizerEmail?: string): Promise<Conversation[]>;
@@ -70,14 +66,12 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
-  private professionals: Map<number, Professional>;
   private professionalProfiles: Map<number, ProfessionalProfile>;
   private organizerProfiles: Map<number, OrganizerProfile>;
   private conversations: Map<number, Conversation>;
   private messages: Map<number, Message>;
   private serviceRequests: Map<number, ServiceRequest>;
   private currentUserId: number;
-  private currentProfessionalId: number;
   private currentProfileId: number;
   private currentConversationId: number;
   private currentMessageId: number;

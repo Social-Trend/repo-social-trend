@@ -16,7 +16,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import CreateProfessionalForm from "@/components/create-professional-form";
+import { Link } from "wouter";
 import type { Professional, ServiceRequest } from "@shared/schema";
 
 const statusColors = {
@@ -29,7 +29,6 @@ const statusColors = {
 export default function ProfessionalDashboard() {
   const { user, isAuthenticated } = useAuth();
   const { hasProfile } = useProfile();
-  const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
   const [responseMessage, setResponseMessage] = useState("");
   const [showResponseDialog, setShowResponseDialog] = useState(false);
@@ -71,9 +70,7 @@ export default function ProfessionalDashboard() {
     },
   });
 
-  const handleFormSuccess = (professional: Professional) => {
-    setShowCreateForm(false);
-  };
+
 
   const handleRespond = (request: ServiceRequest, type: 'accept' | 'decline') => {
     setSelectedRequest(request);
@@ -101,25 +98,16 @@ export default function ProfessionalDashboard() {
           <p className="text-xl text-slate-600 dark:text-slate-400 mb-8">
             Set up your profile to start receiving service requests from event organizers.
           </p>
-        </div>
-
-        {showCreateForm ? (
-          <CreateProfessionalForm 
-            onSuccess={handleFormSuccess}
-            onCancel={() => setShowCreateForm(false)}
-          />
-        ) : (
-          <div className="text-center">
+          <Link href="/onboarding">
             <Button 
-              onClick={() => setShowCreateForm(true)}
               size="lg"
               className="bg-primary hover:bg-primary/90"
             >
               <Briefcase className="h-5 w-5 mr-2" />
-              Create Professional Profile
+              Complete Profile Setup
             </Button>
-          </div>
-        )}
+          </Link>
+        </div>
       </div>
     );
   }
