@@ -65,8 +65,12 @@ export default function Messages() {
         method: "POST",
         body: JSON.stringify({
           professionalId: serviceRequest.professionalId,
-          organizerId: serviceRequest.organizerId,
-          serviceRequestId: serviceRequest.id,
+          organizerName: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email,
+          organizerEmail: user.email,
+          eventTitle: serviceRequest.eventTitle,
+          eventDate: serviceRequest.eventDate,
+          eventLocation: serviceRequest.eventLocation,
+          eventDescription: serviceRequest.eventDescription,
           status: "active"
         })
       });
