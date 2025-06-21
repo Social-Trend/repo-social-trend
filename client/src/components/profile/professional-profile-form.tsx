@@ -19,7 +19,7 @@ import {
 import { Loader2, Upload, X } from "lucide-react";
 
 interface ProfessionalProfileFormProps {
-  userId: number;
+  userId: string | number;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -38,7 +38,7 @@ export default function ProfessionalProfileForm({
   const form = useForm<InsertProfessionalProfile>({
     resolver: zodResolver(insertProfessionalProfileSchema),
     defaultValues: {
-      userId,
+      userId: typeof userId === 'string' ? userId : userId.toString(),
       name: "",
       location: "",
       services: [],
@@ -104,12 +104,13 @@ export default function ProfessionalProfileForm({
     }
   };
 
-  const onSubmit = (data: InsertProfessionalProfile) => {
-    mutation.mutate({
+  const onSubmit = (data: any) => {
+    const profileData: InsertProfessionalProfile = {
       ...data,
       services: selectedServices,
       profileImageUrl: profileImage,
-    });
+    };
+    mutation.mutate(profileData);
   };
 
   return (
