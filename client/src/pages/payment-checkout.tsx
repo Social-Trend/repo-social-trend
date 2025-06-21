@@ -130,11 +130,18 @@ export default function PaymentCheckout() {
   const serviceRequestId = urlParams.get("service_request_id");
 
   // Fetch service request details
-  const { data: serviceRequest, isLoading } = useQuery({
+  const { data: serviceRequest, isLoading, error } = useQuery({
     queryKey: ["/api/service-requests", serviceRequestId],
     queryFn: () => apiRequest(`/api/service-requests/${serviceRequestId}`),
     enabled: !!serviceRequestId,
   });
+
+  // Debug logging
+  console.log("Payment checkout - serviceRequestId:", serviceRequestId);
+  console.log("Payment checkout - clientSecret:", clientSecret);
+  console.log("Payment checkout - serviceRequest:", serviceRequest);
+  console.log("Payment checkout - isLoading:", isLoading);
+  console.log("Payment checkout - error:", error);
 
   useEffect(() => {
     if (!clientSecret || !serviceRequestId) {
