@@ -35,14 +35,21 @@ export default function Onboarding() {
   if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Not authenticated - redirecting...</p>
+        <div className="text-center">
+          <p className="text-lg mb-4">Authentication required</p>
+          <p className="text-sm text-gray-600 mb-4">Please log in to create your profile</p>
+          <button 
+            onClick={() => setLocation("/")} 
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Go to Home
+          </button>
+        </div>
       </div>
     );
   }
 
-  console.log("Onboarding page rendering for user:", user);
-  console.log("User role:", user?.role);
-  console.log("Authentication status:", { isAuthenticated, isLoading });
+
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8">
