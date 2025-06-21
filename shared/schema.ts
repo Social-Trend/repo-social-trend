@@ -170,8 +170,8 @@ export const serviceRequests = pgTable("service_requests", {
 export const payments = pgTable("payments", {
   id: serial("id").primaryKey(),
   serviceRequestId: integer("service_request_id").notNull().references(() => serviceRequests.id),
-  organizerId: integer("organizer_id").notNull().references(() => users.id),
-  professionalId: integer("professional_id").notNull().references(() => users.id),
+  organizerId: text("organizer_id").notNull().references(() => users.id),
+  professionalId: text("professional_id").notNull().references(() => users.id),
   amount: integer("amount").notNull(), // Amount in cents
   stripePaymentIntentId: text("stripe_payment_intent_id").notNull(),
   stripeChargeId: text("stripe_charge_id"),
