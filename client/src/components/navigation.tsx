@@ -3,12 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/auth-context";
 import { useProfile } from "@/hooks/useProfile";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { apiRequest } from "@/lib/queryClient";
 import AuthModal from "@/components/auth/auth-modal";
 import RoleSwitcher from "@/components/role-switcher";
 import { Badge } from "@/components/ui/badge";
+import ChatModal from "@/components/chat-modal";
+import type { Conversation } from "@shared/schema";
 
 
 interface NavigationProps {}
@@ -17,7 +22,16 @@ export default function Navigation({}: NavigationProps) {
   const [location] = useLocation();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const { hasProfile, profileCompletion } = useProfile();
-  const { unreadCount, hasUnreadMessages, resetNotifications } = useUnreadMessages();
+  const { unreadCount, hasUnreadMessages, resetNotifications, clearNotificationForConversation } = useUnreadMessages();
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
+  // Fetch conversations for the Messages button
+  const { data: conversations = [] } = useQuery({
+    queryKey: ["/api/conversations", { userId: user?.id }],
+    queryFn: () => apiRequest("/api/conversations"),
+    enabled: isAuthenticated && !!user,
+  });
 
   const getUserInitials = (user: any) => {
     if (user?.firstName && user?.lastName) {
@@ -72,24 +86,33 @@ export default function Navigation({}: NavigationProps) {
               </Button>
             </Link>
             
-            <Link href="/messages">
-              <Button 
-                variant={location === "/messages" ? "secondary" : "ghost"}
-                size="sm"
-                className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 relative"
-              >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Messages
-                {hasUnreadMessages && (
-                  <Badge 
-                    variant="destructive" 
-                    className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-                  >
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </Badge>
-                )}
-              </Button>
-            </Link>
+            <Button 
+              variant="ghost"
+              size="sm"
+              className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 relative"
+              onClick={() => {
+                if (conversations.length > 0) {
+                  const firstConversation = conversations[0];
+                  setSelectedConversation(firstConversation);
+                  setIsChatOpen(true);
+                  clearNotificationForConversation(firstConversation.id);
+                } else {
+                  // If no conversations, navigate to messages page
+                  window.location.href = '/messages';
+                }
+              }}
+            >
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Messages
+              {hasUnreadMessages && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                >
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </Badge>
+              )}
+            </Button>
           </div>
 
           {/* Auth Section */}
