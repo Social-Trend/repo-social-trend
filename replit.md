@@ -74,6 +74,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- June 21, 2025: **COMPLETED** in-app service request system
+  - ✓ Built service request form for organizers to contact professionals directly within the app
+  - ✓ Created service request management dashboard with accept/decline functionality for professionals
+  - ✓ Implemented real-time status tracking (pending/accepted/declined/expired) with timestamps
+  - ✓ Added "Requests" navigation link integrated into main app routing system
+  - ✓ All communication stays within SocialTend - no external email/phone contact required
+  - ✓ Sample service requests seeded for testing professional dashboard functionality
+
 - June 21, 2025: **COMPLETED** dual role profile switching system
   - ✓ Role switcher component in navigation showing current role with easy switching
   - ✓ Backend API endpoint for role switching with proper authentication

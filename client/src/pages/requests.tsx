@@ -37,11 +37,13 @@ export default function Requests() {
   
   console.log('Requests page - User:', user, 'Current role:', currentRole);
 
-  const { data: requests = [], isLoading } = useQuery({
+  const { data: requests = [], isLoading, error } = useQuery({
     queryKey: ["/api/service-requests", { role: currentRole, userId: user?.id }],
     queryFn: () => apiRequest(`/api/service-requests?role=${currentRole}`),
     enabled: isAuthenticated && !!user,
   });
+
+  console.log('Service requests data:', requests, 'Loading:', isLoading, 'Error:', error);
 
   const respondMutation = useMutation({
     mutationFn: async ({ id, status, message }: { id: number; status: string; message?: string }) => {
