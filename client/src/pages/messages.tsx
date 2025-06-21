@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageCircle, Calendar, Clock, CheckCircle, XCircle, User, DollarSign, Send, ChevronDown, ChevronUp } from "lucide-react";
 import PaymentButton from "@/components/payment/payment-button";
+import ChatModal from "@/components/chat-modal";
 import type { ServiceRequest, Conversation, Message } from "@shared/schema";
 
 export default function Messages() {
