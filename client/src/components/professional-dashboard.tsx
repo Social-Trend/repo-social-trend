@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { MapPin, Calendar, Clock, MessageSquare, AlertCircle, CheckCircle, Briefcase, ArrowRight, Plus } from "lucide-react";
+import { MapPin, Calendar, Clock, MessageSquare, AlertCircle, CheckCircle, Briefcase } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
@@ -26,7 +26,7 @@ const statusColors = {
   expired: "bg-gray-100 text-gray-800",
 };
 
-export default function ProfessionalView() {
+export default function ProfessionalDashboard() {
   const { user, isAuthenticated } = useAuth();
   const { hasProfile } = useProfile();
   const [showCreateForm, setShowCreateForm] = useState(false);
