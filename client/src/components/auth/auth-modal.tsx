@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,9 +17,10 @@ import { Loader2, Eye, EyeOff } from "lucide-react";
 interface AuthModalProps {
   children: React.ReactNode;
   defaultTab?: "login" | "register";
+  defaultRole?: "organizer" | "professional";
 }
 
-export default function AuthModal({ children, defaultTab = "login" }: AuthModalProps) {
+export default function AuthModal({ children, defaultTab = "login", defaultRole = "organizer" }: AuthModalProps) {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [showPassword, setShowPassword] = useState(false);
@@ -43,7 +44,7 @@ export default function AuthModal({ children, defaultTab = "login" }: AuthModalP
       confirmPassword: "",
       firstName: "",
       lastName: "",
-      role: "organizer",
+      role: defaultRole,
     },
   });
 
@@ -106,6 +107,20 @@ export default function AuthModal({ children, defaultTab = "login" }: AuthModalP
   const onLoginSubmit = (data: LoginUser) => {
     loginMutation.mutate(data);
   };
+
+  // Reset form with default role when modal opens
+  useEffect(() => {
+    if (open) {
+      registerForm.reset({
+        email: "",
+        password: "",
+        confirmPassword: "",
+        firstName: "",
+        lastName: "",
+        role: defaultRole,
+      });
+    }
+  }, [open, defaultRole, registerForm]);
 
   const onRegisterSubmit = (data: RegisterUser) => {
     registerMutation.mutate(data);

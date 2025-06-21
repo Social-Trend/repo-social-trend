@@ -15,6 +15,30 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const professionalProfiles = pgTable("professional_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  name: text("name").notNull(),
+  location: text("location").notNull(),
+  services: text("services").array().notNull(),
+  hourlyRate: text("hourly_rate"),
+  bio: text("bio"),
+  profileImageUrl: text("profile_image_url"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const organizerProfiles = pgTable("organizer_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  name: text("name").notNull(),
+  location: text("location").notNull(),
+  eventTypes: text("event_types").array().notNull(),
+  profileImageUrl: text("profile_image_url"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const professionals = pgTable("professionals", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -47,6 +71,52 @@ export const registerUserSchema = insertUserSchema.extend({
   message: "Passwords don't match",
   path: ["confirmPassword"],
 });
+
+// Professional profile schemas
+export const insertProfessionalProfileSchema = createInsertSchema(professionalProfiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  services: z.array(z.string()).min(1, "Please select at least one service"),
+  hourlyRate: z.string().optional(),
+  bio: z.string().max(500, "Bio must be 500 characters or less").optional(),
+});
+
+// Organizer profile schemas
+export const insertOrganizerProfileSchema = createInsertSchema(organizerProfiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  eventTypes: z.array(z.string()).min(1, "Please select at least one event type"),
+});
+
+// Service options for professionals
+export const serviceOptions = [
+  "Bartender",
+  "Chef", 
+  "Waiter/Server",
+  "Photographer",
+  "DJ",
+  "Event Coordinator",
+  "Security",
+  "Cleaning Staff",
+  "Other"
+] as const;
+
+// Event type options for organizers
+export const eventTypeOptions = [
+  "Wedding",
+  "Corporate Event",
+  "Birthday Party",
+  "Anniversary",
+  "Baby Shower",
+  "Graduation",
+  "Holiday Party",
+  "Fundraiser",
+  "Other"
+] as const;
 
 export const conversations = pgTable("conversations", {
   id: serial("id").primaryKey(),

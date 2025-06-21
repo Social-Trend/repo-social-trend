@@ -105,7 +105,7 @@ export default function Navigation({}: NavigationProps) {
               </DropdownMenu>
             ) : (
               <>
-                <AuthModal defaultTab="login">
+                <AuthModal defaultTab="login" defaultRole="organizer">
                   <Button 
                     variant="ghost" 
                     size="sm"
@@ -114,7 +114,7 @@ export default function Navigation({}: NavigationProps) {
                     Sign up/ Log in
                   </Button>
                 </AuthModal>
-                <AuthModal defaultTab="register">
+                <AuthModal defaultTab="register" defaultRole="professional">
                   <Button 
                     size="sm"
                     className="bg-primary hover:bg-primary/90 text-primary-foreground"
