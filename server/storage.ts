@@ -35,7 +35,7 @@ export interface IStorage {
   upsertUser(user: any): Promise<User>;
   
   // Professional profile methods
-  getProfessionalProfile(userId: number): Promise<ProfessionalProfile | undefined>;
+  getProfessionalProfile(userId: string | number): Promise<ProfessionalProfile | undefined>;
   createProfessionalProfile(profile: InsertProfessionalProfile): Promise<ProfessionalProfile>;
   updateProfessionalProfile(userId: number, updates: Partial<InsertProfessionalProfile>): Promise<ProfessionalProfile | undefined>;
   getAllProfessionalProfiles(filters?: {
@@ -150,6 +150,40 @@ export class MemStorage implements IStorage {
     };
     this.users.set(id, updated);
     return updated;
+  }
+
+  async upsertUser(userData: any): Promise<User> {
+    // For Replit Auth compatibility - find by string ID or create new user
+    const stringId = userData.id;
+    let existingUser = Array.from(this.users.values()).find(u => u.id.toString() === stringId);
+    
+    if (existingUser) {
+      // Update existing user
+      const updated: User = {
+        ...existingUser,
+        ...userData,
+        updatedAt: new Date()
+      };
+      this.users.set(existingUser.id, updated);
+      return updated;
+    } else {
+      // Create new user with string ID converted to number for storage
+      const numericId = parseInt(stringId) || this.currentUserId++;
+      const newUser: User = {
+        id: numericId,
+        email: userData.email,
+        password: userData.password || '',
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        role: userData.role || 'organizer',
+        profileImageUrl: userData.profileImageUrl,
+        isEmailVerified: userData.isEmailVerified || false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      this.users.set(numericId, newUser);
+      return newUser;
+    }
   }
 
 
@@ -574,11 +608,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Professional profile methods
-  async getProfessionalProfile(userId: number): Promise<ProfessionalProfile | undefined> {
+  async getProfessionalProfile(userId: string | number): Promise<ProfessionalProfile | undefined> {
+    const userIdStr = typeof userId === 'string' ? userId : userId.toString();
     const [profile] = await db
       .select()
       .from(professionalProfiles)
-      .where(eq(professionalProfiles.userId, userId));
+      .where(eq(professionalProfiles.userId, userIdStr));
     return profile;
   }
 
@@ -829,4 +864,4 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();
