@@ -33,8 +33,16 @@ export default function Onboarding() {
   }
 
   if (!isAuthenticated || !user) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Not authenticated - redirecting...</p>
+      </div>
+    );
   }
+
+  console.log("Onboarding page rendering for user:", user);
+  console.log("User role:", user?.role);
+  console.log("Authentication status:", { isAuthenticated, isLoading });
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8">
@@ -92,19 +100,21 @@ export default function Onboarding() {
         </div>
 
         {/* Profile Creation Form */}
-        {user.role === "professional" ? (
-          <ProfessionalProfileForm
-            userId={user.id}
-            onSuccess={handleProfileSuccess}
-            onCancel={handleSkip}
-          />
-        ) : (
-          <OrganizerProfileForm
-            userId={user.id}
-            onSuccess={handleProfileSuccess}
-            onCancel={handleSkip}
-          />
-        )}
+        <div className="mb-8">
+          {user.role === "professional" ? (
+            <ProfessionalProfileForm
+              userId={user.id}
+              onSuccess={handleProfileSuccess}
+              onCancel={handleSkip}
+            />
+          ) : (
+            <OrganizerProfileForm
+              userId={user.id}
+              onSuccess={handleProfileSuccess}
+              onCancel={handleSkip}
+            />
+          )}
+        </div>
 
         {/* Benefits Card */}
         <Card className="mt-8 max-w-2xl mx-auto">
