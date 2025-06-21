@@ -532,7 +532,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/confirm-payment", authenticateToken, async (req, res) => {
+  app.post("/api/confirm-payment", async (req, res) => {
     try {
       if (!stripe) {
         return res.status(500).json({ error: "Stripe configuration missing" });
@@ -547,6 +547,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Verify payment with Stripe
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      
+      // Verify this payment intent belongs to this service request (security check)
+      if (paymentIntent.metadata.serviceRequestId !== serviceRequestId.toString()) {
+        return res.status(403).json({ error: "Payment intent does not match service request" });
+      }
       
       if (paymentIntent.status === 'succeeded') {
         // Update service request with payment info

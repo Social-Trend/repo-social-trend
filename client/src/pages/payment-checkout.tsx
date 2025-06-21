@@ -46,10 +46,29 @@ function CheckoutForm({ serviceRequest, clientSecret }: { serviceRequest: Servic
           variant: "destructive",
         });
       } else {
-        toast({
-          title: "Payment Successful",
-          description: "Your deposit has been processed successfully!",
-        });
+        // Payment successful - confirm with backend
+        try {
+          await apiRequest("/api/confirm-payment", {
+            method: "POST",
+            body: JSON.stringify({
+              serviceRequestId: serviceRequest.id,
+              paymentIntentId: clientSecret.split("_secret_")[0], // Extract payment intent ID
+            }),
+          });
+
+          toast({
+            title: "Payment Successful",
+            description: "Your deposit has been processed successfully!",
+          });
+        } catch (confirmError) {
+          console.error("Payment confirmation error:", confirmError);
+          toast({
+            title: "Payment Completed",
+            description: "Payment processed, but there was an issue updating the status. Please refresh the page.",
+            variant: "destructive",
+          });
+        }
+        
         setLocation("/messages");
       }
     } catch (error) {
