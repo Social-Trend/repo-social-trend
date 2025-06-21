@@ -265,15 +265,41 @@ export default function Messages() {
                   {/* Payment and Message Actions for Accepted Requests */}
                   {request.status === 'accepted' && (
                     <div className="flex gap-2 mt-4">
-                      {user.role === 'organizer' && request.paymentStatus !== 'paid' && (
-                        <PaymentButton 
-                          serviceRequest={request}
-                          onPaymentSuccess={() => {
-                            // Refresh the requests list after payment
-                            window.location.reload();
-                          }}
-                          size="sm"
-                        />
+                      {user.role === 'organizer' && (
+                        <>
+                          {request.paymentStatus !== 'paid' && request.paymentStatus !== 'pending' && (
+                            <PaymentButton 
+                              serviceRequest={request}
+                              onPaymentSuccess={() => {
+                                // Refresh the requests list after payment
+                                window.location.reload();
+                              }}
+                              size="sm"
+                            />
+                          )}
+                          {request.paymentStatus === 'pending' && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              disabled={true}
+                              className="flex items-center gap-2"
+                            >
+                              <DollarSign className="h-4 w-4" />
+                              Processing Payment...
+                            </Button>
+                          )}
+                          {request.paymentStatus === 'paid' && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              disabled={true}
+                              className="flex items-center gap-2 text-green-600 border-green-200 bg-green-50 dark:text-green-400 dark:border-green-800 dark:bg-green-900/20"
+                            >
+                              <DollarSign className="h-4 w-4" />
+                              Deposit Paid
+                            </Button>
+                          )}
+                        </>
                       )}
                       <Button 
                         size="sm" 
