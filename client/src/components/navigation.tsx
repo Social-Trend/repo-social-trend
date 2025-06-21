@@ -8,6 +8,7 @@ import { useProfile } from "@/hooks/useProfile";
 import AuthModal from "@/components/auth/auth-modal";
 import RoleSwitcher from "@/components/role-switcher";
 
+
 interface NavigationProps {}
 
 export default function Navigation({}: NavigationProps) {
@@ -44,8 +45,8 @@ export default function Navigation({}: NavigationProps) {
             </Link>
           </div>
 
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-4">
+          {/* Navigation Links - 3 Item Consolidated */}
+          <div className="hidden md:flex items-center space-x-6">
             <Link href="/">
               <Button 
                 variant={location === "/" ? "secondary" : "ghost"}
@@ -55,16 +56,46 @@ export default function Navigation({}: NavigationProps) {
                 Home
               </Button>
             </Link>
-            <Link href="/professionals">
-              <Button 
-                variant={location === "/professionals" ? "secondary" : "ghost"}
-                size="sm"
-                className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-              >
-                <Search className="h-4 w-4 mr-2" />
-                Browse Professionals
-              </Button>
-            </Link>
+            
+            {/* Role-Adaptive Bookings Button */}
+            {isAuthenticated && user ? (
+              user.role === 'professional' ? (
+                <Link href="/requests">
+                  <Button 
+                    variant={location === "/requests" ? "secondary" : "ghost"}
+                    size="sm"
+                    className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    My Requests
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/professionals">
+                  <Button 
+                    variant={location === "/professionals" ? "secondary" : "ghost"}
+                    size="sm"
+                    className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                  >
+                    <Search className="h-4 w-4 mr-2" />
+                    Find Professionals
+                  </Button>
+                </Link>
+              )
+            ) : (
+              // Default for non-authenticated users
+              <Link href="/professionals">
+                <Button 
+                  variant={location === "/professionals" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                >
+                  <Search className="h-4 w-4 mr-2" />
+                  Find Professionals
+                </Button>
+              </Link>
+            )}
+            
             <Link href="/messages">
               <Button 
                 variant={location === "/messages" ? "secondary" : "ghost"}
@@ -75,27 +106,10 @@ export default function Navigation({}: NavigationProps) {
                 Messages
               </Button>
             </Link>
-            <Link href="/requests">
-              <Button 
-                variant={location === "/requests" ? "secondary" : "ghost"}
-                size="sm"
-                className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Requests
-              </Button>
-            </Link>
           </div>
 
           {/* Auth Section */}
           <div className="flex items-center space-x-3">
-            {isLoading ? (
-              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
-            ) : isAuthenticated && user ? (
-              <>
-                <RoleSwitcher />
-              </>
-            ) : null}
             
             {isLoading ? (
               <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
@@ -113,6 +127,9 @@ export default function Navigation({}: NavigationProps) {
                   <DropdownMenuItem className="flex flex-col items-start">
                     <div className="font-medium">{user.firstName || user.email}</div>
                     <div className="text-xs text-muted-foreground">{user.email}</div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Current role: {user.role === 'professional' ? 'Professional Tender' : 'Event Organizer'}
+                    </div>
                     {isAuthenticated && (
                       <div className="text-xs text-muted-foreground mt-1">
                         {hasProfile 
@@ -122,6 +139,16 @@ export default function Navigation({}: NavigationProps) {
                       </div>
                     )}
                   </DropdownMenuItem>
+                  
+                  <DropdownMenuSeparator />
+                  
+                  {/* Role Switcher in Dropdown */}
+                  <div className="px-2 py-2">
+                    <RoleSwitcher />
+                  </div>
+                  
+                  <DropdownMenuSeparator />
+                  
                   <DropdownMenuItem onClick={() => {
                     // Use window.location to ensure auth state is preserved
                     if (isAuthenticated && user) {
