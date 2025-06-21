@@ -130,7 +130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/auth/me", authenticateToken, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.userId);
+      const user = await storage.getUser(req.user.id);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -152,7 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid role. Must be 'organizer' or 'professional'" });
       }
       
-      const updatedUser = await storage.updateUser(req.user.userId, { role });
+      const updatedUser = await storage.updateUser(req.user.id, { role });
       
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
