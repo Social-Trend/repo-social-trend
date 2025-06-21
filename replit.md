@@ -74,6 +74,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- June 21, 2025: **COMPLETED** dual role profile switching system
+  - ✓ Role switcher component in navigation showing current role with easy switching
+  - ✓ Backend API endpoint for role switching with proper authentication
+  - ✓ Updated profile system to fetch both organizer and professional profiles simultaneously
+  - ✓ Profile completion tracking for both roles with visual indicators
+  - ✓ Fixed pricing display formatting in professional directory
+  - ✓ Users can now be both Event Organizers and Professional Tenders seamlessly
+
 - June 21, 2025: **COMPLETED** professional directory with real user profiles
   - ✓ Created API endpoint for professional profiles with search and filter capabilities
   - ✓ Built storage methods to fetch real professional profiles with location, service, and price filtering

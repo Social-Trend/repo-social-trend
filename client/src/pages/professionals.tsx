@@ -196,7 +196,9 @@ export default function Professionals() {
                     {professional.hourlyRate && (
                       <div className="flex items-center text-green-600">
                         <DollarSign className="h-4 w-4 mr-1" />
-                        <span className="font-semibold">${professional.hourlyRate}/hour</span>
+                        <span className="font-semibold">
+                          {professional.hourlyRate.toString().replace(/^\$/, '')}/hour
+                        </span>
                       </div>
                     )}
                   </div>

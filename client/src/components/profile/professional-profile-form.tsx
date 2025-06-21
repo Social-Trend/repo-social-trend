@@ -245,11 +245,23 @@ export default function ProfessionalProfileForm({
           {/* Hourly Rate */}
           <div className="space-y-2">
             <Label htmlFor="hourlyRate">Hourly Rate</Label>
-            <Input
-              id="hourlyRate"
-              {...form.register("hourlyRate")}
-              placeholder="e.g., $50/hour"
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span className="text-gray-500 sm:text-sm">$</span>
+              </div>
+              <Input
+                id="hourlyRate"
+                {...form.register("hourlyRate")}
+                placeholder="50"
+                className="pl-8"
+                type="number"
+                min="0"
+                step="0.01"
+              />
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <span className="text-gray-500 sm:text-sm">/hour</span>
+              </div>
+            </div>
           </div>
 
           {/* Bio */}
