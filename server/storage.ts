@@ -212,72 +212,27 @@ export class MemStorage implements IStorage {
   }
 
   private seedConversations() {
-    const sampleConversations = [
-      {
-        organizerName: "Jennifer Smith",
-        organizerEmail: "jennifer@eventpro.com",
-        professionalId: 1,
-        eventTitle: "Corporate Annual Gala",
-        eventDate: "2024-07-15",
-        eventLocation: "San Francisco Convention Center",
-        eventDescription: "Annual company celebration with 300 guests, requiring photography and catering services.",
-        status: "active"
-      },
-      {
-        organizerName: "Michael Johnson",
-        organizerEmail: "michael@weddingdreams.com",
-        professionalId: 2,
-        eventTitle: "Summer Wedding Reception",
-        eventDate: "2024-08-20",
-        eventLocation: "Napa Valley Vineyard",
-        eventDescription: "Elegant outdoor wedding reception for 150 guests, need full catering service with wine pairing.",
-        status: "active"
-      },
-      {
-        organizerName: "Sarah Wilson",
-        organizerEmail: "sarah@creativevents.com",
-        professionalId: 5,
-        eventTitle: "Product Launch Party",
-        eventDate: "2024-06-30",
-        eventLocation: "Downtown Rooftop Venue",
-        eventDescription: "Tech company product launch with cocktail service for 200 attendees.",
-        status: "active"
-      }
-    ];
-
-    sampleConversations.forEach(conv => {
-      const id = this.currentConversationId++;
-      const conversation: Conversation = {
-        ...conv,
-        id,
-        createdAt: new Date()
-      };
-      this.conversations.set(id, conversation);
-
-      // Add sample messages for each conversation
-      this.seedMessagesForConversation(id, conv.organizerName);
-    });
+    // Conversations will be created when users interact
   }
 
   private seedMessagesForConversation(conversationId: number, organizerName: string) {
     const conversation = this.conversations.get(conversationId);
     if (!conversation) return;
 
-    const professional = this.professionals.get(conversation.professionalId);
-    if (!professional) return;
+    // Legacy professional system removed
 
     const sampleMessages = [
       {
         conversationId,
         senderType: "organizer",
         senderName: organizerName,
-        content: `Hi ${professional.name}! I'm interested in your services for our upcoming event. Could you provide more details about your availability and pricing?`,
+        content: `Hi! I'm interested in your services for our upcoming event. Could you provide more details about your availability and pricing?`,
         isRead: true
       },
       {
         conversationId,
         senderType: "professional",
-        senderName: professional.name,
+        senderName: "Professional",
         content: `Hello ${organizerName}! Thank you for reaching out. I'd be happy to help with your event. Could you tell me more about the date, guest count, and specific requirements?`,
         isRead: true
       },
