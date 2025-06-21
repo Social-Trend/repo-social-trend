@@ -58,7 +58,7 @@ export default function ContactProfessionalForm({
         body: JSON.stringify({
           organizerName: "Anonymous Organizer",
           organizerEmail: "organizer@example.com",
-          professionalId: professional.userId || professional.id,
+          professionalId: professional.id,
           eventTitle: data.eventTitle,
           eventDate: data.eventDate || null,
           eventLocation: data.eventLocation || null,

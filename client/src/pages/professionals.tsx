@@ -246,19 +246,7 @@ export default function Professionals() {
       {/* Contact Modal */}
       {selectedProfessional && (
         <ContactProfessionalForm
-          professional={{
-            id: selectedProfessional.id,
-            name: selectedProfessional.name,
-            email: "", // Will be handled by backend lookup
-            location: selectedProfessional.location,
-            services: selectedProfessional.services,
-            hourlyRate: selectedProfessional.hourlyRate,
-            bio: selectedProfessional.bio,
-            phone: null,
-            experience: null,
-            avatar: selectedProfessional.profileImageUrl,
-            verified: null
-          }}
+          professional={selectedProfessional}
           trigger={null}
           onConversationCreated={() => {
             setIsContactModalOpen(false);
