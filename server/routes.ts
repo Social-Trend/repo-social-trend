@@ -169,11 +169,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Profile routes
   app.get("/api/profiles/professional/:userId", authenticateToken, async (req: any, res) => {
     try {
-      const userId = parseInt(req.params.userId);
-      if (isNaN(userId)) {
-        return res.status(400).json({ message: "Invalid user ID" });
-      }
-
+      const userId = req.params.userId;
+      
       const profile = await storage.getProfessionalProfile(userId);
       if (!profile) {
         return res.status(404).json({ message: "Professional profile not found" });
@@ -203,10 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/profiles/professional/:userId", authenticateToken, async (req: any, res) => {
     try {
-      const userId = parseInt(req.params.userId);
-      if (isNaN(userId)) {
-        return res.status(400).json({ message: "Invalid user ID" });
-      }
+      const userId = req.params.userId;
 
       const result = insertProfessionalProfileSchema.partial().safeParse(req.body);
       if (!result.success) {
@@ -227,10 +221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/profiles/organizer/:userId", authenticateToken, async (req: any, res) => {
     try {
-      const userId = parseInt(req.params.userId);
-      if (isNaN(userId)) {
-        return res.status(400).json({ message: "Invalid user ID" });
-      }
+      const userId = req.params.userId;
 
       const profile = await storage.getOrganizerProfile(userId);
       if (!profile) {
@@ -261,10 +252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/profiles/organizer/:userId", authenticateToken, async (req: any, res) => {
     try {
-      const userId = parseInt(req.params.userId);
-      if (isNaN(userId)) {
-        return res.status(400).json({ message: "Invalid user ID" });
-      }
+      const userId = req.params.userId;
 
       const result = insertOrganizerProfileSchema.partial().safeParse(req.body);
       if (!result.success) {
