@@ -9,12 +9,16 @@ import { CheckCircle, Users, Briefcase } from "lucide-react";
 export default function Onboarding() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
+  
+  console.log("Onboarding page loaded - auth status:", { user: !!user, isAuthenticated, isLoading });
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    // Only redirect if we're sure the user is not authenticated (not loading and no user)
+    if (!isLoading && !isAuthenticated && !user) {
+      console.log("Redirecting to home - not authenticated");
       setLocation("/");
     }
-  }, [isAuthenticated, isLoading, setLocation]);
+  }, [isAuthenticated, isLoading, setLocation, user]);
 
   const handleProfileSuccess = () => {
     setLocation("/");
@@ -32,7 +36,17 @@ export default function Onboarding() {
     );
   }
 
+  // Show loading while authentication is being determined
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated || !user) {
+    console.log("Onboarding - redirecting due to auth failure");
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -48,6 +62,8 @@ export default function Onboarding() {
       </div>
     );
   }
+
+  console.log("Onboarding - rendering form for user:", user.email, "role:", user.role);
 
 
 
