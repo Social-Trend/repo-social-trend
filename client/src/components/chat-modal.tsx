@@ -76,21 +76,16 @@ export default function ChatModal({ conversation, isOpen, onClose }: ChatModalPr
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px] h-[600px] flex flex-col p-0">
         <DialogHeader className="p-4 border-b">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback>
-                  {otherPartyName.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <DialogTitle className="text-lg">{otherPartyName}</DialogTitle>
-                <p className="text-sm text-gray-500">{conversation.eventTitle}</p>
-              </div>
+          <div className="flex items-center gap-3">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback>
+                {otherPartyName.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <DialogTitle className="text-lg">{otherPartyName}</DialogTitle>
+              <p className="text-sm text-gray-500">{conversation.eventTitle}</p>
             </div>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </DialogHeader>
 
