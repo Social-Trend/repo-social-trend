@@ -260,8 +260,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const professionals = await storage.getAllProfessionalProfiles({
         location: location as string,
         service: service as string,
-        minRate: minRate ? parseInt(minRate as string) : undefined,
-        maxRate: maxRate ? parseInt(maxRate as string) : undefined,
+        minRate: minRate ? parseFloat(minRate as string) : undefined,
+        maxRate: maxRate ? parseFloat(maxRate as string) : undefined,
         search: search as string,
       });
       res.json(professionals);

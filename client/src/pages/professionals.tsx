@@ -6,8 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import ProfessionalProfile from "@/components/professional-profile";
-import type { Professional } from "@shared/schema";
+import ProfessionalProfileComponent from "@/components/professional-profile";
+import type { ProfessionalProfile, serviceOptions } from "@shared/schema";
 import { useState, useMemo } from "react";
 
 export default function Professionals() {
@@ -22,7 +22,7 @@ export default function Professionals() {
       if (!response.ok) {
         throw new Error("Failed to fetch professionals");
       }
-      return response.json() as Promise<Professional[]>;
+      return response.json() as Promise<ProfessionalProfile[]>;
     }
   });
 

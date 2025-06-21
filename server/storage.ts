@@ -507,15 +507,19 @@ export class MemStorage implements IStorage {
 
     // Filter by price range
     if (filters.minRate !== undefined) {
-      profiles = profiles.filter(profile => 
-        profile.hourlyRate !== null && profile.hourlyRate >= filters.minRate!
-      );
+      profiles = profiles.filter(profile => {
+        if (!profile.hourlyRate) return false;
+        const rate = parseFloat(profile.hourlyRate);
+        return !isNaN(rate) && rate >= filters.minRate!;
+      });
     }
 
     if (filters.maxRate !== undefined) {
-      profiles = profiles.filter(profile => 
-        profile.hourlyRate !== null && profile.hourlyRate <= filters.maxRate!
-      );
+      profiles = profiles.filter(profile => {
+        if (!profile.hourlyRate) return false;
+        const rate = parseFloat(profile.hourlyRate);
+        return !isNaN(rate) && rate <= filters.maxRate!;
+      });
     }
 
     // Search by name or bio
@@ -566,57 +570,6 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
-  async getAllProfessionalProfiles(filters?: {
-    location?: string;
-    service?: string;
-    minRate?: number;
-    maxRate?: number;
-    search?: string;
-  }): Promise<ProfessionalProfile[]> {
-    let profiles = Array.from(this.professionalProfiles.values());
-
-    if (!filters) return profiles;
-
-    // Filter by location
-    if (filters.location) {
-      profiles = profiles.filter(profile => 
-        profile.location?.toLowerCase().includes(filters.location!.toLowerCase())
-      );
-    }
-
-    // Filter by service
-    if (filters.service) {
-      profiles = profiles.filter(profile => 
-        profile.services?.some(service => 
-          service.toLowerCase().includes(filters.service!.toLowerCase())
-        )
-      );
-    }
-
-    // Filter by price range
-    if (filters.minRate !== undefined) {
-      profiles = profiles.filter(profile => 
-        profile.hourlyRate !== null && profile.hourlyRate >= filters.minRate!
-      );
-    }
-
-    if (filters.maxRate !== undefined) {
-      profiles = profiles.filter(profile => 
-        profile.hourlyRate !== null && profile.hourlyRate <= filters.maxRate!
-      );
-    }
-
-    // Search by name or bio
-    if (filters.search) {
-      const searchTerm = filters.search.toLowerCase();
-      profiles = profiles.filter(profile => 
-        profile.name?.toLowerCase().includes(searchTerm) ||
-        profile.bio?.toLowerCase().includes(searchTerm)
-      );
-    }
-
-    return profiles;
-  }
 }
 
 export const storage = new MemStorage();
