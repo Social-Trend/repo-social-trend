@@ -136,12 +136,7 @@ export default function PaymentCheckout() {
     enabled: !!serviceRequestId,
   });
 
-  // Debug logging
-  console.log("Payment checkout - serviceRequestId:", serviceRequestId);
-  console.log("Payment checkout - clientSecret:", clientSecret);
-  console.log("Payment checkout - serviceRequest:", serviceRequest);
-  console.log("Payment checkout - isLoading:", isLoading);
-  console.log("Payment checkout - error:", error);
+
 
   useEffect(() => {
     if (!clientSecret || !serviceRequestId) {

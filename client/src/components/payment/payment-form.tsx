@@ -56,13 +56,10 @@ export default function PaymentForm({ serviceRequest, onSuccess, onCancel }: Pay
       return response;
     },
     onSuccess: (data) => {
-      console.log("Payment intent response:", data);
       if (data.clientSecret && data.clientSecret !== "payment_intent_placeholder") {
         // Real Stripe integration - redirect to checkout
-        console.log("Redirecting to checkout with client secret:", data.clientSecret);
         window.location.href = `/payment-checkout?client_secret=${data.clientSecret}&service_request_id=${serviceRequest.id}`;
       } else {
-        console.log("No valid client secret, showing fallback message");
         toast({
           title: "Payment System Ready",
           description: "Stripe integration activated. Processing payment...",
