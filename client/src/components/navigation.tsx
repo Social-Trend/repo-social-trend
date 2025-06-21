@@ -1,11 +1,29 @@
-import { Calendar, Search, MessageCircle } from "lucide-react";
+import { Calendar, Search, MessageCircle, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/contexts/auth-context";
+import AuthModal from "@/components/auth/auth-modal";
 
 interface NavigationProps {}
 
 export default function Navigation({}: NavigationProps) {
   const [location] = useLocation();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
+
+  const getUserInitials = (user: any) => {
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+    }
+    if (user?.firstName) {
+      return user.firstName[0].toUpperCase();
+    }
+    if (user?.email) {
+      return user.email[0].toUpperCase();
+    }
+    return "U";
+  };
 
   return (
     <header className="bg-white dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
@@ -56,21 +74,56 @@ export default function Navigation({}: NavigationProps) {
             </Link>
           </div>
 
-          {/* Auth Buttons */}
+          {/* Auth Section */}
           <div className="flex items-center space-x-3">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-            >
-              Sign up/ Log in
-            </Button>
-            <Button 
-              size="sm"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              Become a Tender
-            </Button>
+            {isLoading ? (
+              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+            ) : isAuthenticated && user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.profileImageUrl || undefined} alt={user.email} />
+                      <AvatarFallback>{getUserInitials(user)}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuItem className="flex flex-col items-start">
+                    <div className="font-medium">{user.firstName || user.email}</div>
+                    <div className="text-xs text-muted-foreground">{user.email}</div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={logout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <AuthModal defaultTab="login">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                  >
+                    Sign up/ Log in
+                  </Button>
+                </AuthModal>
+                <AuthModal defaultTab="register">
+                  <Button 
+                    size="sm"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                  >
+                    Become a Tender
+                  </Button>
+                </AuthModal>
+              </>
+            )}
           </div>
         </div>
       </div>
