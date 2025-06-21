@@ -25,6 +25,7 @@ export default function ChatModal({ conversation, isOpen, onClose }: ChatModalPr
   // Fetch messages for the conversation
   const { data: messages = [], refetch: refetchMessages } = useQuery<Message[]>({
     queryKey: ["/api/messages", conversation?.id],
+    queryFn: () => apiRequest(`/api/messages/${conversation?.id}`),
     enabled: !!conversation?.id && isOpen,
     refetchInterval: 2000, // Poll every 2 seconds for new messages
   });
