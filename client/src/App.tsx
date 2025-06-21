@@ -10,6 +10,7 @@ import Professionals from "@/pages/professionals";
 import Messages from "@/pages/messages";
 import Onboarding from "@/pages/onboarding";
 import TestOnboarding from "@/pages/test-onboarding";
+import Requests from "@/pages/requests";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/professionals" component={Professionals} />
         <Route path="/messages" component={Messages} />
+        <Route path="/requests" component={Requests} />
         <Route path="/onboarding" component={Onboarding} />
         <Route path="/test-onboarding" component={TestOnboarding} />
         <Route component={NotFound} />

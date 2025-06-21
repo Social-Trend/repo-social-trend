@@ -1,4 +1,4 @@
-import { Calendar, Search, MessageCircle, LogOut, User } from "lucide-react";
+import { Calendar, Search, MessageCircle, LogOut, User, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -73,6 +73,16 @@ export default function Navigation({}: NavigationProps) {
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Messages
+              </Button>
+            </Link>
+            <Link href="/requests">
+              <Button 
+                variant={location === "/requests" ? "secondary" : "ghost"}
+                size="sm"
+                className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Requests
               </Button>
             </Link>
           </div>
