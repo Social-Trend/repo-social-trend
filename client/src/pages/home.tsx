@@ -14,7 +14,7 @@ export default function Home() {
       return <ProfessionalDashboard />;
     }
 
-    return <OrganizerView />;
+    return <OrganizerDashboard />;
   };
 
   return (
