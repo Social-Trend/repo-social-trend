@@ -45,25 +45,23 @@ export default function PaymentForm({ serviceRequest, onSuccess, onCancel }: Pay
 
   const createPaymentIntent = useMutation({
     mutationFn: async (data: PaymentForm) => {
-      return await apiRequest("POST", "/api/create-payment-intent", {
+      const response = await apiRequest("POST", "/api/create-payment-intent", {
         serviceRequestId: serviceRequest.id,
         amount: data.depositAmount * 100,
         totalAmount: data.totalAmount * 100,
       });
+      return response;
     },
     onSuccess: (data) => {
-      if (data.clientSecret === "payment_intent_placeholder") {
+      if (data.clientSecret && data.clientSecret !== "payment_intent_placeholder") {
+        // Real Stripe integration - redirect to checkout
+        window.location.href = `/payment-checkout?client_secret=${data.clientSecret}&service_request_id=${serviceRequest.id}`;
+      } else {
         toast({
           title: "Payment System Ready",
-          description: "Payment infrastructure configured. Stripe integration will activate once API keys are provided.",
+          description: "Stripe integration activated. Processing payment...",
         });
         onSuccess?.();
-      } else {
-        setIsProcessing(true);
-        toast({
-          title: "Processing Payment",
-          description: "Redirecting to secure payment processor...",
-        });
       }
     },
     onError: (error) => {

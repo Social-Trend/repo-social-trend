@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import Stripe from "stripe";
 import { storage } from "./storage";
 import { 
   loginUserSchema, 
@@ -13,6 +14,11 @@ import {
 } from "@shared/schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+
+// Initialize Stripe
+const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY)
+  : null;
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-jwt-secret-key";
 
@@ -448,11 +454,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Payment routes (Stripe integration)
   app.post("/api/create-payment-intent", authenticateToken, async (req, res) => {
     try {
-      if (!process.env.STRIPE_SECRET_KEY) {
+      if (!stripe) {
         return res.status(500).json({ error: "Stripe configuration missing" });
       }
 
-      const { serviceRequestId, amount } = req.body;
+      const { serviceRequestId, amount, totalAmount } = req.body;
       
       if (!serviceRequestId || !amount) {
         return res.status(400).json({ error: "Service request ID and amount required" });
@@ -465,14 +471,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Verify user owns this request
-      if (serviceRequest.organizerId !== req.user.id) {
+      const userId = (req.user as any)?.id;
+      if (serviceRequest.organizerId !== userId) {
         return res.status(403).json({ error: "Unauthorized" });
       }
 
-      // For now, return success - will be implemented when Stripe keys are provided
+      // Create Stripe payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount, // Amount in cents
+        currency: "usd",
+        metadata: {
+          serviceRequestId: serviceRequestId.toString(),
+          organizerId: userId?.toString() || "",
+          professionalId: serviceRequest.professionalId.toString(),
+        },
+        description: `Deposit for ${serviceRequest.eventTitle}`,
+      });
+
+      // Update service request with payment details
+      await storage.updateServiceRequestPayment(
+        serviceRequestId,
+        paymentIntent.id,
+        "pending"
+      );
+
       res.json({
-        clientSecret: "payment_intent_placeholder",
-        message: "Payment processing will be activated once Stripe keys are configured"
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id
       });
     } catch (error) {
       console.error("Payment intent creation error:", error);
@@ -482,6 +507,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/confirm-payment", authenticateToken, async (req, res) => {
     try {
+      if (!stripe) {
+        return res.status(500).json({ error: "Stripe configuration missing" });
+      }
+
       const { serviceRequestId, paymentIntentId } = req.body;
       
       const serviceRequest = await storage.getServiceRequest(serviceRequestId);
@@ -489,17 +518,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Service request not found" });
       }
 
-      // Update service request with payment info
-      const updatedRequest = await storage.updateServiceRequestPayment(
-        serviceRequestId,
-        paymentIntentId,
-        'paid'
-      );
+      // Verify payment with Stripe
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      
+      if (paymentIntent.status === 'succeeded') {
+        // Update service request with payment info
+        const updatedRequest = await storage.updateServiceRequestPayment(
+          serviceRequestId,
+          paymentIntentId,
+          'paid'
+        );
 
-      res.json({
-        success: true,
-        serviceRequest: updatedRequest
-      });
+        // Create payment record
+        await storage.createPayment({
+          serviceRequestId,
+          organizerId: serviceRequest.organizerId,
+          professionalId: serviceRequest.professionalId,
+          amount: paymentIntent.amount,
+          stripePaymentIntentId: paymentIntentId,
+          type: 'deposit',
+          status: 'succeeded'
+        });
+
+        res.json({
+          success: true,
+          serviceRequest: updatedRequest
+        });
+      } else {
+        res.status(400).json({ error: "Payment not completed" });
+      }
     } catch (error) {
       console.error("Payment confirmation error:", error);
       res.status(500).json({ error: "Failed to confirm payment" });
