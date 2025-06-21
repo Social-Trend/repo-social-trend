@@ -17,6 +17,8 @@ export default function Messages() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // Fetch service requests (now part of unified communication)
   const { data: serviceRequests = [], isLoading: requestsLoading } = useQuery({
@@ -98,8 +100,7 @@ export default function Messages() {
     },
   });
 
-  const [openConversations, setOpenConversations] = useState<Set<number>>(new Set());
-  const [messageInputs, setMessageInputs] = useState<Record<number, string>>({});
+
 
   const handleStartConversation = (serviceRequest: ServiceRequest) => {
     // Check if conversation already exists
@@ -393,21 +394,12 @@ export default function Messages() {
                       size="sm" 
                       variant="outline"
                       onClick={() => {
-                        const newOpenConversations = new Set(openConversations);
-                        if (openConversations.has(conversation.id)) {
-                          newOpenConversations.delete(conversation.id);
-                        } else {
-                          newOpenConversations.add(conversation.id);
-                        }
-                        setOpenConversations(newOpenConversations);
+                        setSelectedConversation(conversation);
+                        setIsChatOpen(true);
                       }}
                     >
-                      {openConversations.has(conversation.id) ? (
-                        <ChevronUp className="h-4 w-4 mr-2" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4 mr-2" />
-                      )}
-                      {openConversations.has(conversation.id) ? 'Close Chat' : 'Open Chat'}
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      Open Chat
                     </Button>
                   </div>
                 </CardContent>
@@ -416,6 +408,16 @@ export default function Messages() {
           </div>
         )}
       </div>
+
+      {/* Chat Modal */}
+      <ChatModal 
+        conversation={selectedConversation}
+        isOpen={isChatOpen}
+        onClose={() => {
+          setIsChatOpen(false);
+          setSelectedConversation(null);
+        }}
+      />
     </div>
   );
 }
