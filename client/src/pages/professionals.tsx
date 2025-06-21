@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import type { ProfessionalProfile } from "@shared/schema";
 import ContactProfessionalForm from "@/components/messaging/contact-professional-form";
+import ServiceRequestForm from "@/components/service-request-form";
 
 export default function Professionals() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -230,14 +231,15 @@ export default function Professionals() {
                 <Separator className="mb-4" />
 
                 <div className="flex gap-2">
-                  <Button 
-                    onClick={() => handleContact(professional)}
-                    className="flex-1"
-                    size="sm"
-                  >
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    Contact
-                  </Button>
+                  <ServiceRequestForm
+                    professional={professional}
+                    trigger={
+                      <Button className="flex-1" size="sm">
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        Request Services
+                      </Button>
+                    }
+                  />
                 </div>
               </CardContent>
             </Card>

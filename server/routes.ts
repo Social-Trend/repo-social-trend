@@ -443,6 +443,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Service request endpoints
+  app.get('/api/service-requests', authenticateToken, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { role } = req.query;
+      
+      let requests;
+      if (role === 'professional') {
+        requests = await storage.getServiceRequests(userId);
+      } else {
+        requests = await storage.getServiceRequests(undefined, userId);
+      }
+      
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching service requests:", error);
+      res.status(500).json({ message: "Failed to fetch service requests" });
+    }
+  });
+
+  app.post('/api/service-requests', authenticateToken, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const requestData = { ...req.body, organizerId: userId };
+      
+      const request = await storage.createServiceRequest(requestData);
+      res.status(201).json(request);
+    } catch (error) {
+      console.error("Error creating service request:", error);
+      res.status(500).json({ message: "Failed to create service request" });
+    }
+  });
+
+  app.patch('/api/service-requests/:id', authenticateToken, async (req: any, res) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      const { status, responseMessage } = req.body;
+      
+      const request = await storage.updateServiceRequestStatus(requestId, status, responseMessage);
+      if (!request) {
+        return res.status(404).json({ message: "Service request not found" });
+      }
+      
+      res.json(request);
+    } catch (error) {
+      console.error("Error updating service request:", error);
+      res.status(500).json({ message: "Failed to update service request" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

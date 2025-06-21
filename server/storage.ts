@@ -583,6 +583,60 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
+  // Service request methods
+  async getServiceRequests(professionalId?: number, organizerId?: number): Promise<ServiceRequest[]> {
+    const allRequests = Array.from(this.serviceRequests.values());
+    
+    if (professionalId) {
+      return allRequests.filter(request => request.professionalId === professionalId);
+    }
+    
+    if (organizerId) {
+      return allRequests.filter(request => request.organizerId === organizerId);
+    }
+    
+    return allRequests;
+  }
+
+  async getServiceRequest(id: number): Promise<ServiceRequest | undefined> {
+    return this.serviceRequests.get(id);
+  }
+
+  async createServiceRequest(insertRequest: InsertServiceRequest): Promise<ServiceRequest> {
+    const id = this.currentServiceRequestId++;
+    const request: ServiceRequest = {
+      id,
+      organizerId: insertRequest.organizerId,
+      professionalId: insertRequest.professionalId,
+      eventTitle: insertRequest.eventTitle,
+      eventDate: insertRequest.eventDate || null,
+      eventLocation: insertRequest.eventLocation || null,
+      eventDescription: insertRequest.eventDescription || null,
+      requestMessage: insertRequest.requestMessage,
+      status: insertRequest.status || "pending",
+      responseMessage: insertRequest.responseMessage || null,
+      respondedAt: null,
+      expiresAt: insertRequest.expiresAt || null,
+      createdAt: new Date(),
+    };
+    this.serviceRequests.set(id, request);
+    return request;
+  }
+
+  async updateServiceRequestStatus(id: number, status: string, responseMessage?: string): Promise<ServiceRequest | undefined> {
+    const existing = this.serviceRequests.get(id);
+    if (!existing) return undefined;
+
+    const updated: ServiceRequest = {
+      ...existing,
+      status,
+      responseMessage: responseMessage || existing.responseMessage,
+      respondedAt: status !== "pending" ? new Date() : existing.respondedAt,
+    };
+    this.serviceRequests.set(id, updated);
+    return updated;
+  }
+
 }
 
 export const storage = new MemStorage();
