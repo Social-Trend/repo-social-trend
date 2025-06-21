@@ -5,6 +5,8 @@ import {
   messages,
   professionalProfiles,
   organizerProfiles,
+  serviceRequests,
+  payments,
   type User, 
   type InsertUser, 
   type Professional, 
@@ -17,9 +19,10 @@ import {
   type InsertProfessionalProfile,
   type OrganizerProfile,
   type InsertOrganizerProfile,
-  serviceRequests,
   type ServiceRequest,
-  type InsertServiceRequest
+  type InsertServiceRequest,
+  type Payment,
+  type InsertPayment
 } from "@shared/schema";
 
 export interface IStorage {
@@ -77,11 +80,13 @@ export class MemStorage implements IStorage {
   private conversations: Map<number, Conversation>;
   private messages: Map<number, Message>;
   private serviceRequests: Map<number, ServiceRequest>;
+  private payments: Map<number, Payment>;
   private currentUserId: number;
   private currentProfileId: number;
   private currentConversationId: number;
   private currentMessageId: number;
   private currentServiceRequestId: number;
+  private currentPaymentId: number;
 
   constructor() {
     this.users = new Map();
@@ -90,11 +95,13 @@ export class MemStorage implements IStorage {
     this.conversations = new Map();
     this.messages = new Map();
     this.serviceRequests = new Map();
+    this.payments = new Map();
     this.currentUserId = 1;
     this.currentProfileId = 1;
     this.currentConversationId = 1;
     this.currentMessageId = 1;
     this.currentServiceRequestId = 1;
+    this.currentPaymentId = 1;
     
     this.seedServiceRequests();
   }
@@ -431,7 +438,15 @@ export class MemStorage implements IStorage {
       status: insertRequest.status || "pending",
       responseMessage: insertRequest.responseMessage || null,
       respondedAt: null,
-      expiresAt: insertRequest.expiresAt || null,
+      expiresAt: null,
+      
+      // Payment fields
+      depositAmount: insertRequest.depositAmount || null,
+      totalAmount: insertRequest.totalAmount || null,
+      stripePaymentIntentId: null,
+      paymentStatus: insertRequest.paymentStatus || "unpaid",
+      paidAt: null,
+      
       createdAt: new Date(),
     };
     this.serviceRequests.set(id, request);
@@ -449,6 +464,54 @@ export class MemStorage implements IStorage {
       respondedAt: status !== "pending" ? new Date() : existing.respondedAt,
     };
     this.serviceRequests.set(id, updated);
+    return updated;
+  }
+
+  async updateServiceRequestPayment(id: number, paymentIntentId: string, paymentStatus: string): Promise<ServiceRequest | undefined> {
+    const existing = this.serviceRequests.get(id);
+    if (!existing) return undefined;
+
+    const updated: ServiceRequest = {
+      ...existing,
+      stripePaymentIntentId: paymentIntentId,
+      paymentStatus,
+      paidAt: paymentStatus === 'paid' ? new Date() : existing.paidAt,
+      status: paymentStatus === 'paid' ? 'paid' : existing.status,
+    };
+    this.serviceRequests.set(id, updated);
+    return updated;
+  }
+
+  async getPayments(serviceRequestId?: number): Promise<Payment[]> {
+    const allPayments = Array.from(this.payments.values());
+    if (serviceRequestId) {
+      return allPayments.filter(payment => payment.serviceRequestId === serviceRequestId);
+    }
+    return allPayments;
+  }
+
+  async createPayment(insertPayment: InsertPayment): Promise<Payment> {
+    const id = this.currentPaymentId++;
+    const payment: Payment = { 
+      id, 
+      ...insertPayment,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.payments.set(id, payment);
+    return payment;
+  }
+
+  async updatePaymentStatus(id: number, status: string): Promise<Payment | undefined> {
+    const existing = this.payments.get(id);
+    if (!existing) return undefined;
+
+    const updated: Payment = {
+      ...existing,
+      status,
+      updatedAt: new Date(),
+    };
+    this.payments.set(id, updated);
     return updated;
   }
 
