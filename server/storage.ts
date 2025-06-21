@@ -29,6 +29,13 @@ export interface IStorage {
   getProfessionalProfile(userId: number): Promise<ProfessionalProfile | undefined>;
   createProfessionalProfile(profile: InsertProfessionalProfile): Promise<ProfessionalProfile>;
   updateProfessionalProfile(userId: number, updates: Partial<InsertProfessionalProfile>): Promise<ProfessionalProfile | undefined>;
+  getAllProfessionalProfiles(filters?: {
+    location?: string;
+    service?: string;
+    minRate?: number;
+    maxRate?: number;
+    search?: string;
+  }): Promise<ProfessionalProfile[]>;
   
   // Organizer profile methods
   getOrganizerProfile(userId: number): Promise<OrganizerProfile | undefined>;
@@ -471,6 +478,58 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
+  async getAllProfessionalProfiles(filters?: {
+    location?: string;
+    service?: string;
+    minRate?: number;
+    maxRate?: number;
+    search?: string;
+  }): Promise<ProfessionalProfile[]> {
+    let profiles = Array.from(this.professionalProfiles.values());
+
+    if (!filters) return profiles;
+
+    // Filter by location
+    if (filters.location) {
+      profiles = profiles.filter(profile => 
+        profile.location?.toLowerCase().includes(filters.location!.toLowerCase())
+      );
+    }
+
+    // Filter by service
+    if (filters.service) {
+      profiles = profiles.filter(profile => 
+        profile.services?.some(service => 
+          service.toLowerCase().includes(filters.service!.toLowerCase())
+        )
+      );
+    }
+
+    // Filter by price range
+    if (filters.minRate !== undefined) {
+      profiles = profiles.filter(profile => 
+        profile.hourlyRate !== null && profile.hourlyRate >= filters.minRate!
+      );
+    }
+
+    if (filters.maxRate !== undefined) {
+      profiles = profiles.filter(profile => 
+        profile.hourlyRate !== null && profile.hourlyRate <= filters.maxRate!
+      );
+    }
+
+    // Search by name or bio
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
+      profiles = profiles.filter(profile => 
+        profile.name?.toLowerCase().includes(searchTerm) ||
+        profile.bio?.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    return profiles;
+  }
+
   // Organizer profile methods
   async getOrganizerProfile(userId: number): Promise<OrganizerProfile | undefined> {
     return Array.from(this.organizerProfiles.values()).find(
@@ -505,6 +564,58 @@ export class MemStorage implements IStorage {
     };
     this.organizerProfiles.set(existing.id, updated);
     return updated;
+  }
+
+  async getAllProfessionalProfiles(filters?: {
+    location?: string;
+    service?: string;
+    minRate?: number;
+    maxRate?: number;
+    search?: string;
+  }): Promise<ProfessionalProfile[]> {
+    let profiles = Array.from(this.professionalProfiles.values());
+
+    if (!filters) return profiles;
+
+    // Filter by location
+    if (filters.location) {
+      profiles = profiles.filter(profile => 
+        profile.location?.toLowerCase().includes(filters.location!.toLowerCase())
+      );
+    }
+
+    // Filter by service
+    if (filters.service) {
+      profiles = profiles.filter(profile => 
+        profile.services?.some(service => 
+          service.toLowerCase().includes(filters.service!.toLowerCase())
+        )
+      );
+    }
+
+    // Filter by price range
+    if (filters.minRate !== undefined) {
+      profiles = profiles.filter(profile => 
+        profile.hourlyRate !== null && profile.hourlyRate >= filters.minRate!
+      );
+    }
+
+    if (filters.maxRate !== undefined) {
+      profiles = profiles.filter(profile => 
+        profile.hourlyRate !== null && profile.hourlyRate <= filters.maxRate!
+      );
+    }
+
+    // Search by name or bio
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
+      profiles = profiles.filter(profile => 
+        profile.name?.toLowerCase().includes(searchTerm) ||
+        profile.bio?.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    return profiles;
   }
 }
 

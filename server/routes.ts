@@ -253,12 +253,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Professional routes
+  // Professional directory - get all real professional profiles
   app.get("/api/professionals", async (req, res) => {
     try {
-      const professionals = await storage.getProfessionals();
+      const { location, service, minRate, maxRate, search } = req.query;
+      const professionals = await storage.getAllProfessionalProfiles({
+        location: location as string,
+        service: service as string,
+        minRate: minRate ? parseInt(minRate as string) : undefined,
+        maxRate: maxRate ? parseInt(maxRate as string) : undefined,
+        search: search as string,
+      });
       res.json(professionals);
     } catch (error) {
+      console.error("Error fetching professional profiles:", error);
       res.status(500).json({ error: "Failed to fetch professionals" });
     }
   });
