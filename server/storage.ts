@@ -16,7 +16,10 @@ import {
   type ProfessionalProfile,
   type InsertProfessionalProfile,
   type OrganizerProfile,
-  type InsertOrganizerProfile
+  type InsertOrganizerProfile,
+  serviceRequests,
+  type ServiceRequest,
+  type InsertServiceRequest
 } from "@shared/schema";
 
 export interface IStorage {
@@ -57,6 +60,12 @@ export interface IStorage {
   getMessages(conversationId: number): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   markMessagesAsRead(conversationId: number, senderType: string): Promise<void>;
+  
+  // Service request methods
+  getServiceRequests(professionalId?: number, organizerId?: number): Promise<ServiceRequest[]>;
+  getServiceRequest(id: number): Promise<ServiceRequest | undefined>;
+  createServiceRequest(request: InsertServiceRequest): Promise<ServiceRequest>;
+  updateServiceRequestStatus(id: number, status: string, responseMessage?: string): Promise<ServiceRequest | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -66,11 +75,13 @@ export class MemStorage implements IStorage {
   private organizerProfiles: Map<number, OrganizerProfile>;
   private conversations: Map<number, Conversation>;
   private messages: Map<number, Message>;
+  private serviceRequests: Map<number, ServiceRequest>;
   private currentUserId: number;
   private currentProfessionalId: number;
   private currentProfileId: number;
   private currentConversationId: number;
   private currentMessageId: number;
+  private currentServiceRequestId: number;
 
   constructor() {
     this.users = new Map();
@@ -79,11 +90,13 @@ export class MemStorage implements IStorage {
     this.organizerProfiles = new Map();
     this.conversations = new Map();
     this.messages = new Map();
+    this.serviceRequests = new Map();
     this.currentUserId = 1;
     this.currentProfessionalId = 1;
     this.currentProfileId = 1;
     this.currentConversationId = 1;
     this.currentMessageId = 1;
+    this.currentServiceRequestId = 1;
     
     // Add sample professionals
     this.seedProfessionals();

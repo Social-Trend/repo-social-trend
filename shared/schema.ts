@@ -141,6 +141,23 @@ export const messages = pgTable("messages", {
   isRead: boolean("is_read").default(false),
 });
 
+// Service requests table for direct contact/booking requests
+export const serviceRequests = pgTable("service_requests", {
+  id: serial("id").primaryKey(),
+  organizerId: integer("organizer_id").notNull().references(() => users.id),
+  professionalId: integer("professional_id").notNull().references(() => users.id),
+  eventTitle: text("event_title").notNull(),
+  eventDate: timestamp("event_date"),
+  eventLocation: text("event_location"),
+  eventDescription: text("event_description"),
+  requestMessage: text("request_message").notNull(),
+  status: text("status").notNull().default("pending"), // pending, accepted, declined, expired
+  responseMessage: text("response_message"),
+  respondedAt: timestamp("responded_at"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertProfessionalSchema = createInsertSchema(professionals).omit({
   id: true,
 });
@@ -155,6 +172,12 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
   timestamp: true,
 });
 
+export const insertServiceRequestSchema = createInsertSchema(serviceRequests).omit({
+  id: true,
+  createdAt: true,
+  respondedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type LoginUser = z.infer<typeof loginUserSchema>;
 export type RegisterUser = z.infer<typeof registerUserSchema>;
@@ -165,6 +188,8 @@ export type InsertConversation = z.infer<typeof insertConversationSchema>;
 export type Conversation = typeof conversations.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
+export type InsertServiceRequest = z.infer<typeof insertServiceRequestSchema>;
+export type ServiceRequest = typeof serviceRequests.$inferSelect;
 
 // New profile types
 export type InsertProfessionalProfile = z.infer<typeof insertProfessionalProfileSchema>;
