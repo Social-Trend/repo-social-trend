@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Card, CardContent } from "@/components/ui/card";
 import { Mail, Calendar, MapPin, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { Professional, Conversation } from "@shared/schema";
+import type { ProfessionalProfile, Conversation } from "@shared/schema";
 
 const contactFormSchema = z.object({
   eventTitle: z.string().min(5, "Event title must be at least 5 characters"),
@@ -24,7 +24,7 @@ const contactFormSchema = z.object({
 type ContactFormData = z.infer<typeof contactFormSchema>;
 
 interface ContactProfessionalFormProps {
-  professional: Professional;
+  professional: ProfessionalProfile;
   onConversationCreated?: (conversation: Conversation) => void;
   trigger?: React.ReactNode;
 }
@@ -58,7 +58,7 @@ export default function ContactProfessionalForm({
         body: JSON.stringify({
           organizerName: "Anonymous Organizer",
           organizerEmail: "organizer@example.com",
-          professionalId: professional.id,
+          professionalId: professional.userId || professional.id,
           eventTitle: data.eventTitle,
           eventDate: data.eventDate || null,
           eventLocation: data.eventLocation || null,
