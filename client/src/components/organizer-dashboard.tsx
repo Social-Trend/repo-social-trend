@@ -1,4 +1,4 @@
-import { Search, MessageSquare, Clock, CheckCircle, AlertCircle, ArrowRight, Calendar, Users, Plus } from "lucide-react";
+import { Search, MessageSquare, Clock, CheckCircle, AlertCircle, ArrowRight, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,7 @@ const statusColors = {
   expired: "bg-gray-100 text-gray-800",
 };
 
-export default function OrganizerView() {
+export default function OrganizerDashboard() {
   const { user, isAuthenticated } = useAuth();
 
   // Fetch service requests for organizer

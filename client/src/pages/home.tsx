@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/auth-context";
-import OrganizerView from "@/components/organizer-view";
+import OrganizerDashboard from "@/components/organizer-dashboard";
 import ProfessionalDashboard from "@/components/professional-dashboard";
 
 export default function Home() {
@@ -7,7 +7,7 @@ export default function Home() {
 
   const renderRoleBasedView = () => {
     if (!isAuthenticated || !user) {
-      return <OrganizerView />; // Default to organizer view for non-authenticated users
+      return <OrganizerDashboard />; // Default to organizer dashboard for non-authenticated users
     }
 
     if (user.role === 'professional') {
