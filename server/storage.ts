@@ -24,12 +24,15 @@ import {
   type Payment,
   type InsertPayment
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and, or, desc, ilike } from "drizzle-orm";
 
 export interface IStorage {
-  getUser(id: number): Promise<User | undefined>;
+  getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<InsertUser>): Promise<User | undefined>;
+  upsertUser(user: any): Promise<User>;
   
   // Professional profile methods
   getProfessionalProfile(userId: number): Promise<ProfessionalProfile | undefined>;
@@ -525,4 +528,304 @@ export class MemStorage implements IStorage {
 
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  // User operations (required for Replit Auth)
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: number, updates: Partial<InsertUser>): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set(updates)
+      .where(eq(users.id, id.toString()))
+      .returning();
+    return user;
+  }
+
+  async upsertUser(userData: any): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  // Professional profile methods
+  async getProfessionalProfile(userId: number): Promise<ProfessionalProfile | undefined> {
+    const [profile] = await db
+      .select()
+      .from(professionalProfiles)
+      .where(eq(professionalProfiles.userId, userId));
+    return profile;
+  }
+
+  async createProfessionalProfile(profile: InsertProfessionalProfile): Promise<ProfessionalProfile> {
+    const [newProfile] = await db
+      .insert(professionalProfiles)
+      .values(profile)
+      .returning();
+    return newProfile;
+  }
+
+  async updateProfessionalProfile(userId: number, updates: Partial<InsertProfessionalProfile>): Promise<ProfessionalProfile | undefined> {
+    const [profile] = await db
+      .update(professionalProfiles)
+      .set(updates)
+      .where(eq(professionalProfiles.userId, userId))
+      .returning();
+    return profile;
+  }
+
+  async getAllProfessionalProfiles(filters?: {
+    location?: string;
+    service?: string;
+    minRate?: number;
+    maxRate?: number;
+    search?: string;
+  }): Promise<ProfessionalProfile[]> {
+    let query = db.select().from(professionalProfiles);
+    
+    if (filters) {
+      const conditions = [];
+      
+      if (filters.location) {
+        conditions.push(ilike(professionalProfiles.location, `%${filters.location}%`));
+      }
+      
+      if (filters.service) {
+        conditions.push(ilike(professionalProfiles.services, `%${filters.service}%`));
+      }
+      
+      if (filters.search) {
+        conditions.push(
+          or(
+            ilike(professionalProfiles.name, `%${filters.search}%`),
+            ilike(professionalProfiles.bio, `%${filters.search}%`),
+            ilike(professionalProfiles.services, `%${filters.search}%`)
+          )
+        );
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    return await query;
+  }
+
+  // Organizer profile methods
+  async getOrganizerProfile(userId: number): Promise<OrganizerProfile | undefined> {
+    const [profile] = await db
+      .select()
+      .from(organizerProfiles)
+      .where(eq(organizerProfiles.userId, userId));
+    return profile;
+  }
+
+  async createOrganizerProfile(profile: InsertOrganizerProfile): Promise<OrganizerProfile> {
+    const [newProfile] = await db
+      .insert(organizerProfiles)
+      .values(profile)
+      .returning();
+    return newProfile;
+  }
+
+  async updateOrganizerProfile(userId: number, updates: Partial<InsertOrganizerProfile>): Promise<OrganizerProfile | undefined> {
+    const [profile] = await db
+      .update(organizerProfiles)
+      .set(updates)
+      .where(eq(organizerProfiles.userId, userId))
+      .returning();
+    return profile;
+  }
+
+  // Messaging methods
+  async getConversations(professionalId?: number, organizerEmail?: string): Promise<Conversation[]> {
+    let query = db.select().from(conversations);
+    
+    if (professionalId) {
+      query = query.where(eq(conversations.professionalId, professionalId));
+    }
+    
+    if (organizerEmail) {
+      query = query.where(eq(conversations.organizerEmail, organizerEmail));
+    }
+    
+    return await query.orderBy(desc(conversations.createdAt));
+  }
+
+  async getConversation(id: number): Promise<Conversation | undefined> {
+    const [conversation] = await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.id, id));
+    return conversation;
+  }
+
+  async createConversation(conversation: InsertConversation): Promise<Conversation> {
+    const [newConversation] = await db
+      .insert(conversations)
+      .values(conversation)
+      .returning();
+    return newConversation;
+  }
+
+  async updateConversationStatus(id: number, status: string): Promise<Conversation | undefined> {
+    const [conversation] = await db
+      .update(conversations)
+      .set({ status })
+      .where(eq(conversations.id, id))
+      .returning();
+    return conversation;
+  }
+
+  async getMessages(conversationId: number): Promise<Message[]> {
+    return await db
+      .select()
+      .from(messages)
+      .where(eq(messages.conversationId, conversationId))
+      .orderBy(messages.timestamp);
+  }
+
+  async createMessage(message: InsertMessage): Promise<Message> {
+    const [newMessage] = await db
+      .insert(messages)
+      .values(message)
+      .returning();
+    return newMessage;
+  }
+
+  async markMessagesAsRead(conversationId: number, senderType: string): Promise<void> {
+    await db
+      .update(messages)
+      .set({ isRead: true })
+      .where(
+        and(
+          eq(messages.conversationId, conversationId),
+          eq(messages.senderType, senderType === 'professional' ? 'organizer' : 'professional')
+        )
+      );
+  }
+
+  // Service request methods
+  async getServiceRequests(professionalId?: number, organizerId?: number): Promise<ServiceRequest[]> {
+    let query = db.select().from(serviceRequests);
+    
+    if (professionalId) {
+      query = query.where(eq(serviceRequests.professionalId, professionalId));
+    }
+    
+    if (organizerId) {
+      query = query.where(eq(serviceRequests.organizerId, organizerId));
+    }
+    
+    return await query.orderBy(desc(serviceRequests.createdAt));
+  }
+
+  async getServiceRequest(id: number): Promise<ServiceRequest | undefined> {
+    const [request] = await db
+      .select()
+      .from(serviceRequests)
+      .where(eq(serviceRequests.id, id));
+    return request;
+  }
+
+  async createServiceRequest(request: InsertServiceRequest): Promise<ServiceRequest> {
+    const [newRequest] = await db
+      .insert(serviceRequests)
+      .values(request)
+      .returning();
+    return newRequest;
+  }
+
+  async updateServiceRequestStatus(id: number, status: string, responseMessage?: string): Promise<ServiceRequest | undefined> {
+    const updates: any = { status };
+    if (responseMessage) {
+      updates.responseMessage = responseMessage;
+    }
+    if (status === 'accepted' || status === 'declined') {
+      updates.respondedAt = new Date();
+    }
+    
+    const [request] = await db
+      .update(serviceRequests)
+      .set(updates)
+      .where(eq(serviceRequests.id, id))
+      .returning();
+    return request;
+  }
+
+  async updateServiceRequestPayment(id: number, paymentIntentId: string, paymentStatus: string): Promise<ServiceRequest | undefined> {
+    const updates: any = {
+      stripePaymentIntentId: paymentIntentId,
+      paymentStatus
+    };
+    
+    if (paymentStatus === 'paid') {
+      updates.paidAt = new Date();
+    }
+    
+    const [request] = await db
+      .update(serviceRequests)
+      .set(updates)
+      .where(eq(serviceRequests.id, id))
+      .returning();
+    return request;
+  }
+
+  // Payment methods
+  async getPayments(serviceRequestId?: number): Promise<Payment[]> {
+    let query = db.select().from(payments);
+    
+    if (serviceRequestId) {
+      query = query.where(eq(payments.serviceRequestId, serviceRequestId));
+    }
+    
+    return await query.orderBy(desc(payments.createdAt));
+  }
+
+  async createPayment(payment: InsertPayment): Promise<Payment> {
+    const [newPayment] = await db
+      .insert(payments)
+      .values(payment)
+      .returning();
+    return newPayment;
+  }
+
+  async updatePaymentStatus(id: number, status: string): Promise<Payment | undefined> {
+    const [payment] = await db
+      .update(payments)
+      .set({ 
+        status,
+        updatedAt: new Date()
+      })
+      .where(eq(payments.id, id))
+      .returning();
+    return payment;
+  }
+}
+
+export const storage = new DatabaseStorage();
