@@ -3,6 +3,8 @@ import {
   professionals, 
   conversations, 
   messages,
+  professionalProfiles,
+  organizerProfiles,
   type User, 
   type InsertUser, 
   type Professional, 
@@ -10,7 +12,11 @@ import {
   type Conversation,
   type InsertConversation,
   type Message,
-  type InsertMessage
+  type InsertMessage,
+  type ProfessionalProfile,
+  type InsertProfessionalProfile,
+  type OrganizerProfile,
+  type InsertOrganizerProfile
 } from "@shared/schema";
 
 export interface IStorage {
@@ -18,6 +24,18 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<InsertUser>): Promise<User | undefined>;
+  
+  // Professional profile methods
+  getProfessionalProfile(userId: number): Promise<ProfessionalProfile | undefined>;
+  createProfessionalProfile(profile: InsertProfessionalProfile): Promise<ProfessionalProfile>;
+  updateProfessionalProfile(userId: number, updates: Partial<InsertProfessionalProfile>): Promise<ProfessionalProfile | undefined>;
+  
+  // Organizer profile methods
+  getOrganizerProfile(userId: number): Promise<OrganizerProfile | undefined>;
+  createOrganizerProfile(profile: InsertOrganizerProfile): Promise<OrganizerProfile>;
+  updateOrganizerProfile(userId: number, updates: Partial<InsertOrganizerProfile>): Promise<OrganizerProfile | undefined>;
+  
+  // Legacy professional methods (to maintain compatibility)
   getProfessional(id: number): Promise<Professional | undefined>;
   getProfessionals(): Promise<Professional[]>;
   createProfessional(professional: InsertProfessional): Promise<Professional>;
@@ -37,20 +55,26 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private professionals: Map<number, Professional>;
+  private professionalProfiles: Map<number, ProfessionalProfile>;
+  private organizerProfiles: Map<number, OrganizerProfile>;
   private conversations: Map<number, Conversation>;
   private messages: Map<number, Message>;
   private currentUserId: number;
   private currentProfessionalId: number;
+  private currentProfileId: number;
   private currentConversationId: number;
   private currentMessageId: number;
 
   constructor() {
     this.users = new Map();
     this.professionals = new Map();
+    this.professionalProfiles = new Map();
+    this.organizerProfiles = new Map();
     this.conversations = new Map();
     this.messages = new Map();
     this.currentUserId = 1;
     this.currentProfessionalId = 1;
+    this.currentProfileId = 1;
     this.currentConversationId = 1;
     this.currentMessageId = 1;
     
@@ -407,6 +431,80 @@ export class MemStorage implements IStorage {
       };
       this.messages.set(id, message);
     });
+  }
+
+  // Professional profile methods
+  async getProfessionalProfile(userId: number): Promise<ProfessionalProfile | undefined> {
+    return Array.from(this.professionalProfiles.values()).find(
+      (profile) => profile.userId === userId
+    );
+  }
+
+  async createProfessionalProfile(insertProfile: InsertProfessionalProfile): Promise<ProfessionalProfile> {
+    const id = this.currentProfileId++;
+    const profile: ProfessionalProfile = {
+      id,
+      userId: insertProfile.userId,
+      name: insertProfile.name,
+      location: insertProfile.location,
+      services: insertProfile.services,
+      hourlyRate: insertProfile.hourlyRate || null,
+      bio: insertProfile.bio || null,
+      profileImageUrl: insertProfile.profileImageUrl || null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.professionalProfiles.set(id, profile);
+    return profile;
+  }
+
+  async updateProfessionalProfile(userId: number, updates: Partial<InsertProfessionalProfile>): Promise<ProfessionalProfile | undefined> {
+    const existing = await this.getProfessionalProfile(userId);
+    if (!existing) return undefined;
+
+    const updated: ProfessionalProfile = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.professionalProfiles.set(existing.id, updated);
+    return updated;
+  }
+
+  // Organizer profile methods
+  async getOrganizerProfile(userId: number): Promise<OrganizerProfile | undefined> {
+    return Array.from(this.organizerProfiles.values()).find(
+      (profile) => profile.userId === userId
+    );
+  }
+
+  async createOrganizerProfile(insertProfile: InsertOrganizerProfile): Promise<OrganizerProfile> {
+    const id = this.currentProfileId++;
+    const profile: OrganizerProfile = {
+      id,
+      userId: insertProfile.userId,
+      name: insertProfile.name,
+      location: insertProfile.location,
+      eventTypes: insertProfile.eventTypes,
+      profileImageUrl: insertProfile.profileImageUrl || null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.organizerProfiles.set(id, profile);
+    return profile;
+  }
+
+  async updateOrganizerProfile(userId: number, updates: Partial<InsertOrganizerProfile>): Promise<OrganizerProfile | undefined> {
+    const existing = await this.getOrganizerProfile(userId);
+    if (!existing) return undefined;
+
+    const updated: OrganizerProfile = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.organizerProfiles.set(existing.id, updated);
+    return updated;
   }
 }
 

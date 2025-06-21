@@ -165,3 +165,9 @@ export type InsertConversation = z.infer<typeof insertConversationSchema>;
 export type Conversation = typeof conversations.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
+
+// New profile types
+export type InsertProfessionalProfile = z.infer<typeof insertProfessionalProfileSchema>;
+export type ProfessionalProfile = typeof professionalProfiles.$inferSelect;
+export type InsertOrganizerProfile = z.infer<typeof insertOrganizerProfileSchema>;
+export type OrganizerProfile = typeof organizerProfiles.$inferSelect;
