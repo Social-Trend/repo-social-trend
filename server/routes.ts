@@ -31,9 +31,9 @@ const authenticateToken = (req: any, res: any, next: any) => {
     return res.status(401).json({ message: 'Access token required' });
   }
 
-  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
+  jwt.verify(token, JWT_SECRET, (err: any, decoded: any) => {
     if (err) return res.status(403).json({ message: 'Invalid token' });
-    req.user = user;
+    req.user = { id: decoded.userId, email: decoded.email, role: decoded.role };
     next();
   });
 };

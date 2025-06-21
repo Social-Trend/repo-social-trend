@@ -45,10 +45,13 @@ export default function PaymentForm({ serviceRequest, onSuccess, onCancel }: Pay
 
   const createPaymentIntent = useMutation({
     mutationFn: async (data: PaymentForm) => {
-      const response = await apiRequest("POST", "/api/create-payment-intent", {
-        serviceRequestId: serviceRequest.id,
-        amount: data.depositAmount * 100,
-        totalAmount: data.totalAmount * 100,
+      const response = await apiRequest("/api/create-payment-intent", {
+        method: "POST",
+        body: JSON.stringify({
+          serviceRequestId: serviceRequest.id,
+          amount: data.depositAmount * 100,
+          totalAmount: data.totalAmount * 100,
+        })
       });
       return response;
     },
