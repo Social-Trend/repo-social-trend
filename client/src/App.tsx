@@ -11,6 +11,7 @@ import Messages from "@/pages/messages";
 import Onboarding from "@/pages/onboarding";
 import TestOnboarding from "@/pages/test-onboarding";
 import Requests from "@/pages/requests";
+import PaymentCheckout from "@/pages/payment-checkout";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,6 +25,7 @@ function Router() {
         <Route path="/requests" component={Requests} />
         <Route path="/onboarding" component={Onboarding} />
         <Route path="/test-onboarding" component={TestOnboarding} />
+        <Route path="/payment-checkout" component={PaymentCheckout} />
         <Route component={NotFound} />
       </Switch>
     </div>
