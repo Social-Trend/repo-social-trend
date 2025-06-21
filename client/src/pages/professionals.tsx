@@ -47,7 +47,7 @@ export default function Professionals() {
   // Build query parameters for API call
   const queryParams = new URLSearchParams();
   if (searchTerm) queryParams.set('search', searchTerm);
-  if (locationFilter && locationFilter !== 'all') queryParams.set('location', locationFilter);
+  if (locationFilter && locationFilter !== 'all' && locationFilter !== '') queryParams.set('location', locationFilter);
   if (effectiveServiceFilter && effectiveServiceFilter !== 'all' && effectiveServiceFilter !== '') {
     queryParams.set('service', effectiveServiceFilter);
   }
@@ -93,8 +93,8 @@ export default function Professionals() {
 
   const clearFilters = () => {
     setSearchTerm("");
-    setLocationFilter("");
-    setServiceFilter("");
+    setLocationFilter("all");
+    setServiceFilter("all");
     setCustomService("");
     setPriceRangeMin("");
     setPriceRangeMax("");
@@ -160,7 +160,7 @@ export default function Professionals() {
               Advanced Filters
             </Button>
             
-            {(searchTerm || locationFilter || effectiveServiceFilter || priceRangeMin || priceRangeMax) && (
+            {(searchTerm || (locationFilter && locationFilter !== 'all') || (effectiveServiceFilter && effectiveServiceFilter !== 'all') || priceRangeMin || priceRangeMax) && (
               <Button variant="outline" onClick={clearFilters} className="flex items-center gap-2">
                 <X className="h-4 w-4" />
                 Clear All
@@ -185,7 +185,7 @@ export default function Professionals() {
                     <SelectValue placeholder="All Locations" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Locations</SelectItem>
+                    <SelectItem value="all">All Locations</SelectItem>
                     {uniqueLocations.map((location) => (
                       <SelectItem key={location} value={location}>
                         {location}
@@ -205,7 +205,7 @@ export default function Professionals() {
                     <SelectValue placeholder="All Services" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Services</SelectItem>
+                    <SelectItem value="all">All Services</SelectItem>
                     {serviceCategories.map((service) => (
                       <SelectItem key={service} value={service}>
                         {service}
@@ -256,27 +256,27 @@ export default function Professionals() {
             </div>
 
             {/* Active Filters Display */}
-            {(effectiveServiceFilter || locationFilter || priceRangeMin || priceRangeMax) && (
+            {((effectiveServiceFilter && effectiveServiceFilter !== 'all') || (locationFilter && locationFilter !== 'all') || priceRangeMin || priceRangeMax) && (
               <div className="flex flex-wrap gap-2 pt-2">
                 <span className="text-sm text-gray-600">Active filters:</span>
-                {effectiveServiceFilter && (
+                {effectiveServiceFilter && effectiveServiceFilter !== 'all' && (
                   <Badge variant="secondary" className="flex items-center gap-1">
                     {effectiveServiceFilter}
                     <X 
                       className="h-3 w-3 cursor-pointer" 
                       onClick={() => {
-                        setServiceFilter("");
+                        setServiceFilter("all");
                         setCustomService("");
                       }}
                     />
                   </Badge>
                 )}
-                {locationFilter && (
+                {locationFilter && locationFilter !== 'all' && (
                   <Badge variant="secondary" className="flex items-center gap-1">
                     {locationFilter}
                     <X 
                       className="h-3 w-3 cursor-pointer" 
-                      onClick={() => setLocationFilter("")}
+                      onClick={() => setLocationFilter("all")}
                     />
                   </Badge>
                 )}
@@ -309,11 +309,11 @@ export default function Professionals() {
           <Users className="h-16 w-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No professionals found</h3>
           <p className="text-gray-600 mb-4">
-            {searchTerm || (locationFilter && locationFilter !== "all") || (serviceFilter && serviceFilter !== "all")
+            {searchTerm || (locationFilter && locationFilter !== 'all') || (effectiveServiceFilter && effectiveServiceFilter !== 'all') || priceRangeMin || priceRangeMax
               ? "Try adjusting your search criteria or clearing filters"
               : "No professional profiles have been created yet"}
           </p>
-          {(searchTerm || (locationFilter && locationFilter !== "all") || (serviceFilter && serviceFilter !== "all")) && (
+          {(searchTerm || (locationFilter && locationFilter !== 'all') || (effectiveServiceFilter && effectiveServiceFilter !== 'all') || priceRangeMin || priceRangeMax) && (
             <Button variant="outline" onClick={clearFilters}>
               Clear All Filters
             </Button>
