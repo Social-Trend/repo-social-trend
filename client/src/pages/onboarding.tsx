@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/auth-context";
+import { useProfile } from "@/hooks/useProfile";
 import ProfessionalProfileForm from "@/components/profile/professional-profile-form";
 import OrganizerProfileForm from "@/components/profile/organizer-profile-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Users, Briefcase } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, Users, Briefcase, ArrowRight } from "lucide-react";
 
 export default function Onboarding() {
   const { user, isAuthenticated, isLoading } = useAuth();

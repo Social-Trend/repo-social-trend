@@ -33,14 +33,6 @@ export default function RoleSwitcher() {
     }
   };
 
-  const getRoleIcon = (role: "organizer" | "professional") => {
-    return role === "organizer" ? User : Briefcase;
-  };
-
-  const getRoleLabel = (role: "organizer" | "professional") => {
-    return role === "organizer" ? "Event Organizer" : "Professional Tender";
-  };
-
   const getCompletionBadge = (role: "organizer" | "professional") => {
     const completion = role === "organizer" ? organizerCompletion : professionalCompletion;
     const hasProfile = role === "organizer" ? hasOrganizerProfile : hasProfessionalProfile;
@@ -65,7 +57,7 @@ export default function RoleSwitcher() {
           ) : (
             <Briefcase className="h-4 w-4" />
           )}
-          <span className="hidden sm:inline">{getRoleLabel(user.role)}</span>
+          <span className="hidden sm:inline">{user.role === "organizer" ? "Event Organizer" : "Professional Tender"}</span>
           <ArrowLeftRight className="h-3 w-3" />
         </Button>
       </DropdownMenuTrigger>
