@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Filter, Users, MapPin, DollarSign, Star, MessageCircle } from "lucide-react";
+import { Search, Filter, Users, MapPin, DollarSign, Star, MessageCircle, X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,28 +8,57 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { ProfessionalProfile } from "@shared/schema";
 import ContactProfessionalForm from "@/components/messaging/contact-professional-form";
 import ServiceRequestForm from "@/components/service-request-form";
+
+// Predefined service categories
+const serviceCategories = [
+  "Photography",
+  "DJ Services", 
+  "Event Planning",
+  "Catering",
+  "Bartending",
+  "Wedding Planning",
+  "Audio/Visual",
+  "Decoration",
+  "Security",
+  "Transportation",
+  "Cleaning",
+  "Entertainment"
+];
 
 export default function Professionals() {
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [serviceFilter, setServiceFilter] = useState("");
+  const [customService, setCustomService] = useState("");
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [priceRangeMin, setPriceRangeMin] = useState("");
+  const [priceRangeMax, setPriceRangeMax] = useState("");
   const [selectedProfessional, setSelectedProfessional] = useState<ProfessionalProfile | null>(null);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
+  // Determine effective service filter (predefined or custom)
+  const effectiveServiceFilter = serviceFilter === 'custom' ? customService : serviceFilter;
 
   // Build query parameters for API call
   const queryParams = new URLSearchParams();
   if (searchTerm) queryParams.set('search', searchTerm);
   if (locationFilter && locationFilter !== 'all') queryParams.set('location', locationFilter);
-  if (serviceFilter && serviceFilter !== 'all') queryParams.set('service', serviceFilter);
+  if (effectiveServiceFilter && effectiveServiceFilter !== 'all' && effectiveServiceFilter !== '') {
+    queryParams.set('service', effectiveServiceFilter);
+  }
+  if (priceRangeMin) queryParams.set('minRate', priceRangeMin);
+  if (priceRangeMax) queryParams.set('maxRate', priceRangeMax);
   
   const queryString = queryParams.toString();
   const queryUrl = queryString ? `/api/professionals?${queryString}` : '/api/professionals';
 
   const { data: professionals = [], isLoading, error } = useQuery({
-    queryKey: ['/api/professionals', searchTerm, locationFilter, serviceFilter],
+    queryKey: ['/api/professionals', searchTerm, locationFilter, effectiveServiceFilter, priceRangeMin, priceRangeMax],
     queryFn: async () => {
       const response = await fetch(queryUrl);
       if (!response.ok) {
@@ -64,8 +93,11 @@ export default function Professionals() {
 
   const clearFilters = () => {
     setSearchTerm("");
-    setLocationFilter("all");
-    setServiceFilter("all");
+    setLocationFilter("");
+    setServiceFilter("");
+    setCustomService("");
+    setPriceRangeMin("");
+    setPriceRangeMax("");
   };
 
   if (isLoading) {
@@ -104,6 +136,7 @@ export default function Professionals() {
 
       {/* Search and Filters */}
       <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
+        {/* Basic Search */}
         <div className="flex flex-col lg:flex-row gap-4 mb-4">
           <div className="flex-1">
             <div className="relative">
@@ -118,43 +151,153 @@ export default function Professionals() {
           </div>
           
           <div className="flex gap-2">
-            <Select value={locationFilter} onValueChange={setLocationFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Location" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
-                {uniqueLocations.map((location) => (
-                  <SelectItem key={location} value={location}>
-                    {location}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={serviceFilter} onValueChange={setServiceFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Service Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Services</SelectItem>
-                {uniqueServices.map((service) => (
-                  <SelectItem key={service} value={service}>
-                    {service}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {(searchTerm || (locationFilter && locationFilter !== "all") || (serviceFilter && serviceFilter !== "all")) && (
-              <Button variant="outline" onClick={clearFilters}>
-                Clear
+            <Button
+              variant="outline"
+              onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+              className="flex items-center gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              Advanced Filters
+            </Button>
+            
+            {(searchTerm || locationFilter || effectiveServiceFilter || priceRangeMin || priceRangeMax) && (
+              <Button variant="outline" onClick={clearFilters} className="flex items-center gap-2">
+                <X className="h-4 w-4" />
+                Clear All
               </Button>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        {/* Advanced Filters */}
+        <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
+          <CollapsibleContent className="space-y-4">
+            <Separator />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Location Filter */}
+              <div>
+                <Label htmlFor="location-filter" className="text-sm font-medium mb-2 block">
+                  Location
+                </Label>
+                <Select value={locationFilter} onValueChange={setLocationFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Locations" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Locations</SelectItem>
+                    {uniqueLocations.map((location) => (
+                      <SelectItem key={location} value={location}>
+                        {location}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Service Type Filter */}
+              <div>
+                <Label htmlFor="service-filter" className="text-sm font-medium mb-2 block">
+                  Service Type
+                </Label>
+                <Select value={serviceFilter} onValueChange={setServiceFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Services" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Services</SelectItem>
+                    {serviceCategories.map((service) => (
+                      <SelectItem key={service} value={service}>
+                        {service}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="custom">Custom Service...</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Custom Service Input */}
+              {serviceFilter === 'custom' && (
+                <div>
+                  <Label htmlFor="custom-service" className="text-sm font-medium mb-2 block">
+                    Custom Service
+                  </Label>
+                  <Input
+                    id="custom-service"
+                    placeholder="Enter service type..."
+                    value={customService}
+                    onChange={(e) => setCustomService(e.target.value)}
+                  />
+                </div>
+              )}
+
+              {/* Price Range */}
+              <div className={serviceFilter === 'custom' ? 'md:col-span-2 lg:col-span-1' : ''}>
+                <Label className="text-sm font-medium mb-2 block">
+                  Hourly Rate Range
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Min"
+                    type="number"
+                    value={priceRangeMin}
+                    onChange={(e) => setPriceRangeMin(e.target.value)}
+                    className="w-full"
+                  />
+                  <Input
+                    placeholder="Max" 
+                    type="number"
+                    value={priceRangeMax}
+                    onChange={(e) => setPriceRangeMax(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Active Filters Display */}
+            {(effectiveServiceFilter || locationFilter || priceRangeMin || priceRangeMax) && (
+              <div className="flex flex-wrap gap-2 pt-2">
+                <span className="text-sm text-gray-600">Active filters:</span>
+                {effectiveServiceFilter && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    {effectiveServiceFilter}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => {
+                        setServiceFilter("");
+                        setCustomService("");
+                      }}
+                    />
+                  </Badge>
+                )}
+                {locationFilter && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    {locationFilter}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => setLocationFilter("")}
+                    />
+                  </Badge>
+                )}
+                {(priceRangeMin || priceRangeMax) && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    ${priceRangeMin || '0'} - ${priceRangeMax || '∞'}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => {
+                        setPriceRangeMin("");
+                        setPriceRangeMax("");
+                      }}
+                    />
+                  </Badge>
+                )}
+              </div>
+            )}
+          </CollapsibleContent>
+        </Collapsible>
+
+        <div className="flex items-center gap-2 text-sm text-gray-600 mt-4">
           <Users className="h-4 w-4" />
           <span>{professionals.length} professionals found</span>
         </div>
