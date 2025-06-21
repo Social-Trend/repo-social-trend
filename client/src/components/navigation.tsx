@@ -94,11 +94,27 @@ export default function Navigation({}: NavigationProps) {
                   <DropdownMenuItem className="flex flex-col items-start">
                     <div className="font-medium">{user.firstName || user.email}</div>
                     <div className="text-xs text-muted-foreground">{user.email}</div>
+                    {isAuthenticated && (
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {hasProfile 
+                          ? `Profile ${profileCompletion}% complete`
+                          : "Profile not created"
+                        }
+                      </div>
+                    )}
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
+                    <span>
+                      {hasProfile ? "Edit Profile" : "Create Profile"}
+                    </span>
                   </DropdownMenuItem>
+                  {!hasProfile && (
+                    <DropdownMenuItem onClick={() => window.location.href = "/onboarding"}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Complete Profile Setup</span>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={logout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
