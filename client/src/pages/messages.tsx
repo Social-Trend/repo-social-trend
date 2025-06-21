@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -5,9 +6,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Calendar, Clock, CheckCircle, XCircle, User, DollarSign } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { MessageCircle, Calendar, Clock, CheckCircle, XCircle, User, DollarSign, Send, ChevronDown, ChevronUp } from "lucide-react";
 import PaymentButton from "@/components/payment/payment-button";
-import type { ServiceRequest, Conversation } from "@shared/schema";
+import type { ServiceRequest, Conversation, Message } from "@shared/schema";
 
 export default function Messages() {
   const { user, isAuthenticated } = useAuth();
@@ -54,6 +57,61 @@ export default function Messages() {
       });
     },
   });
+
+  // Mutation for creating/finding conversations
+  const createConversation = useMutation({
+    mutationFn: async (serviceRequest: ServiceRequest) => {
+      return await apiRequest("/api/conversations", {
+        method: "POST",
+        body: JSON.stringify({
+          professionalId: serviceRequest.professionalId,
+          organizerId: serviceRequest.organizerId,
+          serviceRequestId: serviceRequest.id,
+          status: "active"
+        })
+      });
+    },
+    onSuccess: (conversation) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
+      // Scroll to conversations section
+      const conversationsSection = document.getElementById("conversations-section");
+      conversationsSection?.scrollIntoView({ behavior: "smooth" });
+      toast({
+        title: "Conversation Started",
+        description: "You can now message about this service request.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to Start Conversation",
+        description: error.message || "Could not create conversation",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const [openConversations, setOpenConversations] = useState<Set<number>>(new Set());
+  const [messageInputs, setMessageInputs] = useState<Record<number, string>>({});
+
+  const handleStartConversation = (serviceRequest: ServiceRequest) => {
+    // Check if conversation already exists
+    const existingConversation = conversations.find((conv: Conversation) => 
+      conv.professionalId === serviceRequest.professionalId
+    );
+    
+    if (existingConversation) {
+      // Scroll to existing conversation
+      const conversationsSection = document.getElementById("conversations-section");
+      conversationsSection?.scrollIntoView({ behavior: "smooth" });
+      toast({
+        title: "Conversation Found",
+        description: "Scrolling to your existing conversation.",
+      });
+    } else {
+      // Create new conversation
+      createConversation.mutate(serviceRequest);
+    }
+  };
 
   const statusColors = {
     pending: "bg-yellow-100 text-yellow-800",
@@ -217,7 +275,12 @@ export default function Messages() {
                           size="sm"
                         />
                       )}
-                      <Button size="sm" variant="outline" className="flex items-center gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="flex items-center gap-2"
+                        onClick={() => handleStartConversation(request)}
+                      >
                         <MessageCircle className="h-4 w-4" />
                         Continue Conversation
                       </Button>
@@ -249,7 +312,7 @@ export default function Messages() {
       </div>
 
       {/* Conversations Section */}
-      <div>
+      <div id="conversations-section">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
             Ongoing Conversations
@@ -292,9 +355,25 @@ export default function Messages() {
                         Created: {new Date(conversation.createdAt).toLocaleDateString()}
                       </p>
                     </div>
-                    <Button size="sm" variant="outline">
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      Open Chat
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        const newOpenConversations = new Set(openConversations);
+                        if (openConversations.has(conversation.id)) {
+                          newOpenConversations.delete(conversation.id);
+                        } else {
+                          newOpenConversations.add(conversation.id);
+                        }
+                        setOpenConversations(newOpenConversations);
+                      }}
+                    >
+                      {openConversations.has(conversation.id) ? (
+                        <ChevronUp className="h-4 w-4 mr-2" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 mr-2" />
+                      )}
+                      {openConversations.has(conversation.id) ? 'Close Chat' : 'Open Chat'}
                     </Button>
                   </div>
                 </CardContent>
