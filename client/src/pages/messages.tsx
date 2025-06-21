@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/auth-context";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,8 @@ import type { ServiceRequest, Conversation } from "@shared/schema";
 
 export default function Messages() {
   const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch service requests (now part of unified communication)
   const { data: serviceRequests = [], isLoading: requestsLoading } = useQuery({
@@ -23,6 +26,33 @@ export default function Messages() {
     queryKey: ["/api/conversations", { userId: user?.id }],
     queryFn: () => apiRequest("/api/conversations"),
     enabled: isAuthenticated && !!user,
+  });
+
+  // Mutation for updating service request status
+  const updateRequestStatus = useMutation({
+    mutationFn: async ({ requestId, status, responseMessage }: { requestId: number; status: string; responseMessage?: string }) => {
+      return await apiRequest(`/api/service-requests/${requestId}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          status,
+          responseMessage
+        })
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/service-requests"] });
+      toast({
+        title: "Request Updated",
+        description: "Service request status has been updated successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update service request",
+        variant: "destructive",
+      });
+    },
   });
 
   const statusColors = {
@@ -147,10 +177,28 @@ export default function Messages() {
                   {/* Action Buttons for Professionals */}
                   {user.role === 'professional' && request.status === 'pending' && (
                     <div className="flex gap-2 mt-4">
-                      <Button size="sm" variant="default">
+                      <Button 
+                        size="sm" 
+                        variant="default"
+                        disabled={updateRequestStatus.isPending}
+                        onClick={() => updateRequestStatus.mutate({
+                          requestId: request.id,
+                          status: 'accepted',
+                          responseMessage: 'Request accepted! Looking forward to working with you.'
+                        })}
+                      >
                         Accept & Message
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        disabled={updateRequestStatus.isPending}
+                        onClick={() => updateRequestStatus.mutate({
+                          requestId: request.id,
+                          status: 'declined',
+                          responseMessage: 'Thank you for considering me, but I am not available for this event.'
+                        })}
+                      >
                         Decline
                       </Button>
                     </div>
