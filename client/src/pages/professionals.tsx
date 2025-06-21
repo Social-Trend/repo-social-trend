@@ -21,8 +21,8 @@ export default function Professionals() {
   // Build query parameters for API call
   const queryParams = new URLSearchParams();
   if (searchTerm) queryParams.set('search', searchTerm);
-  if (locationFilter) queryParams.set('location', locationFilter);
-  if (serviceFilter) queryParams.set('service', serviceFilter);
+  if (locationFilter && locationFilter !== 'all') queryParams.set('location', locationFilter);
+  if (serviceFilter && serviceFilter !== 'all') queryParams.set('service', serviceFilter);
   
   const queryString = queryParams.toString();
   const queryUrl = queryString ? `/api/professionals?${queryString}` : '/api/professionals';
@@ -63,8 +63,8 @@ export default function Professionals() {
 
   const clearFilters = () => {
     setSearchTerm("");
-    setLocationFilter("");
-    setServiceFilter("");
+    setLocationFilter("all");
+    setServiceFilter("all");
   };
 
   if (isLoading) {
@@ -122,7 +122,7 @@ export default function Professionals() {
                 <SelectValue placeholder="Location" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Locations</SelectItem>
+                <SelectItem value="all">All Locations</SelectItem>
                 {uniqueLocations.map((location) => (
                   <SelectItem key={location} value={location}>
                     {location}
@@ -136,7 +136,7 @@ export default function Professionals() {
                 <SelectValue placeholder="Service Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Services</SelectItem>
+                <SelectItem value="all">All Services</SelectItem>
                 {uniqueServices.map((service) => (
                   <SelectItem key={service} value={service}>
                     {service}
@@ -145,7 +145,7 @@ export default function Professionals() {
               </SelectContent>
             </Select>
 
-            {(searchTerm || locationFilter || serviceFilter) && (
+            {(searchTerm || (locationFilter && locationFilter !== "all") || (serviceFilter && serviceFilter !== "all")) && (
               <Button variant="outline" onClick={clearFilters}>
                 Clear
               </Button>
@@ -165,11 +165,11 @@ export default function Professionals() {
           <Users className="h-16 w-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No professionals found</h3>
           <p className="text-gray-600 mb-4">
-            {searchTerm || locationFilter || serviceFilter
+            {searchTerm || (locationFilter && locationFilter !== "all") || (serviceFilter && serviceFilter !== "all")
               ? "Try adjusting your search criteria or clearing filters"
               : "No professional profiles have been created yet"}
           </p>
-          {(searchTerm || locationFilter || serviceFilter) && (
+          {(searchTerm || (locationFilter && locationFilter !== "all") || (serviceFilter && serviceFilter !== "all")) && (
             <Button variant="outline" onClick={clearFilters}>
               Clear All Filters
             </Button>
