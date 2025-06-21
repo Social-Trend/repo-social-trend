@@ -495,6 +495,10 @@ export class MemStorage implements IStorage {
     const payment: Payment = { 
       id, 
       ...insertPayment,
+      status: insertPayment.status || "pending",
+      stripeChargeId: insertPayment.stripeChargeId || null,
+      platformFee: insertPayment.platformFee || null,
+      professionalEarnings: insertPayment.professionalEarnings || null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

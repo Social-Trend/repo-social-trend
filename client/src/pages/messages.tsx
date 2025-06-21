@@ -4,7 +4,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Calendar, Clock, CheckCircle, XCircle, User } from "lucide-react";
+import { MessageCircle, Calendar, Clock, CheckCircle, XCircle, User, DollarSign } from "lucide-react";
+import PaymentButton from "@/components/payment/payment-button";
 import type { ServiceRequest, Conversation } from "@shared/schema";
 
 export default function Messages() {
@@ -29,6 +30,8 @@ export default function Messages() {
     accepted: "bg-green-100 text-green-800",
     declined: "bg-red-100 text-red-800",
     expired: "bg-gray-100 text-gray-800",
+    paid: "bg-blue-100 text-blue-800",
+    completed: "bg-purple-100 text-purple-800",
   };
 
   const getStatusIcon = (status: string) => {
@@ -36,6 +39,8 @@ export default function Messages() {
       case 'pending': return <Clock className="h-3 w-3" />;
       case 'accepted': return <CheckCircle className="h-3 w-3" />;
       case 'declined': return <XCircle className="h-3 w-3" />;
+      case 'paid': return <DollarSign className="h-3 w-3" />;
+      case 'completed': return <CheckCircle className="h-3 w-3" />;
       default: return <MessageCircle className="h-3 w-3" />;
     }
   };
