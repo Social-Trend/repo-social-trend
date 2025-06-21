@@ -451,6 +451,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public endpoint for fetching individual service requests (used by payment checkout)
+  app.get('/api/service-requests/:id', async (req, res) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      if (isNaN(requestId)) {
+        return res.status(400).json({ message: "Invalid service request ID" });
+      }
+      
+      const request = await storage.getServiceRequest(requestId);
+      if (!request) {
+        return res.status(404).json({ message: "Service request not found" });
+      }
+      
+      res.json(request);
+    } catch (error) {
+      console.error("Error fetching service request:", error);
+      res.status(500).json({ message: "Failed to fetch service request" });
+    }
+  });
+
   // Payment routes (Stripe integration)
   app.post("/api/create-payment-intent", authenticateToken, async (req, res) => {
     try {
