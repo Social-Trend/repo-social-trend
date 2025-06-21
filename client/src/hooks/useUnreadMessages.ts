@@ -39,42 +39,68 @@ export function useUnreadMessages() {
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["/api/unread-conversations-count"],
     queryFn: async () => {
-      if (!conversations.length) return 0;
+      if (!conversations.length) {
+        console.log('No conversations found for unread count');
+        return 0;
+      }
       
       let conversationsWithActivity = 0;
       const userRole = (user as any)?.role;
       const now = Date.now();
-      const recentThreshold = 60 * 60 * 1000; // 1 hour
+      const recentThreshold = 24 * 60 * 60 * 1000; // 24 hours (extended from 1 hour)
       const viewedConversations = getViewedConversations();
+      
+      console.log('Checking unread messages for user role:', userRole);
+      console.log('Total conversations:', conversations.length);
+      console.log('Viewed conversations:', Array.from(viewedConversations));
       
       for (const conversation of conversations) {
         try {
           // Skip if this conversation has been viewed
           if (viewedConversations.has(conversation.id)) {
+            console.log(`Conversation ${conversation.id} already viewed, skipping`);
             continue;
           }
           
           const messages: Message[] = await apiRequest(`/api/messages/${conversation.id}`);
+          console.log(`Conversation ${conversation.id} has ${messages.length} messages`);
           
           if (messages.length > 0) {
             const lastMessage = messages[messages.length - 1];
             const messageTime = new Date(lastMessage.timestamp).getTime();
             const isRecent = now - messageTime < recentThreshold;
             
+            console.log(`Last message in conversation ${conversation.id}:`, {
+              senderType: lastMessage.senderType,
+              timestamp: lastMessage.timestamp,
+              isRecent,
+              messageTime: new Date(lastMessage.timestamp).toISOString(),
+              ageInHours: (now - messageTime) / (60 * 60 * 1000)
+            });
+            
             // Count as unread if there's recent activity from the other party
             const isFromOtherParty = userRole === 'professional' 
               ? lastMessage.senderType === 'organizer'
               : lastMessage.senderType === 'professional';
             
+            console.log(`Conversation ${conversation.id} analysis:`, {
+              isFromOtherParty,
+              isRecent,
+              shouldCount: isRecent && isFromOtherParty
+            });
+            
             if (isRecent && isFromOtherParty) {
               conversationsWithActivity++;
+              console.log(`Added conversation ${conversation.id} to unread count`);
             }
           }
         } catch (error) {
+          console.error(`Error checking messages for conversation ${conversation.id}:`, error);
           continue;
         }
       }
       
+      console.log('Total unread conversations:', conversationsWithActivity);
       return conversationsWithActivity;
     },
     enabled: isAuthenticated && !!user && conversations.length > 0,
