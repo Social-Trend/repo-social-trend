@@ -6,10 +6,11 @@ import type { ProfessionalProfile, OrganizerProfile } from "@shared/schema";
 export function useProfile() {
   const { user, isAuthenticated } = useAuth();
 
+  // Always fetch both profiles for authenticated users
   const { data: professionalProfile, isLoading: professionalLoading } = useQuery({
     queryKey: ["/api/profiles/professional", user?.id],
     queryFn: async () => {
-      if (!user?.id || user.role !== "professional") return null;
+      if (!user?.id) return null;
       try {
         return await apiRequest(`/api/profiles/professional/${user.id}`);
       } catch (error: any) {
@@ -17,14 +18,14 @@ export function useProfile() {
         throw error;
       }
     },
-    enabled: isAuthenticated && user?.role === "professional" && !!user?.id,
+    enabled: isAuthenticated && !!user?.id,
     retry: false,
   });
 
   const { data: organizerProfile, isLoading: organizerLoading } = useQuery({
     queryKey: ["/api/profiles/organizer", user?.id],
     queryFn: async () => {
-      if (!user?.id || user.role !== "organizer") return null;
+      if (!user?.id) return null;
       try {
         return await apiRequest(`/api/profiles/organizer/${user.id}`);
       } catch (error: any) {
@@ -32,21 +33,40 @@ export function useProfile() {
         throw error;
       }
     },
-    enabled: isAuthenticated && user?.role === "organizer" && !!user?.id,
+    enabled: isAuthenticated && !!user?.id,
     retry: false,
   });
 
-  const profile = user?.role === "professional" ? professionalProfile : organizerProfile;
-  const isLoading = user?.role === "professional" ? professionalLoading : organizerLoading;
-  const hasProfile = !!profile;
+  const currentProfile = user?.role === "professional" ? professionalProfile : organizerProfile;
+  const isLoading = professionalLoading || organizerLoading;
   
-  const profileCompletion = hasProfile ? calculateProfileCompletion(profile, user?.role) : 0;
+  const hasCurrentProfile = !!currentProfile;
+  const hasProfessionalProfile = !!professionalProfile;
+  const hasOrganizerProfile = !!organizerProfile;
+  const hasBothProfiles = hasProfessionalProfile && hasOrganizerProfile;
+  
+  const currentProfileCompletion = calculateProfileCompletion(currentProfile, user?.role);
+  const professionalCompletion = calculateProfileCompletion(professionalProfile, "professional");
+  const organizerCompletion = calculateProfileCompletion(organizerProfile, "organizer");
 
   return {
-    profile,
-    hasProfile,
+    // Current active profile (for backward compatibility)
+    profile: currentProfile,
+    hasProfile: hasCurrentProfile,
+    profileCompletion: currentProfileCompletion,
+    
+    // Individual profiles for dual role support
+    professionalProfile,
+    organizerProfile,
+    hasProfessionalProfile,
+    hasOrganizerProfile,
+    hasBothProfiles,
+    
+    // Profile completions
+    professionalCompletion,
+    organizerCompletion,
+    
     isLoading,
-    profileCompletion,
   };
 }
 

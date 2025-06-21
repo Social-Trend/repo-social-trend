@@ -8,6 +8,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   logout: () => void;
+  switchRole: (newRole: "organizer" | "professional") => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -57,11 +58,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     window.location.reload();
   };
 
+  const switchRole = async (newRole: "organizer" | "professional") => {
+    if (!user) return;
+    
+    try {
+      const response = await apiRequest("/api/auth/switch-role", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: newRole })
+      });
+      
+      // Update local storage and trigger re-fetch
+      localStorage.setItem("user", JSON.stringify({ ...user, role: newRole }));
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to switch role:", error);
+    }
+  };
+
   const value = {
     user: user || null,
     isAuthenticated: !!user && !!token,
     isLoading: isLoading && !!token,
     logout,
+    switchRole,
   };
 
   return (
