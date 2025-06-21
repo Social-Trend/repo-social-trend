@@ -103,18 +103,13 @@ export default function Navigation({}: NavigationProps) {
                       </div>
                     )}
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => window.location.href = "/onboarding"}>
                     <User className="mr-2 h-4 w-4" />
                     <span>
                       {hasProfile ? "Edit Profile" : "Create Profile"}
                     </span>
                   </DropdownMenuItem>
-                  {!hasProfile && (
-                    <DropdownMenuItem onClick={() => window.location.href = "/onboarding"}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Complete Profile Setup</span>
-                    </DropdownMenuItem>
-                  )}
+
                   <DropdownMenuItem onClick={logout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
