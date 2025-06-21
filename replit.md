@@ -74,6 +74,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- June 21, 2025: **COMPLETED** unified communication hub and navigation simplification
+  - ✓ Consolidated navigation from 4+ items to clean 3-item layout: Home | Find Professionals | Messages
+  - ✓ Moved role switcher into user profile dropdown to reduce top-level clutter
+  - ✓ Unified service requests and messaging into single "Messages & Requests" hub
+  - ✓ Eliminated duplicate "My Requests" navigation for professionals - all communication now in Messages
+  - ✓ Professional and organizer dashboards now direct users to unified Messages section
+  - ✓ Simplified user experience with single communication point for all interactions
+
 - June 21, 2025: **COMPLETED** cleanup of dual professional workflow
   - ✓ Removed legacy professional system causing duplicate profile prompts
   - ✓ Unified all professional functionality to use single profile system

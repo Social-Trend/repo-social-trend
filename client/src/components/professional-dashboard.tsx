@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { MapPin, Calendar, Clock, MessageSquare, AlertCircle, CheckCircle, Briefcase } from "lucide-react";
+import { MapPin, Calendar, Clock, MessageSquare, AlertCircle, CheckCircle, Briefcase, ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
@@ -141,7 +141,7 @@ export default function ProfessionalDashboard() {
                     {pendingRequests.length} new requests awaiting your response
                   </p>
                 </div>
-                <ArrowRight className="h-5 w-5 text-slate-400 ml-auto" />
+                <MessageSquare className="h-5 w-5 text-slate-400 ml-auto" />
               </div>
             </CardContent>
           </Card>
@@ -160,7 +160,7 @@ export default function ProfessionalDashboard() {
                     {acceptedRequests.length} confirmed bookings to coordinate
                   </p>
                 </div>
-                <ArrowRight className="h-5 w-5 text-slate-400 ml-auto" />
+                <MessageSquare className="h-5 w-5 text-slate-400 ml-auto" />
               </div>
             </CardContent>
           </Card>
