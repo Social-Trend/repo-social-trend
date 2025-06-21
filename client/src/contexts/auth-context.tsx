@@ -18,6 +18,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     setToken(storedToken);
+
+    // Listen for storage events to update token when it changes
+    const handleStorageChange = () => {
+      const newToken = localStorage.getItem("token");
+      setToken(newToken);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const { data: user, isLoading } = useQuery({

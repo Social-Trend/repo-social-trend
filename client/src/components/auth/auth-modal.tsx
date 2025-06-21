@@ -67,7 +67,10 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       });
       setOpen(false);
       loginForm.reset();
-      window.location.reload();
+      // Trigger storage event to update auth context immediately
+      window.dispatchEvent(new Event('storage'));
+      // Small delay to allow auth context to update before redirect
+      setTimeout(() => window.location.reload(), 100);
     },
     onError: (error: any) => {
       toast({
@@ -95,8 +98,10 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       });
       setOpen(false);
       registerForm.reset();
+      // Trigger a storage event to update auth context immediately
+      window.dispatchEvent(new Event('storage'));
       // Redirect to onboarding for profile creation
-      setLocation("/onboarding");
+      setTimeout(() => setLocation("/onboarding"), 100);
     },
     onError: (error: any) => {
       toast({
