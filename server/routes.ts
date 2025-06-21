@@ -471,6 +471,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test route for quick payment testing
+  app.get('/test-payment', (req, res) => {
+    const clientSecret = 'pi_test_1234567890_secret_test123';
+    const serviceRequestId = '1';
+    res.redirect(`/payment-checkout?client_secret=${clientSecret}&service_request_id=${serviceRequestId}`);
+  });
+
   // Payment routes (Stripe integration)
   app.post("/api/create-payment-intent", authenticateToken, async (req, res) => {
     try {
