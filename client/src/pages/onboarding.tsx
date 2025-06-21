@@ -383,11 +383,13 @@ export default function Onboarding() {
         <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6">
           {user.role === "professional" ? (
             <ProfessionalProfileForm
+              userId={user.id}
               onSuccess={handleProfileSuccess}
               onCancel={handleSkip}
             />
           ) : (
             <OrganizerProfileForm
+              userId={user.id}
               onSuccess={handleProfileSuccess}
               onCancel={handleSkip}
             />
