@@ -17,7 +17,7 @@ export const users = pgTable("users", {
 
 export const professionalProfiles = pgTable("professional_profiles", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
+  userId: text("user_id").notNull().references(() => users.id),
   name: text("name").notNull(),
   location: text("location").notNull(),
   services: text("services").array().notNull(),
@@ -30,7 +30,7 @@ export const professionalProfiles = pgTable("professional_profiles", {
 
 export const organizerProfiles = pgTable("organizer_profiles", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
+  userId: text("user_id").notNull().references(() => users.id),
   name: text("name").notNull(),
   location: text("location").notNull(),
   eventTypes: text("event_types").array().notNull(),
@@ -144,8 +144,8 @@ export const messages = pgTable("messages", {
 // Service requests table for direct contact/booking requests
 export const serviceRequests = pgTable("service_requests", {
   id: serial("id").primaryKey(),
-  organizerId: integer("organizer_id").notNull().references(() => users.id),
-  professionalId: integer("professional_id").notNull().references(() => users.id),
+  organizerId: text("organizer_id").notNull().references(() => users.id),
+  professionalId: text("professional_id").notNull().references(() => users.id),
   eventTitle: text("event_title").notNull(),
   eventDate: timestamp("event_date"),
   eventLocation: text("event_location"),
