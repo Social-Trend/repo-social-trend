@@ -31,13 +31,13 @@ export interface IStorage {
   getUser(id: string | number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  updateUser(id: number, updates: Partial<InsertUser>): Promise<User | undefined>;
+  updateUser(id: string | number, updates: Partial<InsertUser>): Promise<User | undefined>;
   upsertUser(user: any): Promise<User>;
   
   // Professional profile methods
   getProfessionalProfile(userId: string | number): Promise<ProfessionalProfile | undefined>;
   createProfessionalProfile(profile: InsertProfessionalProfile): Promise<ProfessionalProfile>;
-  updateProfessionalProfile(userId: number, updates: Partial<InsertProfessionalProfile>): Promise<ProfessionalProfile | undefined>;
+  updateProfessionalProfile(userId: string | number, updates: Partial<InsertProfessionalProfile>): Promise<ProfessionalProfile | undefined>;
   getAllProfessionalProfiles(filters?: {
     location?: string;
     service?: string;
@@ -47,9 +47,9 @@ export interface IStorage {
   }): Promise<ProfessionalProfile[]>;
   
   // Organizer profile methods
-  getOrganizerProfile(userId: number): Promise<OrganizerProfile | undefined>;
+  getOrganizerProfile(userId: string | number): Promise<OrganizerProfile | undefined>;
   createOrganizerProfile(profile: InsertOrganizerProfile): Promise<OrganizerProfile>;
-  updateOrganizerProfile(userId: number, updates: Partial<InsertOrganizerProfile>): Promise<OrganizerProfile | undefined>;
+  updateOrganizerProfile(userId: string | number, updates: Partial<InsertOrganizerProfile>): Promise<OrganizerProfile | undefined>;
   
 
   
@@ -625,11 +625,11 @@ export class DatabaseStorage implements IStorage {
     return newProfile;
   }
 
-  async updateProfessionalProfile(userId: number, updates: Partial<InsertProfessionalProfile>): Promise<ProfessionalProfile | undefined> {
+  async updateProfessionalProfile(userId: string | number, updates: Partial<InsertProfessionalProfile>): Promise<ProfessionalProfile | undefined> {
     const [profile] = await db
       .update(professionalProfiles)
       .set(updates)
-      .where(eq(professionalProfiles.userId, userId))
+      .where(eq(professionalProfiles.userId, userId.toString()))
       .returning();
     return profile;
   }
@@ -673,11 +673,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Organizer profile methods
-  async getOrganizerProfile(userId: number): Promise<OrganizerProfile | undefined> {
+  async getOrganizerProfile(userId: string | number): Promise<OrganizerProfile | undefined> {
+    const userIdStr = typeof userId === 'string' ? userId : userId.toString();
     const [profile] = await db
       .select()
       .from(organizerProfiles)
-      .where(eq(organizerProfiles.userId, userId));
+      .where(eq(organizerProfiles.userId, userIdStr));
     return profile;
   }
 
@@ -689,11 +690,12 @@ export class DatabaseStorage implements IStorage {
     return newProfile;
   }
 
-  async updateOrganizerProfile(userId: number, updates: Partial<InsertOrganizerProfile>): Promise<OrganizerProfile | undefined> {
+  async updateOrganizerProfile(userId: string | number, updates: Partial<InsertOrganizerProfile>): Promise<OrganizerProfile | undefined> {
+    const userIdStr = typeof userId === 'string' ? userId : userId.toString();
     const [profile] = await db
       .update(organizerProfiles)
       .set(updates)
-      .where(eq(organizerProfiles.userId, userId))
+      .where(eq(organizerProfiles.userId, userIdStr))
       .returning();
     return profile;
   }

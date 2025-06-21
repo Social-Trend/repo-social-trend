@@ -18,7 +18,7 @@ import {
 import { Loader2, Upload, X } from "lucide-react";
 
 interface OrganizerProfileFormProps {
-  userId: number;
+  userId: string | number;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -37,7 +37,7 @@ export default function OrganizerProfileForm({
   const form = useForm<InsertOrganizerProfile>({
     resolver: zodResolver(insertOrganizerProfileSchema),
     defaultValues: {
-      userId,
+      userId: typeof userId === 'string' ? userId : userId.toString(),
       name: "",
       location: "",
       eventTypes: [],
@@ -101,12 +101,13 @@ export default function OrganizerProfileForm({
     }
   };
 
-  const onSubmit = (data: InsertOrganizerProfile) => {
-    mutation.mutate({
+  const onSubmit = (data: any) => {
+    const profileData: InsertOrganizerProfile = {
       ...data,
       eventTypes: selectedEventTypes,
       profileImageUrl: profileImage,
-    });
+    };
+    mutation.mutate(profileData);
   };
 
 
