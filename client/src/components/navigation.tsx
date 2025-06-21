@@ -1,11 +1,12 @@
 import { Calendar, Search, MessageCircle, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/auth-context";
 import { useProfile } from "@/hooks/useProfile";
 import AuthModal from "@/components/auth/auth-modal";
+import RoleSwitcher from "@/components/role-switcher";
 
 interface NavigationProps {}
 
