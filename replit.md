@@ -74,6 +74,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- June 21, 2025: **COMPLETED** Real-time instant messaging with notification system
+  - ✓ Instant messaging chat popup with real-time message polling every 2 seconds
+  - ✓ Message bubbles with sender identification, timestamps, and auto-scroll
+  - ✓ Notification badge on Messages tab showing unread conversation count
+  - ✓ Smart activity detection for conversations with recent messages from other party
+  - ✓ Fixed photo upload size limit (increased to 10MB) for profile creation
+  - ✓ Complete messaging API endpoints for fetching and sending messages
+
 - June 21, 2025: **COMPLETED** Stripe payment integration for booking deposits
   - ✓ Payment schema added with deposit amounts, total amounts, and payment status tracking
   - ✓ Server-side payment processing endpoints with Stripe infrastructure

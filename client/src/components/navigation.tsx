@@ -5,8 +5,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/auth-context";
 import { useProfile } from "@/hooks/useProfile";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import AuthModal from "@/components/auth/auth-modal";
 import RoleSwitcher from "@/components/role-switcher";
+import { Badge } from "@/components/ui/badge";
 
 
 interface NavigationProps {}
@@ -15,6 +17,7 @@ export default function Navigation({}: NavigationProps) {
   const [location] = useLocation();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const { hasProfile, profileCompletion } = useProfile();
+  const { unreadCount, hasUnreadMessages } = useUnreadMessages();
 
   const getUserInitials = (user: any) => {
     if (user?.firstName && user?.lastName) {
@@ -73,10 +76,18 @@ export default function Navigation({}: NavigationProps) {
               <Button 
                 variant={location === "/messages" ? "secondary" : "ghost"}
                 size="sm"
-                className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 relative"
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Messages
+                {hasUnreadMessages && (
+                  <Badge 
+                    variant="destructive" 
+                    className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                  >
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </Badge>
+                )}
               </Button>
             </Link>
           </div>
