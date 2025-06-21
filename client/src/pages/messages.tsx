@@ -61,12 +61,15 @@ export default function Messages() {
   // Mutation for creating/finding conversations
   const createConversation = useMutation({
     mutationFn: async (serviceRequest: ServiceRequest) => {
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
       return await apiRequest("/api/conversations", {
         method: "POST",
         body: JSON.stringify({
           professionalId: serviceRequest.professionalId,
-          organizerName: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email,
-          organizerEmail: user.email,
+          organizerName: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email || 'Unknown',
+          organizerEmail: user.email || '',
           eventTitle: serviceRequest.eventTitle,
           eventDate: serviceRequest.eventDate,
           eventLocation: serviceRequest.eventLocation,
