@@ -9,7 +9,9 @@ export default function TestOnboarding() {
   
   const handleSuccess = () => {
     console.log("Profile created successfully!");
-    alert("Profile created successfully! Check the browser console for details.");
+    alert("Profile created successfully! You can now go back to the main app.");
+    // Redirect to home after successful profile creation
+    window.location.href = "/";
   };
 
   const handleCancel = () => {
@@ -28,9 +30,15 @@ export default function TestOnboarding() {
                 This bypasses authentication to test the profile creation form directly
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-gray-600">
+                First, you need to be logged in to create a profile. Please log in using the "Sign up/Log in" button in the navigation, then come back here.
+              </p>
               <Button onClick={() => setShowForm(true)} className="w-full">
                 Show Profile Creation Form
+              </Button>
+              <Button onClick={() => window.location.href = "/"} variant="outline" className="w-full">
+                Go Back to Login
               </Button>
             </CardContent>
           </Card>

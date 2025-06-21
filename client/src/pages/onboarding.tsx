@@ -9,16 +9,6 @@ import { CheckCircle, Users, Briefcase } from "lucide-react";
 export default function Onboarding() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
-  
-  console.log("Onboarding page loaded - auth status:", { user: !!user, isAuthenticated, isLoading });
-
-  useEffect(() => {
-    // Only redirect if we're sure the user is not authenticated (not loading and no user)
-    if (!isLoading && !isAuthenticated && !user) {
-      console.log("Redirecting to home - not authenticated");
-      setLocation("/");
-    }
-  }, [isAuthenticated, isLoading, setLocation, user]);
 
   const handleProfileSuccess = () => {
     setLocation("/");

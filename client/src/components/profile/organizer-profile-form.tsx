@@ -111,7 +111,7 @@ export default function OrganizerProfileForm({
 
 
   
-  console.log("OrganizerProfileForm rendering for user ID:", userId);
+
   
   return (
     <Card className="max-w-2xl mx-auto">

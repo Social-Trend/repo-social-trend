@@ -27,16 +27,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       try {
         return await apiRequest("/api/auth/me");
-      } catch (error) {
-        // Token is invalid, remove it
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        setToken(null);
+      } catch (error: any) {
+        // Only clear token on specific auth errors, not network issues
+        if (error.message.includes("401") || error.message.includes("403")) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setToken(null);
+        }
         return null;
       }
     },
     enabled: !!token,
-    retry: false,
+    retry: false
   });
 
   const logout = () => {

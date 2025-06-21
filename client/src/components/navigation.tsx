@@ -103,7 +103,14 @@ export default function Navigation({}: NavigationProps) {
                       </div>
                     )}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => window.location.href = "/onboarding"}>
+                  <DropdownMenuItem onClick={() => {
+                    // Use window.location to ensure auth state is preserved
+                    if (isAuthenticated && user) {
+                      window.location.href = "/onboarding";
+                    } else {
+                      window.location.reload(); // Refresh to fix auth state
+                    }
+                  }}>
                     <User className="mr-2 h-4 w-4" />
                     <span>
                       {hasProfile ? "Edit Profile" : "Create Profile"}
