@@ -398,6 +398,8 @@ export default function Messages() {
                       onClick={() => {
                         setSelectedConversation(conversation);
                         setIsChatOpen(true);
+                        // Clear notification badge for this conversation
+                        clearNotificationForConversation(conversation.id);
                       }}
                     >
                       <MessageCircle className="h-4 w-4 mr-2" />
