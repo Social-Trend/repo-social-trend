@@ -447,50 +447,7 @@ export class MemStorage implements IStorage {
   }
 
   private seedServiceRequests(): void {
-    // Add sample service requests for testing
-    const sampleRequests = [
-      {
-        organizerId: 1,
-        professionalId: 1,
-        eventTitle: "Corporate Holiday Party",
-        eventDate: new Date("2025-12-15"),
-        eventLocation: "Downtown Convention Center",
-        eventDescription: "Annual company holiday party for 150 employees",
-        requestMessage: "We need a professional bartender for our holiday party. The event will run from 6 PM to 11 PM. We'll provide all alcohol and bar supplies. Looking for someone with experience in corporate events.",
-        status: "pending" as const,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-      },
-      {
-        organizerId: 2,
-        professionalId: 1,
-        eventTitle: "Wedding Reception",
-        eventDate: new Date("2025-07-20"),
-        eventLocation: "Sunset Gardens Venue",
-        eventDescription: "Intimate wedding reception for 80 guests",
-        requestMessage: "Looking for a skilled bartender for our wedding reception. We want specialty cocktails and professional service. The reception will be outdoors with a beautiful garden setting.",
-        status: "pending" as const,
-        expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
-      }
-    ];
-
-    sampleRequests.forEach(request => {
-      const serviceRequest: ServiceRequest = {
-        id: this.currentServiceRequestId++,
-        organizerId: request.organizerId,
-        professionalId: request.professionalId,
-        eventTitle: request.eventTitle,
-        eventDate: request.eventDate,
-        eventLocation: request.eventLocation,
-        eventDescription: request.eventDescription,
-        requestMessage: request.requestMessage,
-        status: request.status,
-        responseMessage: null,
-        respondedAt: null,
-        expiresAt: request.expiresAt,
-        createdAt: new Date(),
-      };
-      this.serviceRequests.set(serviceRequest.id, serviceRequest);
-    });
+    // No sample data - real users will create service requests
   }
 
 }
