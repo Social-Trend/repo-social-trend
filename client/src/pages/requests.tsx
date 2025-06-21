@@ -13,7 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/auth-context";
 import { apiRequest } from "@/lib/queryClient";
 import { Calendar, MapPin, Clock, MessageSquare } from "lucide-react";
 import type { ServiceRequest } from "@shared/schema";
@@ -26,19 +26,21 @@ const statusColors = {
 };
 
 export default function Requests() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
   const [responseMessage, setResponseMessage] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get current role from URL or default to organizer
-  const currentRole = new URLSearchParams(window.location.search).get('role') || 'organizer';
+  // Get current role from user context
+  const currentRole = user?.role || 'organizer';
+  
+  console.log('Requests page - User:', user, 'Current role:', currentRole);
 
   const { data: requests = [], isLoading } = useQuery({
-    queryKey: ["/api/service-requests", { role: currentRole }],
+    queryKey: ["/api/service-requests", { role: currentRole, userId: user?.id }],
     queryFn: () => apiRequest(`/api/service-requests?role=${currentRole}`),
-    enabled: !!user,
+    enabled: isAuthenticated && !!user,
   });
 
   const respondMutation = useMutation({

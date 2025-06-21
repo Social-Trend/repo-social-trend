@@ -451,11 +451,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       let requests;
       if (role === 'professional') {
+        // For professionals, find requests where professionalId matches the user's ID
         requests = await storage.getServiceRequests(userId);
       } else {
+        // For organizers, find requests where organizerId matches the user's ID
         requests = await storage.getServiceRequests(undefined, userId);
       }
       
+      console.log(`Fetching service requests for user ${userId} with role ${role}:`, requests);
       res.json(requests);
     } catch (error) {
       console.error("Error fetching service requests:", error);
