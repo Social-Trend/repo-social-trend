@@ -64,7 +64,7 @@ export interface IStorage {
   markMessagesAsRead(conversationId: number, senderType: string): Promise<void>;
   
   // Service request methods
-  getServiceRequests(professionalId?: number, organizerId?: number): Promise<ServiceRequest[]>;
+  getServiceRequests(professionalId?: string | number, organizerId?: string | number): Promise<ServiceRequest[]>;
   getServiceRequest(id: number): Promise<ServiceRequest | undefined>;
   createServiceRequest(request: InsertServiceRequest): Promise<ServiceRequest>;
   updateServiceRequestStatus(id: number, status: string, responseMessage?: string): Promise<ServiceRequest | undefined>;
@@ -437,19 +437,23 @@ export class MemStorage implements IStorage {
   }
 
   // Service request methods
-  async getServiceRequests(professionalId?: number, organizerId?: number): Promise<ServiceRequest[]> {
+  async getServiceRequests(professionalId?: string | number, organizerId?: string | number): Promise<ServiceRequest[]> {
     const allRequests = Array.from(this.serviceRequests.values());
     console.log('Storage: All service requests:', allRequests);
     console.log('Storage: Filtering by professionalId:', professionalId, 'organizerId:', organizerId);
     
     if (professionalId) {
-      const filtered = allRequests.filter(request => request.professionalId === professionalId);
+      // Convert to string for comparison since IDs are stored as strings
+      const profIdStr = typeof professionalId === 'string' ? professionalId : professionalId.toString();
+      const filtered = allRequests.filter(request => request.professionalId === profIdStr);
       console.log('Storage: Filtered requests for professional:', filtered);
       return filtered;
     }
     
     if (organizerId) {
-      const filtered = allRequests.filter(request => request.organizerId === organizerId);
+      // Convert to string for comparison since IDs are stored as strings
+      const orgIdStr = typeof organizerId === 'string' ? organizerId : organizerId.toString();
+      const filtered = allRequests.filter(request => request.organizerId === orgIdStr);
       console.log('Storage: Filtered requests for organizer:', filtered);
       return filtered;
     }
@@ -465,8 +469,8 @@ export class MemStorage implements IStorage {
     const id = this.currentServiceRequestId++;
     const request: ServiceRequest = {
       id,
-      organizerId: insertRequest.organizerId,
-      professionalId: insertRequest.professionalId,
+      organizerId: typeof insertRequest.organizerId === 'string' ? insertRequest.organizerId : insertRequest.organizerId.toString(),
+      professionalId: typeof insertRequest.professionalId === 'string' ? insertRequest.professionalId : insertRequest.professionalId.toString(),
       eventTitle: insertRequest.eventTitle,
       eventDate: insertRequest.eventDate || null,
       eventLocation: insertRequest.eventLocation || null,
@@ -769,15 +773,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Service request methods
-  async getServiceRequests(professionalId?: number, organizerId?: number): Promise<ServiceRequest[]> {
+  async getServiceRequests(professionalId?: string | number, organizerId?: string | number): Promise<ServiceRequest[]> {
     let query = db.select().from(serviceRequests);
     
     if (professionalId) {
-      query = query.where(eq(serviceRequests.professionalId, professionalId));
+      // Convert to string to match the text field in database
+      const profId = typeof professionalId === 'string' ? professionalId : professionalId.toString();
+      query = query.where(eq(serviceRequests.professionalId, profId));
     }
     
     if (organizerId) {
-      query = query.where(eq(serviceRequests.organizerId, organizerId));
+      // Convert to string to match the text field in database
+      const orgId = typeof organizerId === 'string' ? organizerId : organizerId.toString();
+      query = query.where(eq(serviceRequests.organizerId, orgId));
     }
     
     return await query.orderBy(desc(serviceRequests.createdAt));
