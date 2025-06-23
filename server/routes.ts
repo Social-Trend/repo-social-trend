@@ -509,7 +509,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payment routes (Stripe integration)
-  app.post("/api/create-payment-intent", isAuthenticated, async (req: any, res) => {
+  app.post("/api/create-payment-intent", authenticateToken, async (req: any, res) => {
     try {
       if (!stripe) {
         return res.status(500).json({ error: "Stripe configuration missing" });
@@ -528,8 +528,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Verify user owns this request
-      const userId = req.user.claims.sub;
-      if (serviceRequest.organizerId !== userId) {
+      const userId = req.user.id;
+      if (serviceRequest.organizerId !== userId.toString()) {
         return res.status(403).json({ error: "Unauthorized" });
       }
 

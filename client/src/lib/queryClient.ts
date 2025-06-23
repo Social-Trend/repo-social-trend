@@ -17,12 +17,13 @@ export async function apiRequest(
     "Content-Type": "application/json",
   };
   
+  // Include JWT token for endpoints that still use it
   if (token) {
     defaultHeaders["Authorization"] = `Bearer ${token}`;
   }
 
   const res = await fetch(url, {
-    credentials: "include",
+    credentials: "include", // This ensures session cookies are sent with Replit Auth
     ...options,
     headers: {
       ...defaultHeaders,
