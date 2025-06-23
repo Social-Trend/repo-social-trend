@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { 
   loginUserSchema, 
   registerUserSchema, 
@@ -39,6 +40,20 @@ const authenticateToken = (req: any, res: any, next: any) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Auth middleware
+  await setupAuth(app);
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
   // Authentication routes
   app.post("/api/auth/register", async (req, res) => {
     try {
@@ -494,7 +509,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payment routes (Stripe integration)
-  app.post("/api/create-payment-intent", authenticateToken, async (req, res) => {
+  app.post("/api/create-payment-intent", isAuthenticated, async (req, res) => {
     try {
       if (!stripe) {
         return res.status(500).json({ error: "Stripe configuration missing" });
@@ -513,7 +528,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Verify user owns this request
-      const userId = (req.user as any)?.id;
+      const userId = (req.user as any).claims.sub;
       if (serviceRequest.organizerId !== userId) {
         return res.status(403).json({ error: "Unauthorized" });
       }
@@ -524,7 +539,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currency: "usd",
         metadata: {
           serviceRequestId: serviceRequestId.toString(),
-          organizerId: userId?.toString() || "",
+          organizerId: userId.toString(),
           professionalId: serviceRequest.professionalId.toString(),
         },
         description: `Deposit for ${serviceRequest.eventTitle}`,
