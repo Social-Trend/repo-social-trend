@@ -396,16 +396,7 @@ export default function Onboarding() {
           )}
         </div>
 
-        {/* Skip Option */}
-        <div className="text-center mt-6">
-          <Button 
-            variant="link" 
-            onClick={handleSkip}
-            className="text-slate-600 dark:text-slate-400"
-          >
-            Skip for now →
-          </Button>
-        </div>
+        
       </div>
     </div>
   );
