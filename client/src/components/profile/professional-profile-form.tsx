@@ -323,6 +323,22 @@ export default function ProfessionalProfileForm({
             </div>
           </div>
 
+          {/* Experience */}
+          <div className="space-y-2">
+            <Label htmlFor="experience">Years of Experience</Label>
+            <Input
+              id="experience"
+              type="number"
+              min="0"
+              max="50"
+              {...form.register("experience", { valueAsNumber: true })}
+              placeholder="0"
+            />
+            {form.formState.errors.experience && (
+              <p className="text-sm text-red-500">{form.formState.errors.experience.message}</p>
+            )}
+          </div>
+
           {/* Bio */}
           <div className="space-y-2">
             <Label htmlFor="bio">Bio</Label>

@@ -33,9 +33,6 @@ export default function Navigation({}: NavigationProps) {
   });
 
   const getUserInitials = (user: any) => {
-    if (user?.firstName) {
-      return user.firstName[0].toUpperCase();
-    }
     if (user?.email) {
       return user.email[0].toUpperCase();
     }
@@ -134,10 +131,8 @@ export default function Navigation({}: NavigationProps) {
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <div className="flex items-center justify-start gap-2 p-2">
                       <div className="flex flex-col space-y-1 leading-none">
-                        {user.firstName && (
-                          <p className="font-medium text-sm">{user.firstName} {user.lastName}</p>
-                        )}
                         <p className="text-xs text-muted-foreground">{user.email}</p>
+                        <p className="text-xs text-muted-foreground">Role: {user.role === "professional" ? "Professional Tender" : "Event Organizer"}</p>
                       </div>
                     </div>
                     

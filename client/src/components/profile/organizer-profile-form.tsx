@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -167,17 +168,70 @@ export default function OrganizerProfileForm({
             </div>
           </div>
 
-          {/* Name */}
+          {/* Name Fields */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="firstName">First Name *</Label>
+              <Input
+                id="firstName"
+                {...form.register("firstName")}
+                placeholder="Your first name"
+              />
+              {form.formState.errors.firstName && (
+                <p className="text-sm text-red-500">{form.formState.errors.firstName.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Last Name *</Label>
+              <Input
+                id="lastName"
+                {...form.register("lastName")}
+                placeholder="Your last name"
+              />
+              {form.formState.errors.lastName && (
+                <p className="text-sm text-red-500">{form.formState.errors.lastName.message}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Company Name */}
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name *</Label>
+            <Label htmlFor="companyName">Company/Organization Name</Label>
             <Input
-              id="name"
-              {...form.register("name")}
-              placeholder="Your full name"
+              id="companyName"
+              {...form.register("companyName")}
+              placeholder="Optional company or organization name"
             />
-            {form.formState.errors.name && (
-              <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
+            {form.formState.errors.companyName && (
+              <p className="text-sm text-red-500">{form.formState.errors.companyName.message}</p>
             )}
+          </div>
+
+          {/* Contact Information */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Business Email</Label>
+              <Input
+                id="email"
+                type="email"
+                {...form.register("email")}
+                placeholder="your.business@email.com"
+              />
+              {form.formState.errors.email && (
+                <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                {...form.register("phone")}
+                placeholder="(555) 123-4567"
+              />
+              {form.formState.errors.phone && (
+                <p className="text-sm text-red-500">{form.formState.errors.phone.message}</p>
+              )}
+            </div>
           </div>
 
           {/* Location */}
@@ -246,6 +300,20 @@ export default function OrganizerProfileForm({
             
             {form.formState.errors.eventTypes && (
               <p className="text-sm text-red-500">{form.formState.errors.eventTypes.message}</p>
+            )}
+          </div>
+
+          {/* Bio */}
+          <div className="space-y-2">
+            <Label htmlFor="bio">About You/Your Organization</Label>
+            <Textarea
+              id="bio"
+              {...form.register("bio")}
+              placeholder="Tell professionals about your event planning experience and style..."
+              rows={4}
+            />
+            {form.formState.errors.bio && (
+              <p className="text-sm text-red-500">{form.formState.errors.bio.message}</p>
             )}
           </div>
 
