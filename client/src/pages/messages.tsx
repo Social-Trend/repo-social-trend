@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -18,9 +18,16 @@ export default function Messages() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { clearNotificationForConversation } = useUnreadMessages();
+  const { clearNotificationForConversation, markAllConversationsViewed } = useUnreadMessages();
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+
+  // Mark all conversations as viewed when Messages page is visited
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      markAllConversationsViewed();
+    }
+  }, [isAuthenticated, user, markAllConversationsViewed]);
 
   // Fetch service requests (now part of unified communication)
   const { data: serviceRequests = [], isLoading: requestsLoading } = useQuery({

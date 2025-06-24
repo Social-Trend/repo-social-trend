@@ -66,6 +66,20 @@ export const updateConversationViewTime = (conversationId: number): void => {
   }
 };
 
+// Mark all current conversations as viewed (for when user visits Messages page)
+export const markAllConversationsAsViewed = (conversations: any[], userRole: string): void => {
+  try {
+    const currentTime = Date.now().toString();
+    conversations.forEach(conversation => {
+      const lastViewKey = `lastView_${conversation.id}`;
+      localStorage.setItem(lastViewKey, currentTime);
+    });
+    console.log(`Marked all ${conversations.length} conversations as viewed for ${userRole}`);
+  } catch (error) {
+    // Ignore localStorage errors
+  }
+};
+
 export function useUnreadMessages() {
   const { user, isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
@@ -127,7 +141,15 @@ export function useUnreadMessages() {
     queryClient.invalidateQueries({ queryKey: ["/api/unread-conversations-count"] });
   };
 
-  // Reset function to clear all notification state
+  // Function to mark all conversations as viewed (when user visits Messages page)
+  const markAllConversationsViewed = () => {
+    if (conversations.length > 0 && user?.role) {
+      markAllConversationsAsViewed(conversations, user.role);
+      queryClient.invalidateQueries({ queryKey: ["/api/unread-conversations-count"] });
+    }
+  };
+
+  // Reset function to clear all notification state (for testing/debug)
   const resetNotifications = () => {
     clearAllViewedConversations();
     // Clear all view times
@@ -148,6 +170,7 @@ export function useUnreadMessages() {
     unreadCount,
     hasUnreadMessages: unreadCount > 0,
     clearNotificationForConversation,
+    markAllConversationsViewed,
     resetNotifications,
   };
 }

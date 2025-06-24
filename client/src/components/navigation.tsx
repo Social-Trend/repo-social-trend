@@ -88,15 +88,8 @@ export default function Navigation({}: NavigationProps) {
                 size="sm"
                 className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 relative"
                 onClick={() => {
-                  if (conversations.length > 0) {
-                    const firstConversation = conversations[0];
-                    setSelectedConversation(firstConversation);
-                    setIsChatOpen(true);
-                    clearNotificationForConversation(firstConversation.id);
-                  } else {
-                    // If no conversations, navigate to messages page
-                    window.location.href = '/messages';
-                  }
+                  // Always navigate to messages page - notifications will be cleared there
+                  window.location.href = '/messages';
                 }}
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
