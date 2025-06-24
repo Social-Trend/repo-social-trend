@@ -173,10 +173,7 @@ export class MemStorage implements IStorage {
         id: numericId,
         email: userData.email,
         password: userData.password || '',
-        firstName: userData.firstName,
-        lastName: userData.lastName,
         role: userData.role || 'organizer',
-        profileImageUrl: userData.profileImageUrl,
         isEmailVerified: userData.isEmailVerified || false,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -318,12 +315,18 @@ export class MemStorage implements IStorage {
     const profile: ProfessionalProfile = {
       id,
       userId: insertProfile.userId,
-      name: insertProfile.name,
+      firstName: insertProfile.firstName,
+      lastName: insertProfile.lastName,
+      displayName: insertProfile.displayName || null,
+      email: insertProfile.email || null,
+      phone: insertProfile.phone || null,
       location: insertProfile.location,
       services: insertProfile.services,
       hourlyRate: insertProfile.hourlyRate || null,
       bio: insertProfile.bio || null,
+      experience: insertProfile.experience || null,
       profileImageUrl: insertProfile.profileImageUrl || null,
+      verified: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -392,7 +395,8 @@ export class MemStorage implements IStorage {
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase();
       profiles = profiles.filter(profile => 
-        profile.name?.toLowerCase().includes(searchTerm) ||
+        `${profile.firstName} ${profile.lastName}`.toLowerCase().includes(searchTerm) ||
+        profile.displayName?.toLowerCase().includes(searchTerm) ||
         profile.bio?.toLowerCase().includes(searchTerm)
       );
     }
@@ -412,9 +416,14 @@ export class MemStorage implements IStorage {
     const profile: OrganizerProfile = {
       id,
       userId: insertProfile.userId,
-      name: insertProfile.name,
+      firstName: insertProfile.firstName,
+      lastName: insertProfile.lastName,
+      companyName: insertProfile.companyName || null,
+      email: insertProfile.email || null,
+      phone: insertProfile.phone || null,
       location: insertProfile.location,
       eventTypes: insertProfile.eventTypes,
+      bio: insertProfile.bio || null,
       profileImageUrl: insertProfile.profileImageUrl || null,
       createdAt: new Date(),
       updatedAt: new Date(),
