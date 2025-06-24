@@ -107,7 +107,7 @@ export function useUnreadMessages() {
       
       let conversationsWithActivity = 0;
       const userRole = (user as any)?.role;
-      console.log(`Checking unread messages for ${userRole} user`);
+      console.log(`Checking unread messages for ${userRole} user, ${conversations.length} conversations`);
       
       for (const conversation of conversations) {
         try {
@@ -121,7 +121,7 @@ export function useUnreadMessages() {
               ? lastMessage.senderType === 'organizer'
               : lastMessage.senderType === 'professional';
             
-            console.log(`Conversation ${conversation.id}: Last message from ${lastMessage.senderType}, is from other party: ${isFromOtherParty}`);
+            console.log(`Conversation ${conversation.id}: Last message from ${lastMessage.senderType}, is from other party: ${isFromOtherParty}, userRole: ${userRole}`);
             
             if (isFromOtherParty) {
               // Use the new message checking function  
@@ -147,8 +147,8 @@ export function useUnreadMessages() {
       console.log(`Total unread conversations: ${conversationsWithActivity}`);
       return conversationsWithActivity;
     },
-    enabled: isAuthenticated && !!user && conversations.length > 0,
-    refetchInterval: 5000, // Check every 5 seconds for faster updates
+    enabled: isAuthenticated && !!user,
+    refetchInterval: 3000, // Check every 3 seconds for faster updates
   });
 
   // Function to clear notifications for a conversation and refresh count
