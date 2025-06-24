@@ -72,16 +72,18 @@ export default function Navigation({}: NavigationProps) {
                 </Button>
               </Link>
               
-              <Link href="/professionals">
-                <Button 
-                  variant={location === "/professionals" ? "secondary" : "ghost"}
-                  size="sm"
-                  className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-                >
-                  <Search className="h-4 w-4 mr-2" />
-                  Find Professionals
-                </Button>
-              </Link>
+              {user?.role !== "professional" && (
+                <Link href="/professionals">
+                  <Button 
+                    variant={location === "/professionals" ? "secondary" : "ghost"}
+                    size="sm"
+                    className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                  >
+                    <Search className="h-4 w-4 mr-2" />
+                    Find Professionals
+                  </Button>
+                </Link>
+              )}
               
               <Button 
                 variant="ghost"
