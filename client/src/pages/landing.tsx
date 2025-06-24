@@ -302,7 +302,7 @@ export default function Landing() {
             <Button 
               size="lg" 
               variant="outline" 
-              className="border-white text-white hover:bg-blue-700 px-8 py-3 text-lg"
+              className="border-white text-blue-600 bg-white hover:bg-gray-50 px-8 py-3 text-lg"
               onClick={() => window.location.href = '/onboarding'}
             >
               Join as Professional
