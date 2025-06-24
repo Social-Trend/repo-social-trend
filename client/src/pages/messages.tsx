@@ -25,11 +25,13 @@ export default function Messages() {
   // Only mark conversations as viewed when user actually interacts with them
   // Remove automatic clearing on page visit
   
-  // One-time reset to fix notification system
+  // One-time reset to fix notification system - run only once
   useEffect(() => {
-    if (isAuthenticated && user) {
+    const hasReset = localStorage.getItem('notificationSystemReset');
+    if (isAuthenticated && user && !hasReset) {
       // Clear all notification state once to reset the system
       clearAllNotificationState();
+      localStorage.setItem('notificationSystemReset', 'true');
     }
   }, [isAuthenticated, user, clearAllNotificationState]);
 
