@@ -457,40 +457,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const requestData = { ...req.body, organizerId: userId };
       
       const request = await storage.createServiceRequest(requestData);
-      
-      // Automatically create a conversation for this service request
-      try {
-        const organizerProfile = await storage.getOrganizerProfile(userId);
-        if (organizerProfile) {
-          const conversationData = {
-            organizerName: organizerProfile.name,
-            organizerEmail: organizerProfile.email || '',
-            professionalId: parseInt(requestData.professionalId),
-            eventTitle: requestData.eventTitle,
-            eventDate: requestData.eventDate,
-            eventLocation: requestData.eventLocation,
-            eventDescription: requestData.eventDescription,
-            status: "active"
-          };
-          
-          const conversation = await storage.createConversation(conversationData);
-          
-          // Create an initial message from organizer about the service request
-          const initialMessage = {
-            conversationId: conversation.id,
-            content: `Hi! I've sent you a service request for "${requestData.eventTitle}". ${requestData.requestMessage}`,
-            senderType: "organizer" as const,
-            timestamp: new Date()
-          };
-          
-          await storage.createMessage(initialMessage);
-          console.log(`Created conversation ${conversation.id} and initial message for service request ${request.id}`);
-        }
-      } catch (convError) {
-        console.error("Error creating conversation:", convError);
-        // Don't fail the service request if conversation creation fails
-      }
-      
       res.status(201).json(request);
     } catch (error) {
       console.error("Error creating service request:", error);

@@ -88,8 +88,15 @@ export default function Navigation({}: NavigationProps) {
                 size="sm"
                 className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 relative"
                 onClick={() => {
-                  // Navigate to messages page without clearing notifications automatically
-                  window.location.href = '/messages';
+                  if (conversations.length > 0) {
+                    const firstConversation = conversations[0];
+                    setSelectedConversation(firstConversation);
+                    setIsChatOpen(true);
+                    clearNotificationForConversation(firstConversation.id);
+                  } else {
+                    // If no conversations, navigate to messages page
+                    window.location.href = '/messages';
+                  }
                 }}
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
@@ -102,7 +109,6 @@ export default function Navigation({}: NavigationProps) {
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </Badge>
                 )}
-
               </Button>
             </div>
 

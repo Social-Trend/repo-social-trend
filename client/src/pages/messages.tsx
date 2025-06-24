@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -18,22 +18,9 @@ export default function Messages() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { clearNotificationForConversation, markAllConversationsViewed, clearAllNotificationState } = useUnreadMessages();
+  const { clearNotificationForConversation } = useUnreadMessages();
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
-
-  // Only mark conversations as viewed when user actually interacts with them
-  // Remove automatic clearing on page visit
-  
-  // One-time reset to fix notification system - run only once
-  useEffect(() => {
-    const hasReset = localStorage.getItem('notificationSystemReset');
-    if (isAuthenticated && user && !hasReset) {
-      // Clear all notification state once to reset the system
-      clearAllNotificationState();
-      localStorage.setItem('notificationSystemReset', 'true');
-    }
-  }, [isAuthenticated, user, clearAllNotificationState]);
 
   // Fetch service requests (now part of unified communication)
   const { data: serviceRequests = [], isLoading: requestsLoading } = useQuery({
