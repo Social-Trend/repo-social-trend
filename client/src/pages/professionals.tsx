@@ -328,11 +328,13 @@ export default function Professionals() {
                   <Avatar className="h-16 w-16">
                     <AvatarImage src={professional.profileImageUrl || undefined} />
                     <AvatarFallback className="text-lg">
-                      {professional.name?.charAt(0).toUpperCase() || 'P'}
+                      {professional.firstName?.charAt(0).toUpperCase() || 'P'}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <CardTitle className="text-xl mb-1">{professional.name}</CardTitle>
+                    <CardTitle className="text-xl mb-1">
+                      {professional.displayName || `${professional.firstName} ${professional.lastName}`}
+                    </CardTitle>
                     <div className="flex items-center text-gray-600 mb-2">
                       <MapPin className="h-4 w-4 mr-1" />
                       <span className="text-sm">{professional.location}</span>
@@ -341,7 +343,7 @@ export default function Professionals() {
                       <div className="flex items-center text-green-600">
                         <DollarSign className="h-4 w-4 mr-1" />
                         <span className="font-semibold">
-                          {professional.hourlyRate.toString().replace(/^\$/, '')}/hour
+                          ${professional.hourlyRate}/hour
                         </span>
                       </div>
                     )}
