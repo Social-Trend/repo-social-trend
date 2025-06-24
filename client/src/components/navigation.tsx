@@ -88,7 +88,7 @@ export default function Navigation({}: NavigationProps) {
                 size="sm"
                 className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 relative"
                 onClick={() => {
-                  // Always navigate to messages page - notifications will be cleared there
+                  // Navigate to messages page without clearing notifications automatically
                   window.location.href = '/messages';
                 }}
               >
@@ -101,6 +101,12 @@ export default function Navigation({}: NavigationProps) {
                   >
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </Badge>
+                )}
+                {/* Debug info */}
+                {process.env.NODE_ENV === 'development' && (
+                  <span className="absolute -bottom-6 left-0 text-xs text-gray-500">
+                    Debug: {unreadCount} unread
+                  </span>
                 )}
               </Button>
             </div>

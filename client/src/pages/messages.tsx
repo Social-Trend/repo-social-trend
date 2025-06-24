@@ -18,16 +18,20 @@ export default function Messages() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { clearNotificationForConversation, markAllConversationsViewed } = useUnreadMessages();
+  const { clearNotificationForConversation, markAllConversationsViewed, clearAllNotificationState } = useUnreadMessages();
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
-  // Mark all conversations as viewed when Messages page is visited
+  // Only mark conversations as viewed when user actually interacts with them
+  // Remove automatic clearing on page visit
+  
+  // One-time reset to fix notification system
   useEffect(() => {
     if (isAuthenticated && user) {
-      markAllConversationsViewed();
+      // Clear all notification state once to reset the system
+      clearAllNotificationState();
     }
-  }, [isAuthenticated, user, markAllConversationsViewed]);
+  }, [isAuthenticated, user, clearAllNotificationState]);
 
   // Fetch service requests (now part of unified communication)
   const { data: serviceRequests = [], isLoading: requestsLoading } = useQuery({

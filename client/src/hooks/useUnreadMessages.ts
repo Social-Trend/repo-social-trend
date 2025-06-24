@@ -42,15 +42,22 @@ export const hasNewMessagesInConversation = (conversationId: number, lastMessage
     const lastViewKey = `lastView_${conversationId}`;
     const lastViewTime = localStorage.getItem(lastViewKey);
     
+    console.log(`Checking conversation ${conversationId}: lastViewTime=${lastViewTime}, messageTime=${lastMessageTime}`);
+    
     if (!lastViewTime) {
+      console.log(`No view time found for conversation ${conversationId}, considering as new`);
       return true; // No previous view time, consider it new
     }
     
     const messageTime = new Date(lastMessageTime).getTime();
     const viewTime = parseInt(lastViewTime);
     
-    return messageTime > viewTime;
+    const isNew = messageTime > viewTime;
+    console.log(`Conversation ${conversationId}: messageTime=${messageTime}, viewTime=${viewTime}, isNew=${isNew}`);
+    
+    return isNew;
   } catch (error) {
+    console.error(`Error checking conversation ${conversationId}:`, error);
     return true; // Error checking, consider it new
   }
 };
@@ -100,6 +107,7 @@ export function useUnreadMessages() {
       
       let conversationsWithActivity = 0;
       const userRole = (user as any)?.role;
+      console.log(`Checking unread messages for ${userRole} user`);
       
       for (const conversation of conversations) {
         try {
@@ -113,25 +121,34 @@ export function useUnreadMessages() {
               ? lastMessage.senderType === 'organizer'
               : lastMessage.senderType === 'professional';
             
-            // Use the new message checking function  
-            const timestampStr = typeof lastMessage.timestamp === 'string' 
-              ? lastMessage.timestamp 
-              : lastMessage.timestamp.toISOString();
-            const hasNewMessages = hasNewMessagesInConversation(conversation.id, timestampStr);
+            console.log(`Conversation ${conversation.id}: Last message from ${lastMessage.senderType}, is from other party: ${isFromOtherParty}`);
             
-            if (isFromOtherParty && hasNewMessages) {
-              conversationsWithActivity++;
+            if (isFromOtherParty) {
+              // Use the new message checking function  
+              const timestampStr = typeof lastMessage.timestamp === 'string' 
+                ? lastMessage.timestamp 
+                : lastMessage.timestamp.toISOString();
+              const hasNewMessages = hasNewMessagesInConversation(conversation.id, timestampStr);
+              
+              console.log(`Conversation ${conversation.id}: Has new messages: ${hasNewMessages}, timestamp: ${timestampStr}`);
+              
+              if (hasNewMessages) {
+                conversationsWithActivity++;
+                console.log(`Added conversation ${conversation.id} to unread count`);
+              }
             }
           }
         } catch (error) {
+          console.error(`Error checking conversation ${conversation.id}:`, error);
           continue;
         }
       }
       
+      console.log(`Total unread conversations: ${conversationsWithActivity}`);
       return conversationsWithActivity;
     },
     enabled: isAuthenticated && !!user && conversations.length > 0,
-    refetchInterval: 10000, // Check every 10 seconds
+    refetchInterval: 5000, // Check every 5 seconds for faster updates
   });
 
   // Function to clear notifications for a conversation and refresh count
@@ -166,11 +183,28 @@ export function useUnreadMessages() {
     queryClient.invalidateQueries({ queryKey: ["/api/unread-conversations-count"] });
   };
 
+  // Debug function to clear all notification state
+  const clearAllNotificationState = () => {
+    try {
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('lastView_') || key === 'viewedConversations') {
+          localStorage.removeItem(key);
+        }
+      });
+      console.log('Cleared all notification state');
+      queryClient.invalidateQueries({ queryKey: ["/api/unread-conversations-count"] });
+    } catch (error) {
+      console.error('Error clearing notification state:', error);
+    }
+  };
+
   return {
     unreadCount,
     hasUnreadMessages: unreadCount > 0,
     clearNotificationForConversation,
     markAllConversationsViewed,
     resetNotifications,
+    clearAllNotificationState,
   };
 }
