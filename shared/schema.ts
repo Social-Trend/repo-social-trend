@@ -6,10 +6,7 @@ export const users = pgTable("users", {
   id: text("id").primaryKey().notNull(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
-  firstName: text("first_name"),
-  lastName: text("last_name"),
   role: text("role").notNull().default("organizer"), // "organizer" or "professional"
-  profileImageUrl: text("profile_image_url"),
   isEmailVerified: boolean("is_email_verified").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -18,12 +15,18 @@ export const users = pgTable("users", {
 export const professionalProfiles = pgTable("professional_profiles", {
   id: serial("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id),
-  name: text("name").notNull(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  displayName: text("display_name"), // Optional professional business name
+  email: text("email"), // Can be different from user email for business
+  phone: text("phone"),
   location: text("location").notNull(),
   services: text("services").array().notNull(),
   hourlyRate: text("hourly_rate"),
   bio: text("bio"),
+  experience: integer("experience"),
   profileImageUrl: text("profile_image_url"),
+  verified: boolean("verified").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -31,9 +34,14 @@ export const professionalProfiles = pgTable("professional_profiles", {
 export const organizerProfiles = pgTable("organizer_profiles", {
   id: serial("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id),
-  name: text("name").notNull(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  companyName: text("company_name"), // Optional company/organization name
+  email: text("email"), // Can be different from user email for business
+  phone: text("phone"),
   location: text("location").notNull(),
   eventTypes: text("event_types").array().notNull(),
+  bio: text("bio"), // Description of the organizer/company
   profileImageUrl: text("profile_image_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -78,9 +86,15 @@ export const insertProfessionalProfileSchema = createInsertSchema(professionalPr
   createdAt: true,
   updatedAt: true,
 }).extend({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  displayName: z.string().optional(),
+  email: z.string().email("Please enter a valid email").optional(),
+  phone: z.string().optional(),
   services: z.array(z.string()).min(1, "Please select at least one service"),
   hourlyRate: z.string().optional(),
   bio: z.string().max(500, "Bio must be 500 characters or less").optional(),
+  experience: z.number().min(0).optional(),
 });
 
 // Organizer profile schemas
@@ -89,7 +103,13 @@ export const insertOrganizerProfileSchema = createInsertSchema(organizerProfiles
   createdAt: true,
   updatedAt: true,
 }).extend({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  companyName: z.string().optional(),
+  email: z.string().email("Please enter a valid email").optional(),
+  phone: z.string().optional(),
   eventTypes: z.array(z.string()).min(1, "Please select at least one event type"),
+  bio: z.string().max(500, "Bio must be 500 characters or less").optional(),
 });
 
 // Service options for professionals

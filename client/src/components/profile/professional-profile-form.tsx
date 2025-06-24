@@ -39,11 +39,16 @@ export default function ProfessionalProfileForm({
     resolver: zodResolver(insertProfessionalProfileSchema),
     defaultValues: {
       userId: typeof userId === 'string' ? userId : userId.toString(),
-      name: "",
+      firstName: "",
+      lastName: "",
+      displayName: "",
+      email: "",
+      phone: "",
       location: "",
       services: [],
       hourlyRate: "",
       bio: "",
+      experience: 0,
       profileImageUrl: null,
     },
   });
@@ -161,17 +166,70 @@ export default function ProfessionalProfileForm({
             </div>
           </div>
 
-          {/* Name */}
+          {/* Name Fields */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="firstName">First Name *</Label>
+              <Input
+                id="firstName"
+                {...form.register("firstName")}
+                placeholder="Your first name"
+              />
+              {form.formState.errors.firstName && (
+                <p className="text-sm text-red-500">{form.formState.errors.firstName.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Last Name *</Label>
+              <Input
+                id="lastName"
+                {...form.register("lastName")}
+                placeholder="Your last name"
+              />
+              {form.formState.errors.lastName && (
+                <p className="text-sm text-red-500">{form.formState.errors.lastName.message}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Business/Display Name */}
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name *</Label>
+            <Label htmlFor="displayName">Business/Display Name</Label>
             <Input
-              id="name"
-              {...form.register("name")}
-              placeholder="Your full name"
+              id="displayName"
+              {...form.register("displayName")}
+              placeholder="Optional business or professional name"
             />
-            {form.formState.errors.name && (
-              <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
+            {form.formState.errors.displayName && (
+              <p className="text-sm text-red-500">{form.formState.errors.displayName.message}</p>
             )}
+          </div>
+
+          {/* Contact Information */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Professional Email</Label>
+              <Input
+                id="email"
+                type="email"
+                {...form.register("email")}
+                placeholder="your.business@email.com"
+              />
+              {form.formState.errors.email && (
+                <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                {...form.register("phone")}
+                placeholder="(555) 123-4567"
+              />
+              {form.formState.errors.phone && (
+                <p className="text-sm text-red-500">{form.formState.errors.phone.message}</p>
+              )}
+            </div>
           </div>
 
           {/* Location */}

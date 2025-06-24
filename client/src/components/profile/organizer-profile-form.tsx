@@ -38,9 +38,14 @@ export default function OrganizerProfileForm({
     resolver: zodResolver(insertOrganizerProfileSchema),
     defaultValues: {
       userId: typeof userId === 'string' ? userId : userId.toString(),
-      name: "",
+      firstName: "",
+      lastName: "",
+      companyName: "",
+      email: "",
+      phone: "",
       location: "",
       eventTypes: [],
+      bio: "",
       profileImageUrl: null,
     },
   });
