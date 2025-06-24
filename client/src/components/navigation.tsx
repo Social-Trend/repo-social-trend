@@ -32,12 +32,41 @@ export default function Navigation({}: NavigationProps) {
     enabled: isAuthenticated && !!user,
   });
 
-  const getUserInitials = (user: any) => {
+  // Fetch current profile based on role
+  const { data: professionalProfile } = useQuery({
+    queryKey: ["/api/profiles/professional", user?.id],
+    queryFn: () => apiRequest(`/api/profiles/professional/${user?.id}`),
+    enabled: isAuthenticated && !!user && user.role === "professional",
+  });
+
+  const { data: organizerProfile } = useQuery({
+    queryKey: ["/api/profiles/organizer", user?.id],
+    queryFn: () => apiRequest(`/api/profiles/organizer/${user?.id}`),
+    enabled: isAuthenticated && !!user && user.role === "organizer",
+  });
+
+  const getUserInitials = (user: any, profile: any) => {
+    if (profile?.firstName) {
+      return profile.firstName[0].toUpperCase();
+    }
     if (user?.email) {
       return user.email[0].toUpperCase();
     }
     return "U";
   };
+
+  const getDisplayName = (user: any, profile: any) => {
+    if (profile?.firstName && profile?.lastName) {
+      return `${profile.firstName} ${profile.lastName}`;
+    }
+    if (profile?.displayName) {
+      return profile.displayName;
+    }
+    return user?.email || "User";
+  };
+
+  // Get current profile based on role
+  const currentProfile = user?.role === "professional" ? professionalProfile : organizerProfile;
 
   return (
     <>
@@ -123,7 +152,7 @@ export default function Navigation({}: NavigationProps) {
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={user.profileImageUrl || ""} alt={user.email || ""} />
                         <AvatarFallback className="bg-primary text-primary-foreground">
-                          {getUserInitials(user)}
+                          {getUserInitials(user, currentProfile)}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -131,8 +160,8 @@ export default function Navigation({}: NavigationProps) {
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <div className="flex items-center justify-start gap-2 p-2">
                       <div className="flex flex-col space-y-1 leading-none">
-                        <p className="text-xs text-muted-foreground">{user.email}</p>
-                        <p className="text-xs text-muted-foreground">Role: {user.role === "professional" ? "Professional Tender" : "Event Organizer"}</p>
+                        <p className="font-medium text-sm">{getDisplayName(user, currentProfile)}</p>
+                        <p className="text-xs text-muted-foreground">{user.role === "professional" ? "Professional Tender" : "Event Organizer"}</p>
                       </div>
                     </div>
                     
