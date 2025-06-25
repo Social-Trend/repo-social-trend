@@ -74,6 +74,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- June 25, 2025: **COMPLETED** PostgreSQL database migration and conversation management
+  - ✓ Successfully migrated from in-memory storage to PostgreSQL database
+  - ✓ All database tables created: users, professional_profiles, organizer_profiles, conversations, messages, service_requests, payments, sessions
+  - ✓ Database storage layer activated with full CRUD operations
+  - ✓ Added close (X) buttons to conversation cards for removing duplicates
+  - ✓ Implemented conversation deletion endpoint that marks conversations as "closed"
+  - ✓ Conversations filter to hide closed conversations from display
+  - ✓ Updated welcome messages to use actual first names from role-specific profiles
+  - ✓ Persistent data storage now maintains user profiles and service requests across server restarts
+
 - June 24, 2025: **COMPLETED** Separate profile system with distinct user identities for demo presentations
   - ✓ Implemented completely separate profile data for Event Organizer and Professional Tender roles
   - ✓ Added firstName, lastName, displayName, email, phone fields to professional profiles
