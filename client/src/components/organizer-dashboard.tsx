@@ -6,7 +6,7 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/auth-context";
 import { apiRequest } from "@/lib/queryClient";
-import type { ServiceRequest } from "@shared/schema";
+import type { ServiceRequest, OrganizerProfile } from "@shared/schema";
 
 const statusColors = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -17,6 +17,13 @@ const statusColors = {
 
 export default function OrganizerDashboard() {
   const { user, isAuthenticated } = useAuth();
+
+  // Fetch organizer profile
+  const { data: organizerProfile } = useQuery({
+    queryKey: ["/api/profiles/organizer", user?.id],
+    queryFn: () => apiRequest(`/api/profiles/organizer/${user?.id}`),
+    enabled: isAuthenticated && !!user,
+  });
 
   // Fetch service requests for organizer
   const { data: requests = [], isLoading: requestsLoading } = useQuery({
@@ -36,7 +43,7 @@ export default function OrganizerDashboard() {
           Event Organizer Dashboard
         </h1>
         <p className="text-xl text-slate-600 dark:text-slate-400">
-          Welcome back{user?.firstName ? `, ${user.firstName}` : ''}! Manage your events and professional connections.
+          Welcome back{organizerProfile?.firstName ? `, ${organizerProfile.firstName}` : ''}! Manage your events and professional connections.
         </p>
       </div>
 

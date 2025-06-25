@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageCircle, Calendar, Clock, CheckCircle, XCircle, User, DollarSign, Send, ChevronDown, ChevronUp } from "lucide-react";
+import { MessageCircle, Calendar, Clock, CheckCircle, XCircle, User, DollarSign, Send, ChevronDown, ChevronUp, X } from "lucide-react";
 import PaymentButton from "@/components/payment/payment-button";
 import ChatModal from "@/components/chat-modal";
 import type { ServiceRequest, Conversation, Message } from "@shared/schema";
@@ -34,6 +34,29 @@ export default function Messages() {
     queryKey: ["/api/conversations", { userId: user?.id }],
     queryFn: () => apiRequest("/api/conversations"),
     enabled: isAuthenticated && !!user,
+  });
+
+  // Mutation for deleting conversations
+  const deleteConversation = useMutation({
+    mutationFn: async (conversationId: number) => {
+      return await apiRequest(`/api/conversations/${conversationId}`, {
+        method: "DELETE"
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Conversation closed",
+        description: "The conversation has been removed.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to close conversation. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   // Mutation for updating service request status

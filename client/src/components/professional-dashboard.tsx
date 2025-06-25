@@ -17,7 +17,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Link } from "wouter";
-import type { Professional, ServiceRequest } from "@shared/schema";
+import type { Professional, ServiceRequest, ProfessionalProfile } from "@shared/schema";
 
 const statusColors = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -35,6 +35,13 @@ export default function ProfessionalDashboard() {
   const [responseType, setResponseType] = useState<'accept' | 'decline'>('accept');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Fetch professional profile
+  const { data: professionalProfile } = useQuery({
+    queryKey: ["/api/profiles/professional", user?.id],
+    queryFn: () => apiRequest(`/api/profiles/professional/${user?.id}`),
+    enabled: isAuthenticated && !!user,
+  });
 
   // Fetch service requests for professional
   const { data: requests = [], isLoading: requestsLoading } = useQuery({
@@ -122,7 +129,7 @@ export default function ProfessionalDashboard() {
           Professional Dashboard
         </h1>
         <p className="text-xl text-slate-600 dark:text-slate-400">
-          Welcome back, {user?.firstName || 'Professional'}! Manage your communications and bookings in one place.
+          Welcome back{professionalProfile?.firstName ? `, ${professionalProfile.firstName}` : ''}! Manage your communications and bookings in one place.
         </p>
       </div>
 
