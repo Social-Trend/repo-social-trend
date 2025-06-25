@@ -96,7 +96,7 @@ export default function Messages() {
         method: "POST",
         body: JSON.stringify({
           professionalId: parseInt(serviceRequest.professionalId),
-          organizerName: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email || 'Unknown',
+          organizerName: user.email || 'Unknown',
           organizerEmail: user.email || '',
           eventTitle: serviceRequest.eventTitle,
           eventDate: serviceRequest.eventDate,
@@ -402,19 +402,37 @@ export default function Messages() {
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-slate-800 dark:text-slate-100 mb-1">
-                        {user.role === 'professional' 
-                          ? `${conversation.organizerName} - ${conversation.eventTitle}`
-                          : `Professional ID ${conversation.professionalId} - ${conversation.eventTitle}`
-                        }
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        {conversation.status}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Created: {new Date(conversation.createdAt).toLocaleDateString()}
-                      </p>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-slate-800 dark:text-slate-100 mb-1">
+                            {user.role === 'professional' 
+                              ? `${conversation.organizerName} - ${conversation.eventTitle}`
+                              : `Professional ID ${conversation.professionalId} - ${conversation.eventTitle}`
+                            }
+                          </h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                            {conversation.status}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Created: {new Date(conversation.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteConversation.mutate(conversation.id);
+                          }}
+                          disabled={deleteConversation.isPending}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
+                  </div>
+                  <div className="mt-4">
                     <Button 
                       size="sm" 
                       variant="outline"
@@ -424,6 +442,7 @@ export default function Messages() {
                         // Clear notification badge for this conversation
                         clearNotificationForConversation(conversation.id);
                       }}
+                      className="w-full"
                     >
                       <MessageCircle className="h-4 w-4 mr-2" />
                       Open Chat

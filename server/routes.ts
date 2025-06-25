@@ -314,7 +314,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         professionalId ? parseInt(professionalId as string) : undefined,
         organizerEmail as string
       );
-      res.json(conversations);
+      // Filter out closed conversations
+      const activeConversations = conversations.filter(conv => conv.status !== "closed");
+      res.json(activeConversations);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch conversations" });
     }
@@ -348,6 +350,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid conversation data", details: error });
       }
       res.status(500).json({ error: "Failed to create conversation" });
+    }
+  });
+
+  // Delete conversation endpoint
+  app.delete("/api/conversations/:id", authenticateToken, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      if (isNaN(conversationId)) {
+        return res.status(400).json({ error: "Invalid conversation ID" });
+      }
+      
+      // Check if conversation exists
+      const conversation = await storage.getConversation(conversationId);
+      if (!conversation) {
+        return res.status(404).json({ error: "Conversation not found" });
+      }
+      
+      // For now, we'll mark the conversation as inactive instead of deleting
+      // This preserves data integrity while hiding it from the user
+      await storage.updateConversationStatus(conversationId, "closed");
+      
+      res.json({ success: true, message: "Conversation closed successfully" });
+    } catch (error) {
+      console.error("Error closing conversation:", error);
+      res.status(500).json({ error: "Failed to close conversation" });
     }
   });
 
