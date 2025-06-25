@@ -77,10 +77,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.createUser({
         email,
         password: hashedPassword,
-        firstName: firstName || null,
-        lastName: lastName || null,
         role,
-        profileImageUrl: null,
         isEmailVerified: false
       });
 
