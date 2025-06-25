@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Filter, Users, MapPin, DollarSign, Star, MessageCircle, X, Plus } from "lucide-react";
+import { Search, Filter, Users, MapPin, DollarSign, Star, MessageCircle, X, Plus, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import type { ProfessionalProfile } from "@shared/schema";
 import ContactProfessionalForm from "@/components/messaging/contact-professional-form";
 import ServiceRequestForm from "@/components/service-request-form";
+import ProfessionalProfileModal from "@/components/professional-profile-modal";
 
 // Predefined service categories
 const serviceCategories = [
@@ -40,6 +41,8 @@ export default function Professionals() {
   const [priceRangeMax, setPriceRangeMax] = useState("");
   const [selectedProfessional, setSelectedProfessional] = useState<ProfessionalProfile | null>(null);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [selectedProfileForView, setSelectedProfileForView] = useState<ProfessionalProfile | null>(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   // Determine effective service filter (predefined or custom)
   const effectiveServiceFilter = serviceFilter === 'custom' ? customService : serviceFilter;
@@ -376,6 +379,19 @@ export default function Professionals() {
                 <Separator className="mb-4" />
 
                 <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedProfileForView(professional);
+                      setIsProfileModalOpen(true);
+                    }}
+                    className="flex-1"
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    View Profile
+                  </Button>
+                  
                   <ServiceRequestForm
                     professional={professional}
                     trigger={
@@ -391,6 +407,16 @@ export default function Professionals() {
           ))}
         </div>
       )}
+
+      {/* Profile View Modal */}
+      <ProfessionalProfileModal
+        professional={selectedProfileForView}
+        isOpen={isProfileModalOpen}
+        onClose={() => {
+          setIsProfileModalOpen(false);
+          setSelectedProfileForView(null);
+        }}
+      />
 
       {/* Contact Modal */}
       {selectedProfessional && (
