@@ -13,6 +13,7 @@ import Onboarding from "@/pages/onboarding";
 import TestOnboarding from "@/pages/test-onboarding";
 import Requests from "@/pages/requests";
 import PaymentCheckout from "@/pages/payment-checkout";
+import Demo from "@/pages/demo";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -37,6 +38,7 @@ function Router() {
         <Route path="/onboarding" component={Onboarding} />
         <Route path="/test-onboarding" component={TestOnboarding} />
         <Route path="/payment-checkout" component={PaymentCheckout} />
+        <Route path="/demo" component={Demo} />
         <Route component={NotFound} />
       </Switch>
     </div>
