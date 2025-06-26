@@ -84,6 +84,7 @@ export const registerUserSchema = insertUserSchema.extend({
 // Professional profile schemas
 export const insertProfessionalProfileSchema = createInsertSchema(professionalProfiles).omit({
   id: true,
+  name: true, // Exclude name since it's constructed automatically on backend
   createdAt: true,
   updatedAt: true,
 }).extend({
