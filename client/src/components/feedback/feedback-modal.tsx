@@ -188,23 +188,6 @@ export default function FeedbackModal({ isOpen, onClose, category }: FeedbackMod
             )}
           </div>
 
-          {/* User Intent (Optional) */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
-              What brought you here today? (Optional)
-            </label>
-            <Textarea
-              value={userIntent}
-              onChange={(e) => setUserIntent(e.target.value)}
-              placeholder="e.g., Looking for a DJ for my wedding, exploring catering options..."
-              className="min-h-[60px] resize-none"
-              maxLength={200}
-            />
-            <p className="text-xs text-gray-500 mt-1 text-right">
-              {userIntent.length}/200
-            </p>
-          </div>
-
           {/* Experience Rating */}
           <div className="text-center">
             <p className="text-sm text-gray-600 mb-3">How satisfied are you with the user experience?</p>
@@ -237,6 +220,23 @@ export default function FeedbackModal({ isOpen, onClose, category }: FeedbackMod
                 {experienceRating === 5 && "Very satisfied"}
               </p>
             )}
+          </div>
+
+          {/* User Intent (Optional) */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-2 block">
+              What brought you here today? (Optional)
+            </label>
+            <Textarea
+              value={userIntent}
+              onChange={(e) => setUserIntent(e.target.value)}
+              placeholder="e.g., Looking for a DJ for my wedding, exploring catering options..."
+              className="min-h-[60px] resize-none"
+              maxLength={200}
+            />
+            <p className="text-xs text-gray-500 mt-1 text-right">
+              {userIntent.length}/200
+            </p>
           </div>
 
           {/* Message */}
