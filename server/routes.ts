@@ -480,10 +480,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const requestData = { ...req.body, organizerId: userId };
       
-      const request = await storage.createServiceRequest(requestData);
+      // Convert date strings to Date objects if they exist
+      if (requestData.eventDate && typeof requestData.eventDate === 'string') {
+        requestData.eventDate = new Date(requestData.eventDate);
+      }
+      if (requestData.expiresAt && typeof requestData.expiresAt === 'string') {
+        requestData.expiresAt = new Date(requestData.expiresAt);
+      }
+      
+      // Validate the data using the schema
+      const validatedData = insertServiceRequestSchema.parse(requestData);
+      
+      const request = await storage.createServiceRequest(validatedData);
       res.status(201).json(request);
     } catch (error) {
       console.error("Error creating service request:", error);
+      if (error instanceof Error && error.name === "ZodError") {
+        return res.status(400).json({ message: "Invalid request data", errors: error });
+      }
       res.status(500).json({ message: "Failed to create service request" });
     }
   });
