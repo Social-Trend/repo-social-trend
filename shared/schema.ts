@@ -15,6 +15,7 @@ export const users = pgTable("users", {
 export const professionalProfiles = pgTable("professional_profiles", {
   id: serial("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id),
+  name: text("name").notNull(), // Display name for the professional
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   displayName: text("display_name"), // Optional professional business name
