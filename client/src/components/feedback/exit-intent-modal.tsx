@@ -72,16 +72,22 @@ export default function ExitIntentModal({ isOpen, onClose }: ExitIntentModalProp
       rating: quickRating,
       message: quickMessage,
       category: "exit_intent",
+      recommendationRating: quickRating, // Use same rating for quick exit
+      userIntent: "",
+      experienceRating: quickRating, // Use same rating for quick exit
     });
   };
 
   const handleDetailedSubmit = () => {
-    if (rating === 0) return;
+    if (rating === 0 || recommendationRating === 0 || experienceRating === 0) return;
     
     feedbackMutation.mutate({
       rating,
       message: message.trim(),
       category: "exit_intent",
+      recommendationRating,
+      userIntent: userIntent.trim(),
+      experienceRating,
     });
   };
 
