@@ -14,6 +14,7 @@ import TestOnboarding from "@/pages/test-onboarding";
 import Requests from "@/pages/requests";
 import PaymentCheckout from "@/pages/payment-checkout";
 import Demo from "@/pages/demo";
+import AdminFeedback from "@/pages/admin-feedback";
 import NotFound from "@/pages/not-found";
 import FloatingFeedbackButton from "@/components/feedback/floating-feedback-button";
 import ExitIntentModal from "@/components/feedback/exit-intent-modal";
@@ -61,6 +62,7 @@ function Router() {
         <Route path="/test-onboarding" component={TestOnboarding} />
         <Route path="/payment-checkout" component={PaymentCheckout} />
         <Route path="/demo" component={Demo} />
+        <Route path="/admin/feedback" component={AdminFeedback} />
         <Route component={NotFound} />
       </Switch>
       
