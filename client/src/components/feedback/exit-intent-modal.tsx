@@ -22,11 +22,14 @@ export default function ExitIntentModal({ isOpen, onClose }: ExitIntentModalProp
 
   const feedbackMutation = useMutation({
     mutationFn: async (data: { rating: number; message: string; category: string }) => {
-      return apiRequest("POST", "/api/feedback", {
-        ...data,
-        userAgent: navigator.userAgent,
-        currentPage: window.location.pathname,
-        sessionDuration: Math.floor((Date.now() - performance.timing.navigationStart) / 60000),
+      return apiRequest("/api/feedback", {
+        method: "POST",
+        body: JSON.stringify({
+          ...data,
+          userAgent: navigator.userAgent,
+          currentPage: window.location.pathname,
+          sessionDuration: Math.floor((Date.now() - performance.timing.navigationStart) / 60000),
+        }),
       });
     },
     onSuccess: () => {

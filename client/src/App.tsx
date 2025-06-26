@@ -15,9 +15,31 @@ import Requests from "@/pages/requests";
 import PaymentCheckout from "@/pages/payment-checkout";
 import Demo from "@/pages/demo";
 import NotFound from "@/pages/not-found";
+import FloatingFeedbackButton from "@/components/feedback/floating-feedback-button";
+import ExitIntentModal from "@/components/feedback/exit-intent-modal";
+import { useState, useEffect } from "react";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
+  const [showExitIntent, setShowExitIntent] = useState(false);
+  const [hasShownExitIntent, setHasShownExitIntent] = useState(false);
+
+  // Exit intent detection
+  useEffect(() => {
+    const handleMouseLeave = (e: MouseEvent) => {
+      if (
+        !hasShownExitIntent &&
+        e.clientY <= 0 &&
+        e.relatedTarget === null
+      ) {
+        setShowExitIntent(true);
+        setHasShownExitIntent(true);
+      }
+    };
+
+    document.addEventListener('mouseleave', handleMouseLeave);
+    return () => document.removeEventListener('mouseleave', handleMouseLeave);
+  }, [hasShownExitIntent]);
 
   if (isLoading) {
     return (
@@ -41,6 +63,13 @@ function Router() {
         <Route path="/demo" component={Demo} />
         <Route component={NotFound} />
       </Switch>
+      
+      {/* Feedback System */}
+      <FloatingFeedbackButton />
+      <ExitIntentModal 
+        isOpen={showExitIntent} 
+        onClose={() => setShowExitIntent(false)} 
+      />
     </div>
   );
 }
