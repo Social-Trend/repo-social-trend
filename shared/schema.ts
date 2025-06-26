@@ -207,6 +207,19 @@ export const payments = pgTable("payments", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Feedback table
+export const feedback = pgTable("feedback", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id),
+  rating: integer("rating"), // 1-5 star rating
+  message: text("message"),
+  category: varchar("category", { length: 50 }), // 'general', 'onboarding', 'messaging', 'search', etc.
+  userAgent: text("user_agent"),
+  currentPage: varchar("current_page", { length: 255 }),
+  sessionDuration: integer("session_duration"), // in minutes
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertProfessionalSchema = createInsertSchema(professionals).omit({
   id: true,
 });
@@ -236,6 +249,11 @@ export const insertPaymentSchema = createInsertSchema(payments).omit({
   updatedAt: true,
 });
 
+export const insertFeedbackSchema = createInsertSchema(feedback).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type LoginUser = z.infer<typeof loginUserSchema>;
 export type RegisterUser = z.infer<typeof registerUserSchema>;
@@ -250,6 +268,8 @@ export type InsertServiceRequest = z.infer<typeof insertServiceRequestSchema>;
 export type ServiceRequest = typeof serviceRequests.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type Payment = typeof payments.$inferSelect;
+export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
+export type Feedback = typeof feedback.$inferSelect;
 
 // New profile types
 export type InsertProfessionalProfile = z.infer<typeof insertProfessionalProfileSchema>;

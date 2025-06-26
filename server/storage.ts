@@ -7,6 +7,7 @@ import {
   organizerProfiles,
   serviceRequests,
   payments,
+  feedback,
   type User, 
   type InsertUser, 
   type Professional, 
@@ -22,7 +23,9 @@ import {
   type ServiceRequest,
   type InsertServiceRequest,
   type Payment,
-  type InsertPayment
+  type InsertPayment,
+  type Feedback,
+  type InsertFeedback
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, ilike } from "drizzle-orm";
@@ -74,6 +77,10 @@ export interface IStorage {
   getPayments(serviceRequestId?: number): Promise<Payment[]>;
   createPayment(payment: InsertPayment): Promise<Payment>;
   updatePaymentStatus(id: number, status: string): Promise<Payment | undefined>;
+  
+  // Feedback methods
+  createFeedback(feedback: InsertFeedback): Promise<Feedback>;
+  getFeedback(): Promise<Feedback[]>;
 }
 
 export class MemStorage implements IStorage {
