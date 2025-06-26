@@ -308,7 +308,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { professionalId, organizerEmail } = req.query;
       const conversations = await storage.getConversations(
-        professionalId ? parseInt(professionalId as string) : undefined,
+        professionalId as string,
         organizerEmail as string
       );
       // Filter out closed conversations
@@ -339,10 +339,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/conversations", async (req, res) => {
     try {
+      console.log("Creating conversation with data:", req.body);
       const validatedData = insertConversationSchema.parse(req.body);
+      console.log("Validated data:", validatedData);
       const conversation = await storage.createConversation(validatedData);
+      console.log("Created conversation:", conversation);
       res.status(201).json(conversation);
     } catch (error) {
+      console.error("Conversation creation error:", error);
       if (error instanceof Error && error.name === "ZodError") {
         return res.status(400).json({ error: "Invalid conversation data", details: error });
       }
