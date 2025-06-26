@@ -35,6 +35,7 @@ export const professionalProfiles = pgTable("professional_profiles", {
 export const organizerProfiles = pgTable("organizer_profiles", {
   id: serial("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id),
+  name: text("name").notNull(), // Constructed from firstName + lastName
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   companyName: text("company_name"), // Optional company/organization name
