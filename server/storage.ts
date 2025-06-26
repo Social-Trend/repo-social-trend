@@ -648,7 +648,10 @@ export class DatabaseStorage implements IStorage {
   async createProfessionalProfile(profile: InsertProfessionalProfile): Promise<ProfessionalProfile> {
     const [newProfile] = await db
       .insert(professionalProfiles)
-      .values(profile)
+      .values({
+        ...profile,
+        name: profile.displayName || `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Professional'
+      })
       .returning();
     return newProfile;
   }
