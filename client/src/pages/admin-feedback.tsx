@@ -82,14 +82,15 @@ export default function AdminFeedback() {
     return { total, avgRating, avgRecommendation, categories: categories.length };
   }, [feedback]);
 
-  const renderStars = (rating: number) => {
+  const renderStars = (rating: number | null) => {
+    const ratingValue = rating || 0;
     return (
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
             className={`w-4 h-4 ${
-              star <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+              star <= ratingValue ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
             }`}
           />
         ))}
@@ -239,10 +240,10 @@ export default function AdminFeedback() {
                     <tr key={item.id} className="border-b hover:bg-muted/50">
                       <td className="p-2">
                         <div className="text-sm">
-                          {item.createdAt ? format(new Date(item.createdAt), "MMM dd, yyyy") : "-"}
+                          {item.createdAt ? format(item.createdAt, "MMM dd, yyyy") : "-"}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {item.createdAt ? format(new Date(item.createdAt), "HH:mm") : "-"}
+                          {item.createdAt ? format(item.createdAt, "HH:mm") : "-"}
                         </div>
                       </td>
                       <td className="p-2">
