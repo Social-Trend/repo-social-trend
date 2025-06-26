@@ -54,7 +54,7 @@ export interface IStorage {
 
   
   // Messaging methods
-  getConversations(professionalId?: number, organizerEmail?: string): Promise<Conversation[]>;
+  getConversations(professionalId?: string, organizerEmail?: string): Promise<Conversation[]>;
   getConversation(id: number): Promise<Conversation | undefined>;
   createConversation(conversation: InsertConversation): Promise<Conversation>;
   updateConversationStatus(id: number, status: string): Promise<Conversation | undefined>;
@@ -759,7 +759,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Messaging methods
-  async getConversations(professionalId?: number, organizerEmail?: string): Promise<Conversation[]> {
+  async getConversations(professionalId?: string, organizerEmail?: string): Promise<Conversation[]> {
     let query = db.select().from(conversations);
     
     if (professionalId) {

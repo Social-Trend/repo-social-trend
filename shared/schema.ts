@@ -146,7 +146,7 @@ export const conversations = pgTable("conversations", {
   id: serial("id").primaryKey(),
   organizerName: text("organizer_name").notNull(),
   organizerEmail: text("organizer_email").notNull(),
-  professionalId: integer("professional_id").notNull(),
+  professionalId: text("professional_id").notNull().references(() => users.id),
   eventTitle: text("event_title").notNull(),
   eventDate: text("event_date"),
   eventLocation: text("event_location"),

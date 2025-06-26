@@ -95,7 +95,7 @@ export default function Messages() {
       return await apiRequest("/api/conversations", {
         method: "POST",
         body: JSON.stringify({
-          professionalId: parseInt(serviceRequest.professionalId),
+          professionalId: serviceRequest.professionalId,
           organizerName: user.email || 'Unknown',
           organizerEmail: user.email || '',
           eventTitle: serviceRequest.eventTitle,
