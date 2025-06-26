@@ -17,11 +17,23 @@ export default function FeedbackModal({ isOpen, onClose, category }: FeedbackMod
   const [rating, setRating] = useState(0);
   const [message, setMessage] = useState("");
   const [hoveredRating, setHoveredRating] = useState(0);
+  const [recommendationRating, setRecommendationRating] = useState(0);
+  const [hoveredRecommendation, setHoveredRecommendation] = useState(0);
+  const [userIntent, setUserIntent] = useState("");
+  const [experienceRating, setExperienceRating] = useState(0);
+  const [hoveredExperience, setHoveredExperience] = useState(0);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const feedbackMutation = useMutation({
-    mutationFn: async (data: { rating: number; message: string; category: string }) => {
+    mutationFn: async (data: { 
+      rating: number; 
+      message: string; 
+      category: string;
+      recommendationRating: number;
+      userIntent: string;
+      experienceRating: number;
+    }) => {
       return apiRequest("/api/feedback", {
         method: "POST",
         body: JSON.stringify({
@@ -67,10 +79,31 @@ export default function FeedbackModal({ isOpen, onClose, category }: FeedbackMod
       return;
     }
 
+    if (recommendationRating === 0) {
+      toast({
+        title: "Recommendation Rating Required",
+        description: "Please rate how likely you are to recommend SocialTend.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (experienceRating === 0) {
+      toast({
+        title: "Experience Rating Required",
+        description: "Please rate your satisfaction with the user experience.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     feedbackMutation.mutate({
       rating,
       message: message.trim(),
       category,
+      recommendationRating,
+      userIntent: userIntent.trim(),
+      experienceRating,
     });
   };
 
@@ -112,6 +145,91 @@ export default function FeedbackModal({ isOpen, onClose, category }: FeedbackMod
                 {rating === 3 && "Good - Meets expectations"}
                 {rating === 4 && "Great - Exceeds expectations"}
                 {rating === 5 && "Excellent - Outstanding experience"}
+              </p>
+            )}
+          </div>
+
+          {/* Recommendation Rating */}
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-3">Would you recommend SocialTend to others?</p>
+            <div className="flex justify-center gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRecommendationRating(star)}
+                  onMouseEnter={() => setHoveredRecommendation(star)}
+                  onMouseLeave={() => setHoveredRecommendation(0)}
+                  className="transition-transform hover:scale-110"
+                >
+                  <Star
+                    className={`h-6 w-6 ${
+                      star <= (hoveredRecommendation || recommendationRating)
+                        ? "fill-blue-400 text-blue-400"
+                        : "text-gray-300"
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+            {recommendationRating > 0 && (
+              <p className="text-xs text-gray-500 mt-2">
+                {recommendationRating === 1 && "Definitely not"}
+                {recommendationRating === 2 && "Probably not"}
+                {recommendationRating === 3 && "Maybe"}
+                {recommendationRating === 4 && "Probably yes"}
+                {recommendationRating === 5 && "Definitely yes"}
+              </p>
+            )}
+          </div>
+
+          {/* User Intent (Optional) */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-2 block">
+              What brought you here today? (Optional)
+            </label>
+            <Textarea
+              value={userIntent}
+              onChange={(e) => setUserIntent(e.target.value)}
+              placeholder="e.g., Looking for a DJ for my wedding, exploring catering options..."
+              className="min-h-[60px] resize-none"
+              maxLength={200}
+            />
+            <p className="text-xs text-gray-500 mt-1 text-right">
+              {userIntent.length}/200
+            </p>
+          </div>
+
+          {/* Experience Rating */}
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-3">How satisfied are you with the user experience?</p>
+            <div className="flex justify-center gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setExperienceRating(star)}
+                  onMouseEnter={() => setHoveredExperience(star)}
+                  onMouseLeave={() => setHoveredExperience(0)}
+                  className="transition-transform hover:scale-110"
+                >
+                  <Star
+                    className={`h-6 w-6 ${
+                      star <= (hoveredExperience || experienceRating)
+                        ? "fill-green-400 text-green-400"
+                        : "text-gray-300"
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+            {experienceRating > 0 && (
+              <p className="text-xs text-gray-500 mt-2">
+                {experienceRating === 1 && "Very unsatisfied"}
+                {experienceRating === 2 && "Unsatisfied"}
+                {experienceRating === 3 && "Neutral"}
+                {experienceRating === 4 && "Satisfied"}
+                {experienceRating === 5 && "Very satisfied"}
               </p>
             )}
           </div>

@@ -214,6 +214,9 @@ export const feedback = pgTable("feedback", {
   rating: integer("rating"), // 1-5 star rating
   message: text("message"),
   category: varchar("category", { length: 50 }), // 'general', 'onboarding', 'messaging', 'search', etc.
+  recommendationRating: integer("recommendation_rating"), // 1-5 scale: Would you recommend SocialTend to others?
+  userIntent: text("user_intent"), // optional: What brought you here today?
+  experienceRating: integer("experience_rating"), // 1-5 scale: How satisfied are you with the user experience?
   userAgent: text("user_agent"),
   currentPage: varchar("current_page", { length: 255 }),
   sessionDuration: integer("session_duration"), // in minutes
