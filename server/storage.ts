@@ -646,12 +646,29 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProfessionalProfile(profile: InsertProfessionalProfile): Promise<ProfessionalProfile> {
+    console.log('Creating professional profile with data:', JSON.stringify(profile, null, 2));
+    
+    // Construct name from available fields
+    let name = 'Professional'; // Default fallback
+    
+    if (profile.displayName) {
+      name = profile.displayName;
+    } else if (profile.firstName || profile.lastName) {
+      name = `${profile.firstName || ''} ${profile.lastName || ''}`.trim();
+    }
+    
+    console.log('Constructed name:', name);
+    
+    const profileData = {
+      ...profile,
+      name: name
+    };
+    
+    console.log('Final profile data for insertion:', JSON.stringify(profileData, null, 2));
+    
     const [newProfile] = await db
       .insert(professionalProfiles)
-      .values({
-        ...profile,
-        name: profile.displayName || `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Professional'
-      })
+      .values(profileData)
       .returning();
     return newProfile;
   }
