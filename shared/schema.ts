@@ -102,6 +102,7 @@ export const insertProfessionalProfileSchema = createInsertSchema(professionalPr
 // Organizer profile schemas
 export const insertOrganizerProfileSchema = createInsertSchema(organizerProfiles).omit({
   id: true,
+  name: true, // Exclude name since it's constructed automatically on backend
   createdAt: true,
   updatedAt: true,
 }).extend({

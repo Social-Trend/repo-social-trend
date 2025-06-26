@@ -731,9 +731,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createOrganizerProfile(profile: InsertOrganizerProfile): Promise<OrganizerProfile> {
+    // Construct the name field from firstName and lastName
+    const profileWithName = {
+      ...profile,
+      name: `${profile.firstName} ${profile.lastName}`.trim()
+    };
+    
     const [newProfile] = await db
       .insert(organizerProfiles)
-      .values(profile)
+      .values(profileWithName)
       .returning();
     return newProfile;
   }
