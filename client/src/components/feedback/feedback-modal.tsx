@@ -66,6 +66,11 @@ export default function FeedbackModal({ isOpen, onClose, category }: FeedbackMod
     setRating(0);
     setMessage("");
     setHoveredRating(0);
+    setRecommendationRating(0);
+    setHoveredRecommendation(0);
+    setUserIntent("");
+    setExperienceRating(0);
+    setHoveredExperience(0);
     onClose();
   };
 
@@ -109,7 +114,7 @@ export default function FeedbackModal({ isOpen, onClose, category }: FeedbackMod
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-center">Share Your Feedback</DialogTitle>
         </DialogHeader>
@@ -264,7 +269,7 @@ export default function FeedbackModal({ isOpen, onClose, category }: FeedbackMod
             <Button
               onClick={handleSubmit}
               className="flex-1"
-              disabled={rating === 0 || feedbackMutation.isPending}
+              disabled={rating === 0 || recommendationRating === 0 || experienceRating === 0 || feedbackMutation.isPending}
             >
               {feedbackMutation.isPending ? (
                 "Submitting..."

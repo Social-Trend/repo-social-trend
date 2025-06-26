@@ -16,12 +16,17 @@ export default function ExitIntentModal({ isOpen, onClose }: ExitIntentModalProp
   const [rating, setRating] = useState(0);
   const [message, setMessage] = useState("");
   const [hoveredRating, setHoveredRating] = useState(0);
+  const [recommendationRating, setRecommendationRating] = useState(0);
+  const [hoveredRecommendation, setHoveredRecommendation] = useState(0);
+  const [userIntent, setUserIntent] = useState("");
+  const [experienceRating, setExperienceRating] = useState(0);
+  const [hoveredExperience, setHoveredExperience] = useState(0);
   const [showThankYou, setShowThankYou] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const feedbackMutation = useMutation({
-    mutationFn: async (data: { rating: number; message: string; category: string }) => {
+    mutationFn: async (data: { rating: number; message: string; category: string; recommendationRating: number; userIntent: string; experienceRating: number }) => {
       return apiRequest("/api/feedback", {
         method: "POST",
         body: JSON.stringify({
@@ -53,6 +58,11 @@ export default function ExitIntentModal({ isOpen, onClose }: ExitIntentModalProp
     setRating(0);
     setMessage("");
     setHoveredRating(0);
+    setRecommendationRating(0);
+    setHoveredRecommendation(0);
+    setUserIntent("");
+    setExperienceRating(0);
+    setHoveredExperience(0);
     setShowThankYou(false);
     onClose();
   };
