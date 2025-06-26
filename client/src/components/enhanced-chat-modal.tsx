@@ -94,7 +94,7 @@ export default function EnhancedChatModal({ conversation, isOpen, onClose }: Enh
     }
   };
 
-  const formatMessageTime = (timestamp: string) => {
+  const formatMessageTime = (timestamp: string | Date) => {
     const messageDate = new Date(timestamp);
     const now = new Date();
     const diffInHours = (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
@@ -177,13 +177,13 @@ export default function EnhancedChatModal({ conversation, isOpen, onClose }: Enh
             {messages.map((message, index) => {
               const isMyMessage = message.senderType === (user as any)?.role;
               const showTimestamp = index === 0 || 
-                new Date(message.createdAt).getTime() - new Date(messages[index - 1].createdAt).getTime() > 300000; // 5 minutes
+                new Date(message.timestamp).getTime() - new Date(messages[index - 1].timestamp).getTime() > 300000; // 5 minutes
               
               return (
                 <div key={message.id}>
                   {showTimestamp && (
                     <div className="text-center text-xs text-gray-400 my-2">
-                      {formatMessageTime(message.createdAt)}
+                      {formatMessageTime(message.timestamp)}
                     </div>
                   )}
                   <div className={`flex ${isMyMessage ? "justify-end" : "justify-start"}`}>
@@ -200,7 +200,7 @@ export default function EnhancedChatModal({ conversation, isOpen, onClose }: Enh
                       <div className={`flex items-center mt-1 text-xs text-gray-400 ${
                         isMyMessage ? "justify-end" : "justify-start"
                       }`}>
-                        <span>{formatMessageTime(message.createdAt)}</span>
+                        <span>{formatMessageTime(message.timestamp)}</span>
                         {isMyMessage && (
                           <span className="ml-1">✓✓</span>
                         )}
