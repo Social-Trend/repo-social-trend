@@ -11,7 +11,8 @@ import {
   insertProfessionalSchema, 
   insertConversationSchema, 
   insertMessageSchema,
-  insertServiceRequestSchema 
+  insertServiceRequestSchema,
+  insertFeedbackSchema 
 } from "@shared/schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -654,6 +655,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Payment confirmation error:", error);
       res.status(500).json({ error: "Failed to confirm payment" });
+    }
+  });
+
+  // Feedback endpoints
+  app.post("/api/feedback", async (req, res) => {
+    try {
+      const validatedData = insertFeedbackSchema.parse(req.body);
+      const feedback = await storage.createFeedback(validatedData);
+      res.status(201).json(feedback);
+    } catch (error) {
+      if (error instanceof Error && error.name === "ZodError") {
+        return res.status(400).json({ error: "Invalid feedback data", details: error });
+      }
+      console.error("Error creating feedback:", error);
+      res.status(500).json({ error: "Failed to create feedback" });
+    }
+  });
+
+  app.get("/api/feedback", async (req, res) => {
+    try {
+      const feedbacks = await storage.getFeedback();
+      res.json(feedbacks);
+    } catch (error) {
+      console.error("Error fetching feedback:", error);
+      res.status(500).json({ error: "Failed to fetch feedback" });
     }
   });
 
