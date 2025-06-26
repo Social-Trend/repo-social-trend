@@ -110,11 +110,17 @@ export default function ProfessionalProfileForm({
   };
 
   const onSubmit = (data: any) => {
+    console.log('Form submitted with data:', data);
+    console.log('Selected services:', selectedServices);
+    console.log('Form errors:', form.formState.errors);
+    
     const profileData: InsertProfessionalProfile = {
       ...data,
       services: selectedServices,
       profileImageUrl: profileImage,
     };
+    
+    console.log('Final profile data:', profileData);
     mutation.mutate(profileData);
   };
 
@@ -359,6 +365,11 @@ export default function ProfessionalProfileForm({
               type="submit"
               disabled={mutation.isPending}
               className="flex-1"
+              onClick={() => {
+                console.log('Create Profile button clicked');
+                console.log('Form valid:', form.formState.isValid);
+                console.log('Form errors:', form.formState.errors);
+              }}
             >
               {mutation.isPending ? (
                 <>
