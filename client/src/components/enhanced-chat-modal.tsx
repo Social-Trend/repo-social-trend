@@ -219,9 +219,6 @@ export default function EnhancedChatModal({ conversation, isOpen, onClose }: Enh
         {/* Enhanced Input Area */}
         <div className="p-4 border-t bg-gray-50 dark:bg-gray-800">
           <div className="flex items-end space-x-2">
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-600 mb-1">
-              <Smile className="h-5 w-5" />
-            </Button>
             <div className="flex-1 relative">
               <Input
                 value={messageText}
