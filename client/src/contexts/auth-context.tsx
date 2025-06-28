@@ -68,11 +68,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ role: newRole })
       });
       
-      // Update local storage and trigger re-fetch
-      localStorage.setItem("user", JSON.stringify({ ...user, role: newRole }));
+      // Update the token with the new one from the response
+      if (response.token) {
+        localStorage.setItem("token", response.token);
+        setToken(response.token);
+      }
+      
+      // Force a complete refresh to ensure all queries are invalidated
+      // and the new role is properly reflected across the application
       window.location.reload();
     } catch (error) {
       console.error("Failed to switch role:", error);
+      throw error;
     }
   };
 

@@ -63,7 +63,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ errors: result.error.issues });
       }
 
-      const { email, password, firstName, lastName, role } = result.data;
+      const { email, password, role } = result.data;
 
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
@@ -171,8 +171,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
+      // Generate new JWT token with updated role
+      const newToken = jwt.sign(
+        { userId: updatedUser.id, email: updatedUser.email, role: updatedUser.role },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+      
       const { password: _, ...userWithoutPassword } = updatedUser;
-      res.json(userWithoutPassword);
+      res.json({
+        user: userWithoutPassword,
+        token: newToken
+      });
     } catch (error) {
       console.error("Error switching role:", error);
       res.status(500).json({ message: "Failed to switch role" });
