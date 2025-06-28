@@ -20,7 +20,7 @@ interface NavigationProps {}
 export default function Navigation({}: NavigationProps) {
   const [location] = useLocation();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
-  const { hasProfile, profileCompletion } = useProfile();
+  const { hasProfile, profileCompletion, hasOrganizerProfile } = useProfile();
   const { unreadCount, hasUnreadMessages, resetNotifications, clearNotificationForConversation } = useUnreadMessages();
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -98,7 +98,7 @@ export default function Navigation({}: NavigationProps) {
                 </Button>
               </Link>
               
-              {user?.role !== "professional" && (
+              {user?.role === "organizer" && (
                 <Link href="/professionals">
                   <Button 
                     variant={location === "/professionals" ? "secondary" : "ghost"}
@@ -150,7 +150,7 @@ export default function Navigation({}: NavigationProps) {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.profileImageUrl || ""} alt={user.email || ""} />
+                        <AvatarImage src={currentProfile?.profileImageUrl || ""} alt={user.email || ""} />
                         <AvatarFallback className="bg-primary text-primary-foreground">
                           {getUserInitials(user, currentProfile)}
                         </AvatarFallback>

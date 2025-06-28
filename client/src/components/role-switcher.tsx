@@ -18,7 +18,9 @@ export default function RoleSwitcher() {
   } = useProfile();
   const [isLoading, setIsLoading] = useState(false);
 
-  if (!user) return null;
+  // Only show role switcher if user has profiles for both roles
+  // or if they have at least one profile and can create the other
+  if (!user || (!hasProfessionalProfile && !hasOrganizerProfile)) return null;
 
   const handleRoleSwitch = async (newRole: "organizer" | "professional") => {
     if (newRole === user.role || isLoading) return;
@@ -63,44 +65,75 @@ export default function RoleSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
         <div className="p-2">
-          <p className="text-sm font-medium text-gray-900 mb-1">Switch Role</p>
+          <p className="text-sm font-medium text-gray-900 mb-1">
+            {hasBothProfiles ? "Switch Role" : "Your Role"}
+          </p>
           <p className="text-xs text-gray-500">
             {hasBothProfiles 
               ? "You have both profiles. Switch between them anytime."
-              : "Create profiles for both roles to switch easily."
+              : hasProfessionalProfile && !hasOrganizerProfile
+                ? "You're a Professional Tender. Create an Organizer profile to switch roles."
+                : hasOrganizerProfile && !hasProfessionalProfile
+                  ? "You're an Event Organizer. Create a Professional profile to switch roles."
+                  : "Create profiles for both roles to switch easily."
             }
           </p>
         </div>
         
         <DropdownMenuSeparator />
         
-        {/* Organizer Role */}
-        <DropdownMenuItem
-          onClick={() => handleRoleSwitch("organizer")}
-          disabled={isLoading}
-          className="flex items-center justify-between p-3"
-        >
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            <span>Event Organizer</span>
-            {user.role === "organizer" && <Check className="h-4 w-4 text-green-600" />}
-          </div>
-          {getCompletionBadge("organizer")}
-        </DropdownMenuItem>
+        {/* Only show role switching options if user has both profiles */}
+        {hasBothProfiles ? (
+          <>
+            {/* Organizer Role */}
+            <DropdownMenuItem
+              onClick={() => handleRoleSwitch("organizer")}
+              disabled={isLoading}
+              className="flex items-center justify-between p-3"
+            >
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span>Event Organizer</span>
+                {user.role === "organizer" && <Check className="h-4 w-4 text-green-600" />}
+              </div>
+              {getCompletionBadge("organizer")}
+            </DropdownMenuItem>
 
-        {/* Professional Role */}
-        <DropdownMenuItem
-          onClick={() => handleRoleSwitch("professional")}
-          disabled={isLoading}
-          className="flex items-center justify-between p-3"
-        >
-          <div className="flex items-center gap-2">
-            <Briefcase className="h-4 w-4" />
-            <span>Professional Tender</span>
-            {user.role === "professional" && <Check className="h-4 w-4 text-green-600" />}
-          </div>
-          {getCompletionBadge("professional")}
-        </DropdownMenuItem>
+            {/* Professional Role */}
+            <DropdownMenuItem
+              onClick={() => handleRoleSwitch("professional")}
+              disabled={isLoading}
+              className="flex items-center justify-between p-3"
+            >
+              <div className="flex items-center gap-2">
+                <Briefcase className="h-4 w-4" />
+                <span>Professional Tender</span>
+                {user.role === "professional" && <Check className="h-4 w-4 text-green-600" />}
+              </div>
+              {getCompletionBadge("professional")}
+            </DropdownMenuItem>
+            
+            <DropdownMenuSeparator />
+          </>
+        ) : (
+          <>
+            {/* Show current role status for single-role users */}
+            <div className="p-3 bg-gray-50 rounded-md mx-2 mb-2">
+              <div className="flex items-center gap-2">
+                {user.role === "organizer" ? (
+                  <User className="h-4 w-4 text-blue-600" />
+                ) : (
+                  <Briefcase className="h-4 w-4 text-green-600" />
+                )}
+                <span className="text-sm font-medium">
+                  {user.role === "organizer" ? "Event Organizer" : "Professional Tender"}
+                </span>
+                <Check className="h-4 w-4 text-green-600" />
+              </div>
+              {getCompletionBadge(user.role as "organizer" | "professional")}
+            </div>
+          </>
+        )}
 
         <DropdownMenuSeparator />
 
