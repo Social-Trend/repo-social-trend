@@ -155,15 +155,6 @@ export default function EnhancedChatModal({ conversation, isOpen, onClose }: Enh
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-600">
-                <Phone className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-600">
-                <Video className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-600">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
               <Button variant="ghost" size="icon" onClick={onClose}>
                 <X className="h-4 w-4" />
               </Button>
