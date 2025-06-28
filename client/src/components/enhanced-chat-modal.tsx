@@ -131,7 +131,7 @@ export default function EnhancedChatModal({ conversation, isOpen, onClose }: Enh
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl h-[600px] flex flex-col p-0 gap-0">
+      <DialogContent className="max-w-2xl h-[600px] flex flex-col p-0 gap-0 [&>button]:hidden" aria-describedby={undefined}>
         {/* Enhanced Header */}
         <DialogHeader className="p-4 border-b bg-gray-50 dark:bg-gray-800">
           <div className="flex items-center justify-between">
