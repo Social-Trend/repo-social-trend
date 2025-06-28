@@ -386,18 +386,18 @@ export default function Professionals() {
                       setSelectedProfileForView(professional);
                       setIsProfileModalOpen(true);
                     }}
-                    className="flex-1"
+                    className="flex-1 min-w-0"
                   >
-                    <Users className="h-4 w-4 mr-2" />
-                    View Profile
+                    <Users className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">View Profile</span>
                   </Button>
                   
                   <ServiceRequestForm
                     professional={professional}
                     trigger={
-                      <Button className="flex-1" size="sm">
-                        <MessageCircle className="h-4 w-4 mr-2" />
-                        Request Services
+                      <Button className="flex-1 min-w-0" size="sm">
+                        <MessageCircle className="h-4 w-4 mr-2 flex-shrink-0" />
+                        <span className="truncate">Request Services</span>
                       </Button>
                     }
                   />
