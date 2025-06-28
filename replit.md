@@ -74,6 +74,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- June 28, 2025: **COMPLETED** Enhanced role switching system for single-role and dual-role operation
+  - ✓ Fixed JWT token regeneration when switching roles to ensure proper authentication
+  - ✓ Updated role switcher UI to clearly distinguish between single-role and dual-role users
+  - ✓ Improved navigation logic to only show "Find Professionals" for organizer role
+  - ✓ Enhanced profile management to gracefully handle 404 errors for missing profiles
+  - ✓ Added contextual messaging to guide users on profile creation for dual-role access
+  - ✓ Simplified role switching interface for users with only one profile type
+  - ✓ Maintained backward compatibility for existing single-role workflows
+
 - June 26, 2025: **COMPLETED** UX/UI improvements for onboarding and chat interface
   - ✓ Created streamlined QuickStart component reducing onboarding from 20+ fields to 3-step progressive flow
   - ✓ Quick onboarding now takes 2-3 minutes instead of 10+ minutes
