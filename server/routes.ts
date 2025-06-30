@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { authRateLimit, messageRateLimit } from "./middleware/rateLimiter";
 import { 
   loginUserSchema, 
   registerUserSchema, 
@@ -56,7 +57,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   // Authentication routes
-  app.post("/api/auth/register", async (req, res) => {
+  app.post("/api/auth/register", authRateLimit, async (req, res) => {
     try {
       const result = registerUserSchema.safeParse(req.body);
       if (!result.success) {

@@ -47,5 +47,5 @@ export function createRateLimit(windowMs: number, max: number) {
 
 // Common rate limiters
 export const authRateLimit = createRateLimit(15 * 60 * 1000, 5); // 5 attempts per 15 minutes
-export const apiRateLimit = createRateLimit(15 * 60 * 1000, 100); // 100 requests per 15 minutes
+export const apiRateLimit = createRateLimit(15 * 60 * 1000, process.env.NODE_ENV === 'development' ? 1000 : 100); // Higher limit for dev
 export const messageRateLimit = createRateLimit(60 * 1000, 20); // 20 messages per minute

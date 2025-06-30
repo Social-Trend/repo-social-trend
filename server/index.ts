@@ -1,8 +1,17 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { setupHealthRoutes } from "./health";
+import { requestLogger, errorLogger, logger } from "./middleware/logger";
+import { apiRateLimit, authRateLimit } from "./middleware/rateLimiter";
 
 const app = express();
+
+// Security and logging middleware
+app.set('trust proxy', 1); // Trust first proxy for rate limiting
+app.use(requestLogger);
+app.use(apiRateLimit); // General API rate limiting
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
@@ -37,8 +46,13 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Setup health check routes first
+  setupHealthRoutes(app);
+  
   const server = await registerRoutes(app);
 
+  // Error handling middleware
+  app.use(errorLogger);
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
