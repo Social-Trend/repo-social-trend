@@ -17,6 +17,7 @@ import {
 } from "@shared/schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { sendVerificationEmail, sendPasswordResetEmail, generateVerificationToken } from "./emailService";
 
 // Initialize Stripe
 const stripe = process.env.STRIPE_SECRET_KEY 
@@ -102,7 +103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("/api/auth/login", authRateLimit, async (req, res) => {
     try {
       const result = loginUserSchema.safeParse(req.body);
       if (!result.success) {
@@ -406,7 +407,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/messages", async (req, res) => {
+  app.post("/api/messages", messageRateLimit, async (req, res) => {
     try {
       const validatedData = insertMessageSchema.parse(req.body);
       const message = await storage.createMessage(validatedData);
@@ -433,7 +434,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/conversations/:id/messages", async (req, res) => {
+  app.post("/api/conversations/:id/messages", messageRateLimit, async (req, res) => {
     try {
       const conversationId = parseInt(req.params.id);
       if (isNaN(conversationId)) {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -131,7 +131,7 @@ export default function EnhancedChatModal({ conversation, isOpen, onClose }: Enh
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl h-[600px] flex flex-col p-0 gap-0 [&>button]:hidden" aria-describedby={undefined}>
+      <DialogContent className="max-w-2xl h-[600px] flex flex-col p-0 gap-0 [&>button]:hidden">
         {/* Enhanced Header */}
         <DialogHeader className="p-4 border-b bg-gray-50 dark:bg-gray-800">
           <div className="flex items-center justify-between">
@@ -146,6 +146,9 @@ export default function EnhancedChatModal({ conversation, isOpen, onClose }: Enh
               </div>
               <div>
                 <DialogTitle className="text-lg">{getOtherPartyName()}</DialogTitle>
+                <DialogDescription className="sr-only">
+                  Chat conversation for {conversation.eventTitle} event
+                </DialogDescription>
                 <div className="flex items-center gap-2">
                   <p className="text-sm text-gray-500">{conversation.eventTitle}</p>
                   <Badge variant="secondary" className="text-xs">
