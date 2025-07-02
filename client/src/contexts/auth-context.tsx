@@ -18,11 +18,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
+    console.log("AuthProvider - Initial token from localStorage:", storedToken ? "Present" : "None");
     setToken(storedToken);
 
     // Listen for storage events to update token when it changes
     const handleStorageChange = () => {
       const newToken = localStorage.getItem("token");
+      console.log("AuthProvider - Storage change detected, new token:", newToken ? "Present" : "None");
       setToken(newToken);
     };
 
@@ -33,11 +35,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: user, isLoading } = useQuery({
     queryKey: ["/api/auth/me"],
     queryFn: async () => {
+      console.log("AuthProvider - Fetching user with token:", token ? "Present" : "None");
       if (!token) return null;
       
       try {
-        return await apiRequest("/api/auth/me");
+        const userData = await apiRequest("/api/auth/me");
+        console.log("AuthProvider - User data fetched:", userData);
+        return userData;
       } catch (error: any) {
+        console.error("AuthProvider - Error fetching user:", error);
         // Only clear token on specific auth errors, not network issues
         if (error.message.includes("401") || error.message.includes("403")) {
           localStorage.removeItem("token");
