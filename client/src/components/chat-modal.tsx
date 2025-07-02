@@ -65,6 +65,9 @@ export default function ChatModal({ conversation, isOpen, onClose }: ChatModalPr
       setMessageText("");
       refetchMessages();
       queryClient.invalidateQueries({ queryKey: ["/api/messages", conversation?.id] });
+      // Invalidate unread count to update notifications for other users
+      queryClient.invalidateQueries({ queryKey: ["/api/unread-conversations-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
     },
     onError: (error) => {
       console.error("ChatModal - Message mutation failed:", error);

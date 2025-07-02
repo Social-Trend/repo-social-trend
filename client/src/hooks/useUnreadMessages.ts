@@ -89,7 +89,9 @@ export function useUnreadMessages() {
       
       for (const conversation of conversations) {
         try {
-          const messages: Message[] = await apiRequest(`/api/messages/${conversation.id}`);
+          // Add cache busting parameter to ensure fresh data
+          const cacheKey = `timestamp=${Date.now()}`;
+          const messages: Message[] = await apiRequest(`/api/messages/${conversation.id}?${cacheKey}`);
           
           if (messages.length > 0) {
             const lastMessage = messages[messages.length - 1];
@@ -110,6 +112,7 @@ export function useUnreadMessages() {
             }
           }
         } catch (error) {
+          console.error(`Error checking conversation ${conversation.id}:`, error);
           continue;
         }
       }
@@ -117,7 +120,8 @@ export function useUnreadMessages() {
       return conversationsWithActivity;
     },
     enabled: isAuthenticated && !!user && conversations.length > 0,
-    refetchInterval: 10000, // Check every 10 seconds
+    refetchInterval: 5000, // Check every 5 seconds for more responsive notifications
+    staleTime: 0, // Always consider data stale to force fresh requests
   });
 
   // Function to clear notifications for a conversation and refresh count
