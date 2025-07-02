@@ -92,11 +92,11 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       setOpen(false);
       loginForm.reset();
       
-      // Wait a moment for auth context to update, then navigate
+      // Force a complete app refresh to ensure auth state is properly updated
+      console.log("LOGIN SUCCESS - Forcing page reload to ensure proper authentication");
       setTimeout(() => {
-        console.log("LOGIN SUCCESS - Navigating to dashboard");
-        setLocation("/");
-      }, 100);
+        window.location.href = "/";
+      }, 200);
     },
     onError: (error: any) => {
       console.error("Login failed:", error);
