@@ -28,7 +28,7 @@ import {
   type InsertFeedback
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, or, desc, ilike } from "drizzle-orm";
+import { eq, and, or, desc, ilike, sql } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string | number): Promise<User | undefined>;
@@ -711,7 +711,8 @@ export class DatabaseStorage implements IStorage {
       }
       
       if (filters.service) {
-        conditions.push(ilike(professionalProfiles.services, `%${filters.service}%`));
+        // Use SQL template literal for array contains operation
+        conditions.push(sql`${professionalProfiles.services} @> ARRAY[${filters.service}]::text[]`);
       }
       
       if (filters.search) {
@@ -719,7 +720,8 @@ export class DatabaseStorage implements IStorage {
           or(
             ilike(professionalProfiles.name, `%${filters.search}%`),
             ilike(professionalProfiles.bio, `%${filters.search}%`),
-            ilike(professionalProfiles.services, `%${filters.search}%`)
+            // Convert array to string for searching
+            sql`array_to_string(${professionalProfiles.services}, ' ') ILIKE ${`%${filters.search}%`}`
           )
         );
       }
