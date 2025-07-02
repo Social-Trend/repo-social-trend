@@ -66,16 +66,13 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       }
     },
     onSuccess: (data) => {
-      console.log("LOGIN SUCCESS - Starting redirect process");
+      console.log("LOGIN SUCCESS - Token received:", data.token ? "Present" : "None");
+      console.log("LOGIN SUCCESS - User data:", data.user);
       
       // Set auth data in localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      console.log("Token and user saved to localStorage");
-      
-      // Close modal and reset form immediately
-      setOpen(false);
-      loginForm.reset();
+      console.log("LOGIN SUCCESS - Token and user saved to localStorage");
       
       // Show success message
       toast({
@@ -83,20 +80,20 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
         description: `Successfully signed in as ${data.user.email}`,
       });
       
-      console.log("Login successful, updating auth context...");
-      
       // Dispatch custom event to trigger auth context update
+      console.log("LOGIN SUCCESS - Dispatching auth-token-changed event");
       window.dispatchEvent(new Event('auth-token-changed'));
       
       // Immediately invalidate and refetch auth queries to trigger context update
+      console.log("LOGIN SUCCESS - Invalidating auth queries");
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       queryClient.refetchQueries({ queryKey: ["/api/auth/me"] });
       
-      // Navigate to home page to trigger the authenticated route
-      setTimeout(() => {
-        setLocation("/");
-        setOpen(false);
-      }, 100);
+      // Navigate and close modal
+      console.log("LOGIN SUCCESS - Navigating to home page");
+      setLocation("/");
+      setOpen(false);
+      loginForm.reset();
     },
     onError: (error: any) => {
       console.error("Login failed:", error);
