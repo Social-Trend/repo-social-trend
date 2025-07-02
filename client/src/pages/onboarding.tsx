@@ -396,6 +396,19 @@ export default function Onboarding() {
           )}
         </div>
 
+        {/* Skip Profile Setup Option */}
+        <div className="text-center mt-6">
+          <Button 
+            variant="outline" 
+            onClick={handleSkip}
+            className="text-slate-600 dark:text-slate-400"
+          >
+            Skip Profile Setup for Now
+          </Button>
+          <p className="text-sm text-slate-500 mt-2">
+            You can complete your profile later from the dashboard
+          </p>
+        </div>
         
       </div>
     </div>
