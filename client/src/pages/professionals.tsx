@@ -66,7 +66,7 @@ export default function Professionals() {
   }
   if (priceRangeMin) queryParams.set('minRate', priceRangeMin);
   if (priceRangeMax) queryParams.set('maxRate', priceRangeMax);
-  
+
   const queryString = queryParams.toString();
   const queryUrl = queryString ? `/api/professionals?${queryString}` : '/api/professionals';
 
@@ -95,14 +95,14 @@ export default function Professionals() {
   const { uniqueLocations, uniqueServices } = useMemo(() => {
     const locations = new Set<string>();
     const services = new Set<string>();
-    
+
     professionals.forEach(professional => {
       if (professional.location) locations.add(professional.location);
       if (professional.services) {
         professional.services.forEach((service: string) => services.add(service));
       }
     });
-    
+
     return {
       uniqueLocations: Array.from(locations).sort(),
       uniqueServices: Array.from(services).sort()
@@ -172,7 +172,7 @@ export default function Professionals() {
               />
             </div>
           </div>
-          
+
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -182,7 +182,7 @@ export default function Professionals() {
               <Filter className="h-4 w-4" />
               Advanced Filters
             </Button>
-            
+
             {(searchTerm || (locationFilter && locationFilter !== 'all') || (effectiveServiceFilter && effectiveServiceFilter !== 'all') || priceRangeMin || priceRangeMax) && (
               <Button variant="outline" onClick={clearFilters} className="flex items-center gap-2">
                 <X className="h-4 w-4" />
@@ -196,7 +196,7 @@ export default function Professionals() {
         <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
           <CollapsibleContent className="space-y-4">
             <Separator />
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Location Filter */}
               <div>
@@ -411,7 +411,7 @@ export default function Professionals() {
                     <Users className="h-4 w-4 mr-2 flex-shrink-0" />
                     <span className="truncate">View Profile</span>
                   </Button>
-                  
+
                   <ServiceRequestForm
                     professional={professional}
                     trigger={
