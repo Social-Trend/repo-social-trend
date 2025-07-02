@@ -91,6 +91,9 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       // Immediately invalidate and refetch auth queries to trigger context update
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       queryClient.refetchQueries({ queryKey: ["/api/auth/me"] });
+      
+      // Navigate to home page to trigger the authenticated route
+      window.location.href = "/";
     },
     onError: (error: any) => {
       console.error("Login failed:", error);
