@@ -175,9 +175,29 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
         description: `Successfully signed in as ${result.user.email}`,
       });
 
-      // Instead of reloading, directly navigate to home page
-      console.log("Navigating directly to home page...");
-      window.location.href = "/home";
+      // Multiple navigation attempts to ensure it works
+      console.log("Login successful - attempting navigation...");
+      
+      // Method 1: Direct URL change
+      try {
+        window.location.href = "/home";
+      } catch (e) {
+        console.log("Method 1 failed, trying method 2...");
+        // Method 2: Location replace
+        try {
+          window.location.replace("/home");
+        } catch (e2) {
+          console.log("Method 2 failed, trying method 3...");
+          // Method 3: History API
+          try {
+            window.history.pushState({}, "", "/home");
+            window.location.reload();
+          } catch (e3) {
+            console.log("All methods failed, showing manual instruction");
+            alert("Login successful! Please manually navigate to /home or refresh the page.");
+          }
+        }
+      }
       
     } catch (error) {
       console.error("Login error:", error);

@@ -23,6 +23,10 @@ import { useEffect } from "react";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
+  
+  // Direct token check for debugging
+  const hasToken = localStorage.getItem("token");
+  console.log("Router - Auth status:", { isAuthenticated, isLoading, hasToken: !!hasToken });
   const { showExitIntent, hasShownExitIntent, triggerExitIntent, closeExitIntent, proceedWithLogout } = useExitIntent();
 
   // Exit intent detection - only on browser close attempts
