@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
 
@@ -15,6 +15,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -95,11 +96,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.token) {
         localStorage.setItem("token", response.token);
         setToken(response.token);
+        
+        // Dispatch custom event to notify other components
+        window.dispatchEvent(new Event('auth-token-changed'));
+        
+        // Invalidate all queries to refetch data with new role
+        queryClient.invalidateQueries();
       }
-      
-      // Force a complete refresh to ensure all queries are invalidated
-      // and the new role is properly reflected across the application
-      window.location.reload();
     } catch (error) {
       console.error("Failed to switch role:", error);
       throw error;
