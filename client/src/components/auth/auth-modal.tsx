@@ -175,12 +175,9 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
         description: `Successfully signed in as ${result.user.email}`,
       });
 
-      // Wait a moment then reload to ensure localStorage is saved
-      console.log("Waiting before reload to ensure localStorage persists...");
-      setTimeout(() => {
-        console.log("About to reload. Final check - Token exists:", !!localStorage.getItem("token"));
-        window.location.reload();
-      }, 100);
+      // Instead of reloading, directly navigate to home page
+      console.log("Navigating directly to home page...");
+      window.location.href = "/home";
       
     } catch (error) {
       console.error("Login error:", error);

@@ -44,8 +44,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return userData;
       } catch (error: any) {
         console.error("AuthProvider - Error fetching user:", error);
+        console.error("AuthProvider - Error details:", {
+          message: error.message,
+          status: error.status,
+          hasAuth: error.message.includes("401") || error.message.includes("403")
+        });
         // Only clear token on specific auth errors, not network issues
         if (error.message.includes("401") || error.message.includes("403")) {
+          console.warn("AuthProvider - Clearing token due to auth error");
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           setToken(null);
