@@ -69,8 +69,8 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       loginForm.reset();
       // Trigger storage event to update auth context immediately
       window.dispatchEvent(new Event('storage'));
-      // Small delay to allow auth context to update before redirect
-      setTimeout(() => window.location.reload(), 100);
+      // Redirect to dashboard after successful login
+      setTimeout(() => setLocation("/"), 100);
     },
     onError: (error: any) => {
       toast({
