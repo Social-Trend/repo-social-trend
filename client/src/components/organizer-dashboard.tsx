@@ -56,7 +56,7 @@ export default function OrganizerDashboard() {
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                   <Search className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Find Professionals</h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400">Browse and connect with event professionals</p>
                 </div>
@@ -73,9 +73,9 @@ export default function OrganizerDashboard() {
                 <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
                   <MessageSquare className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Messages</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Chat with your professional contacts</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Chat with your professional contacts and manage communications</p>
                 </div>
                 <ArrowRight className="h-5 w-5 text-slate-400 ml-auto" />
               </div>
