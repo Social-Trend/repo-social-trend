@@ -93,7 +93,10 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       queryClient.refetchQueries({ queryKey: ["/api/auth/me"] });
       
       // Navigate to home page to trigger the authenticated route
-      window.location.href = "/";
+      setTimeout(() => {
+        setLocation("/");
+        setOpen(false);
+      }, 100);
     },
     onError: (error: any) => {
       console.error("Login failed:", error);
