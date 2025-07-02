@@ -26,9 +26,9 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [, setLocation] = useLocation();
 
   const loginForm = useForm<LoginUser>({
     resolver: zodResolver(loginUserSchema),
@@ -92,9 +92,11 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       setOpen(false);
       loginForm.reset();
       
-      // Force a page reload to ensure proper authentication state
-      console.log("LOGIN SUCCESS - Forcing page reload to ensure proper auth state");
-      window.location.href = "/";
+      // Wait a moment for auth context to update, then navigate
+      setTimeout(() => {
+        console.log("LOGIN SUCCESS - Navigating to dashboard");
+        setLocation("/");
+      }, 100);
     },
     onError: (error: any) => {
       console.error("Login failed:", error);
