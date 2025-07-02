@@ -69,8 +69,8 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       loginForm.reset();
       // Trigger storage event to update auth context immediately
       window.dispatchEvent(new Event('storage'));
-      // Redirect to dashboard after successful login
-      setTimeout(() => setLocation("/"), 100);
+      // Force page reload to ensure authentication state is properly updated
+      window.location.href = "/";
     },
     onError: (error: any) => {
       toast({
@@ -101,7 +101,7 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       // Trigger a storage event to update auth context immediately
       window.dispatchEvent(new Event('storage'));
       // Redirect to onboarding for profile creation
-      setTimeout(() => setLocation("/onboarding"), 100);
+      window.location.href = "/onboarding";
     },
     onError: (error: any) => {
       toast({
