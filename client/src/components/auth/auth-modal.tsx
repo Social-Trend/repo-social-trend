@@ -133,8 +133,56 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
     },
   });
 
-  const onLoginSubmit = (data: LoginUser) => {
-    loginMutation.mutate(data);
+  const onLoginSubmit = async (data: LoginUser) => {
+    console.log("LOGIN FORM SUBMITTED with:", data);
+    
+    try {
+      // Direct fetch instead of using mutation to avoid WebSocket interference
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      console.log("Login response status:", response.status);
+      
+      if (!response.ok) {
+        const error = await response.text();
+        console.error("Login failed:", error);
+        throw new Error(error);
+      }
+
+      const result = await response.json();
+      console.log("Login successful:", result);
+
+      // Save to localStorage
+      localStorage.setItem("token", result.token);
+      localStorage.setItem("user", JSON.stringify(result.user));
+
+      // Close modal
+      setOpen(false);
+      loginForm.reset();
+
+      // Show success
+      toast({
+        title: "Welcome back!",
+        description: `Successfully signed in as ${result.user.email}`,
+      });
+
+      // Force page reload
+      console.log("Reloading page...");
+      window.location.reload();
+      
+    } catch (error) {
+      console.error("Login error:", error);
+      toast({
+        title: "Login failed",
+        description: error instanceof Error ? error.message : "Please try again",
+        variant: "destructive",
+      });
+    }
   };
 
   // Reset form with default role when modal opens
