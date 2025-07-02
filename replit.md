@@ -74,8 +74,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- July 2, 2025: **COMPLETED** User experience improvements for authentication and feedback
+  - ✓ Removed login rate limiting to eliminate barriers for legitimate users
+  - ✓ Fixed exit intent modal to only trigger on logout/browser close attempts
+  - ✓ Eliminated random "Before you go" pop-ups during normal workflow
+  - ✓ Created proper exit intent detection system with logout handling
+  - ✓ Added "Leave Without Feedback" option for logout scenarios
+  - ✓ Improved authentication access by removing restrictive login timers
+
 - June 30, 2025: **COMPLETED** Production-ready security and monitoring infrastructure
-  - ✓ Implemented comprehensive rate limiting (auth: 5/15min, API: 100/15min, messages: 20/min)
+  - ✓ Implemented selective rate limiting (API: 100/15min, messages: 20/min) - login restrictions removed
   - ✓ Added structured logging with error tracking and metrics collection
   - ✓ Created health check endpoints for monitoring (/health/live, /health/ready, /health/metrics)
   - ✓ Built email verification system with SendGrid integration
