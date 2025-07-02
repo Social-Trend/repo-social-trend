@@ -52,10 +52,18 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginUser) => {
-      return await apiRequest("/api/auth/login", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      console.log("LOGIN MUTATION STARTING with data:", data);
+      try {
+        const result = await apiRequest("/api/auth/login", {
+          method: "POST",
+          body: JSON.stringify(data),
+        });
+        console.log("LOGIN MUTATION SUCCESS:", result);
+        return result;
+      } catch (error) {
+        console.error("LOGIN MUTATION ERROR:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       console.log("LOGIN SUCCESS - Starting redirect process");
