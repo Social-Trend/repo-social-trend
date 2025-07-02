@@ -34,22 +34,40 @@ export default function ChatModal({ conversation, isOpen, onClose }: ChatModalPr
   // Send message mutation
   const sendMessage = useMutation({
     mutationFn: async (messageData: { conversationId: number; content: string }) => {
-      if (!user) throw new Error("User not authenticated");
+      if (!user) {
+        console.error("ChatModal - User not authenticated:", user);
+        throw new Error("User not authenticated");
+      }
       
-      return await apiRequest("/api/messages", {
-        method: "POST",
-        body: JSON.stringify({
-          conversationId: messageData.conversationId,
-          senderType: (user as any).role === 'professional' ? 'professional' : 'organizer',
-          senderName: (user as any).firstName ? `${(user as any).firstName} ${(user as any).lastName || ''}`.trim() : (user as any).email || 'Unknown',
-          content: messageData.content,
-        }),
-      });
+      const payload = {
+        conversationId: messageData.conversationId,
+        senderType: (user as any).role === 'professional' ? 'professional' : 'organizer',
+        senderName: (user as any).firstName ? `${(user as any).firstName} ${(user as any).lastName || ''}`.trim() : (user as any).email || 'Unknown',
+        content: messageData.content,
+      };
+      
+      console.log("ChatModal - Sending message with payload:", payload);
+      
+      try {
+        const result = await apiRequest("/api/messages", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        console.log("ChatModal - Message sent successfully:", result);
+        return result;
+      } catch (error) {
+        console.error("ChatModal - Failed to send message:", error);
+        throw error;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("ChatModal - Message mutation successful:", data);
       setMessageText("");
       refetchMessages();
       queryClient.invalidateQueries({ queryKey: ["/api/messages", conversation?.id] });
+    },
+    onError: (error) => {
+      console.error("ChatModal - Message mutation failed:", error);
     },
   });
 
