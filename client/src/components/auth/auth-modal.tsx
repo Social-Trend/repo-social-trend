@@ -58,6 +58,7 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       });
     },
     onSuccess: (data) => {
+      console.log("Login successful, redirecting to dashboard...", data);
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
@@ -73,6 +74,7 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       window.location.href = "/";
     },
     onError: (error: any) => {
+      console.error("Login failed:", error);
       toast({
         title: "Sign in failed",
         description: error.message || "Please check your email and password",
