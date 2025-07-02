@@ -70,8 +70,8 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       loginForm.reset();
       // Trigger storage event to update auth context immediately
       window.dispatchEvent(new Event('storage'));
-      // Force page reload to ensure authentication state is properly updated
-      window.location.href = "/";
+      // Force a complete page reload to ensure authentication state is properly updated
+      window.location.reload();
     },
     onError: (error: any) => {
       console.error("Login failed:", error);
