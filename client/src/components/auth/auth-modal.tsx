@@ -83,11 +83,11 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
         description: `Successfully signed in as ${data.user.email}`,
       });
       
-      console.log("Login successful, redirecting to dashboard...");
+      console.log("Login successful, updating auth context...");
       // Trigger storage event to update auth context
       window.dispatchEvent(new Event('storage'));
-      // Navigate to home/dashboard
-      window.location.href = "/";
+      // Invalidate auth queries to refresh user state
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     },
     onError: (error: any) => {
       console.error("Login failed:", error);
@@ -130,63 +130,9 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
     },
   });
 
-  const onLoginSubmit = async (data: LoginUser) => {
+  const onLoginSubmit = (data: LoginUser) => {
     console.log("LOGIN FORM SUBMITTED with:", data);
-    
-    try {
-      // Direct fetch instead of using mutation to avoid WebSocket interference
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      console.log("Login response status:", response.status);
-      
-      if (!response.ok) {
-        const error = await response.text();
-        console.error("Login failed:", error);
-        throw new Error(error);
-      }
-
-      const result = await response.json();
-      console.log("Login successful:", result);
-
-      // Save to localStorage and verify
-      localStorage.setItem("token", result.token);
-      localStorage.setItem("user", JSON.stringify(result.user));
-      
-      console.log("Token saved. Verifying localStorage:");
-      console.log("Token exists:", !!localStorage.getItem("token"));
-      console.log("User exists:", !!localStorage.getItem("user"));
-
-      // Close modal
-      setOpen(false);
-      loginForm.reset();
-
-      // Show success
-      toast({
-        title: "Welcome back!",
-        description: `Successfully signed in as ${result.user.email}`,
-      });
-
-      // Navigate to dashboard
-      console.log("Login successful - redirecting to dashboard...");
-      // Trigger storage event to update auth context
-      window.dispatchEvent(new Event('storage'));
-      // Navigate to home/dashboard
-      window.location.href = "/";
-      
-    } catch (error) {
-      console.error("Login error:", error);
-      toast({
-        title: "Login failed",
-        description: error instanceof Error ? error.message : "Please try again",
-        variant: "destructive",
-      });
-    }
+    loginMutation.mutate(data);
   };
 
   // Reset form with default role when modal opens
