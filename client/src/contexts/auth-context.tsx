@@ -100,8 +100,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Dispatch custom event to notify other components
         window.dispatchEvent(new Event('auth-token-changed'));
         
-        // Invalidate all queries to refetch data with new role
-        queryClient.invalidateQueries();
+        // Small delay to ensure token is properly set before invalidating
+        setTimeout(() => {
+          queryClient.invalidateQueries();
+        }, 100);
       }
     } catch (error) {
       console.error("Failed to switch role:", error);

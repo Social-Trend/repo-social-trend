@@ -90,10 +90,10 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       queryClient.refetchQueries({ queryKey: ["/api/auth/me"] });
       
       // Navigate and close modal
-      console.log("LOGIN SUCCESS - Navigating to home page");
-      setLocation("/");
+      console.log("LOGIN SUCCESS - Navigating to dashboard");
       setOpen(false);
       loginForm.reset();
+      setLocation("/");
     },
     onError: (error: any) => {
       console.error("Login failed:", error);

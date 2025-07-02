@@ -10,6 +10,15 @@ export default function Home() {
   const { user, isAuthenticated } = useAuth();
 
   const renderRoleBasedView = () => {
+    // Show loading while authentication is being determined
+    if (!isAuthenticated && !user) {
+      return (
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+        </div>
+      );
+    }
+
     if (!isAuthenticated || !user) {
       return <OrganizerDashboard />; // Default to organizer dashboard for non-authenticated users
     }
