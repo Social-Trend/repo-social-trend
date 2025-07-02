@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search, Filter, Users, MapPin, DollarSign, Star, MessageCircle, X, Plus, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,7 @@ const serviceCategories = [
 
 export default function Professionals() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [serviceFilter, setServiceFilter] = useState("");
   const [customService, setCustomService] = useState("");
@@ -44,12 +45,21 @@ export default function Professionals() {
   const [selectedProfileForView, setSelectedProfileForView] = useState<ProfessionalProfile | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
+  // Debounce search input to avoid API calls on every keystroke
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300); // Wait 300ms after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   // Determine effective service filter (predefined or custom)
   const effectiveServiceFilter = serviceFilter === 'custom' ? customService : serviceFilter;
 
   // Build query parameters for API call
   const queryParams = new URLSearchParams();
-  if (searchTerm) queryParams.set('search', searchTerm);
+  if (debouncedSearchTerm) queryParams.set('search', debouncedSearchTerm);
   if (locationFilter && locationFilter !== 'all' && locationFilter !== '') queryParams.set('location', locationFilter);
   if (effectiveServiceFilter && effectiveServiceFilter !== 'all' && effectiveServiceFilter !== '') {
     queryParams.set('service', effectiveServiceFilter);
@@ -61,7 +71,7 @@ export default function Professionals() {
   const queryUrl = queryString ? `/api/professionals?${queryString}` : '/api/professionals';
 
   const { data: professionals = [], isLoading, error } = useQuery({
-    queryKey: ['/api/professionals', searchTerm, locationFilter, effectiveServiceFilter, priceRangeMin, priceRangeMax],
+    queryKey: ['/api/professionals', debouncedSearchTerm, locationFilter, effectiveServiceFilter, priceRangeMin, priceRangeMax],
     queryFn: async () => {
       console.log("Professionals page - fetching from:", queryUrl);
       try {
