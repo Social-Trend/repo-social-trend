@@ -57,21 +57,35 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
         body: JSON.stringify(data),
       });
     },
-    onSuccess: (data) => {
-      console.log("Login successful, redirecting to dashboard...", data);
+    onSuccess: async (data) => {
+      console.log("Login successful, updating auth state...", data);
+      
+      // Set auth data in localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      
+      // Close modal and reset form
+      setOpen(false);
+      loginForm.reset();
+      
+      // Show success message
       toast({
         title: "Welcome back!",
         description: `Successfully signed in as ${data.user.email}`,
       });
-      setOpen(false);
-      loginForm.reset();
-      // Trigger storage event to update auth context immediately
+      
+      // Trigger storage event to update auth context
       window.dispatchEvent(new Event('storage'));
-      // Force a complete page reload to ensure authentication state is properly updated
-      window.location.reload();
+      
+      // Invalidate and refetch auth queries
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/auth/me"] });
+      
+      console.log("Auth state updated, forcing page refresh...");
+      // Force complete page refresh to ensure authentication state is properly loaded
+      setTimeout(() => {
+        window.location.reload();
+      }, 200);
     },
     onError: (error: any) => {
       console.error("Login failed:", error);
