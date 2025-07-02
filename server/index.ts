@@ -10,7 +10,16 @@ const app = express();
 // Security and logging middleware
 app.set('trust proxy', 1); // Trust first proxy for rate limiting
 app.use(requestLogger);
-app.use(apiRateLimit); // General API rate limiting
+
+// Apply rate limiting selectively - exclude auth routes
+app.use((req, res, next) => {
+  // Skip rate limiting for authentication routes
+  if (req.path.startsWith('/api/auth/')) {
+    return next();
+  }
+  // Apply general API rate limiting to other routes
+  return apiRateLimit(req, res, next);
+});
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
