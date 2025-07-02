@@ -157,9 +157,13 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       const result = await response.json();
       console.log("Login successful:", result);
 
-      // Save to localStorage
+      // Save to localStorage and verify
       localStorage.setItem("token", result.token);
       localStorage.setItem("user", JSON.stringify(result.user));
+      
+      console.log("Token saved. Verifying localStorage:");
+      console.log("Token exists:", !!localStorage.getItem("token"));
+      console.log("User exists:", !!localStorage.getItem("user"));
 
       // Close modal
       setOpen(false);
@@ -171,9 +175,12 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
         description: `Successfully signed in as ${result.user.email}`,
       });
 
-      // Force page reload
-      console.log("Reloading page...");
-      window.location.reload();
+      // Wait a moment then reload to ensure localStorage is saved
+      console.log("Waiting before reload to ensure localStorage persists...");
+      setTimeout(() => {
+        console.log("About to reload. Final check - Token exists:", !!localStorage.getItem("token"));
+        window.location.reload();
+      }, 100);
       
     } catch (error) {
       console.error("Login error:", error);
