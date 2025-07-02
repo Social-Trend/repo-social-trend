@@ -84,15 +84,13 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       });
       
       console.log("Login successful, updating auth context...");
-      // Force immediate auth context update
-      window.dispatchEvent(new Event('storage'));
       
-      // Use setTimeout to ensure proper state update sequence
-      setTimeout(() => {
-        // Invalidate and refetch auth queries
-        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-        queryClient.refetchQueries({ queryKey: ["/api/auth/me"] });
-      }, 100);
+      // Dispatch custom event to trigger auth context update
+      window.dispatchEvent(new Event('auth-token-changed'));
+      
+      // Immediately invalidate and refetch auth queries to trigger context update
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      queryClient.refetchQueries({ queryKey: ["/api/auth/me"] });
     },
     onError: (error: any) => {
       console.error("Login failed:", error);

@@ -31,13 +31,22 @@ const authenticateToken = (req: any, res: any, next: any) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
+  console.log("AuthToken middleware - Header:", authHeader ? "Present" : "Missing");
+  console.log("AuthToken middleware - Token:", token ? "Present" : "Missing");
+
   if (!token) {
+    console.log("AuthToken middleware - No token provided");
     return res.status(401).json({ message: 'Access token required' });
   }
 
   jwt.verify(token, JWT_SECRET, (err: any, decoded: any) => {
-    if (err) return res.status(403).json({ message: 'Invalid token' });
+    if (err) {
+      console.log("AuthToken middleware - Token verification failed:", err.message);
+      return res.status(403).json({ message: 'Invalid token' });
+    }
+    console.log("AuthToken middleware - Token decoded:", decoded);
     req.user = { id: decoded.userId, email: decoded.email, role: decoded.role };
+    console.log("AuthToken middleware - User set:", req.user);
     next();
   });
 };
@@ -248,12 +257,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/auth/me", authenticateToken, async (req: any, res) => {
     try {
+      console.log("/api/auth/me - User from middleware:", req.user);
+      console.log("/api/auth/me - Looking up user ID:", req.user.id);
+      
       const user = await storage.getUser(req.user.id);
+      console.log("/api/auth/me - User found in database:", user ? "Yes" : "No");
+      
       if (!user) {
+        console.log("/api/auth/me - No user found, returning 404");
         return res.status(404).json({ message: "User not found" });
       }
 
       const { password: _, ...userWithoutPassword } = user;
+      console.log("/api/auth/me - Returning user data:", userWithoutPassword);
       res.json(userWithoutPassword);
     } catch (error) {
       console.error("Get user error:", error);

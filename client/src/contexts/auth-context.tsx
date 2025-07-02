@@ -28,8 +28,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(newToken);
     };
 
+    // Listen for custom storage events (for same-tab changes)
+    const handleCustomStorageChange = () => {
+      const newToken = localStorage.getItem("token");
+      console.log("AuthProvider - Custom storage change detected, new token:", newToken ? "Present" : "None");
+      setToken(newToken);
+    };
+
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('auth-token-changed', handleCustomStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auth-token-changed', handleCustomStorageChange);
+    };
   }, []);
 
   const { data: user, isLoading } = useQuery({
