@@ -58,9 +58,12 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       });
     },
     onSuccess: (data) => {
+      console.log("LOGIN SUCCESS - Starting redirect process");
+      
       // Set auth data in localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
+      console.log("Token and user saved to localStorage");
       
       // Close modal and reset form immediately
       setOpen(false);
@@ -72,8 +75,14 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
         description: `Successfully signed in as ${data.user.email}`,
       });
       
-      // Force immediate page reload - no delays, no async operations
-      window.location.reload();
+      console.log("About to reload page...");
+      // Try multiple reload methods
+      try {
+        window.location.reload();
+      } catch (e) {
+        console.error("Reload failed, trying href method:", e);
+        window.location.href = window.location.href;
+      }
     },
     onError: (error: any) => {
       console.error("Login failed:", error);
