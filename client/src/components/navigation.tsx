@@ -6,6 +6,7 @@ import { Link, useLocation } from "wouter";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/auth-context";
+import { useExitIntent } from "@/contexts/exit-intent-context";
 import { useProfile } from "@/hooks/useProfile";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { apiRequest } from "@/lib/queryClient";
@@ -20,6 +21,7 @@ interface NavigationProps {}
 export default function Navigation({}: NavigationProps) {
   const [location] = useLocation();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { triggerExitIntent, setPendingLogout } = useExitIntent();
   const { hasProfile, profileCompletion, hasOrganizerProfile } = useProfile();
   const { unreadCount, hasUnreadMessages, resetNotifications, clearNotificationForConversation } = useUnreadMessages();
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
@@ -44,6 +46,11 @@ export default function Navigation({}: NavigationProps) {
     queryFn: () => apiRequest(`/api/profiles/organizer/${user?.id}`),
     enabled: isAuthenticated && !!user && user.role === "organizer",
   });
+
+  const handleLogout = () => {
+    setPendingLogout(logout);
+    triggerExitIntent();
+  };
 
   const getUserInitials = (user: any, profile: any) => {
     if (profile?.firstName) {
@@ -212,7 +219,7 @@ export default function Navigation({}: NavigationProps) {
                       <span>Reset Notifications</span>
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem onClick={logout}>
+                    <DropdownMenuItem onClick={handleLogout}>
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Log out</span>
                     </DropdownMenuItem>

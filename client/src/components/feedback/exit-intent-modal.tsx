@@ -10,9 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 interface ExitIntentModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onProceedWithLogout?: () => void;
 }
 
-export default function ExitIntentModal({ isOpen, onClose }: ExitIntentModalProps) {
+export default function ExitIntentModal({ isOpen, onClose, onProceedWithLogout }: ExitIntentModalProps) {
   const [rating, setRating] = useState(0);
   const [message, setMessage] = useState("");
   const [hoveredRating, setHoveredRating] = useState(0);
@@ -41,7 +42,11 @@ export default function ExitIntentModal({ isOpen, onClose }: ExitIntentModalProp
       setShowThankYou(true);
       queryClient.invalidateQueries({ queryKey: ["/api/feedback"] });
       setTimeout(() => {
-        handleClose();
+        if (onProceedWithLogout) {
+          onProceedWithLogout();
+        } else {
+          handleClose();
+        }
       }, 2000);
     },
     onError: (error: any) => {
@@ -67,6 +72,23 @@ export default function ExitIntentModal({ isOpen, onClose }: ExitIntentModalProp
     onClose();
   };
 
+  const handleExitWithoutFeedback = () => {
+    setRating(0);
+    setMessage("");
+    setHoveredRating(0);
+    setRecommendationRating(0);
+    setHoveredRecommendation(0);
+    setUserIntent("");
+    setExperienceRating(0);
+    setHoveredExperience(0);
+    setShowThankYou(false);
+    if (onProceedWithLogout) {
+      onProceedWithLogout();
+    } else {
+      onClose();
+    }
+  };
+
   const handleQuickSubmit = (quickRating: number, quickMessage: string) => {
     feedbackMutation.mutate({
       rating: quickRating,
@@ -75,6 +97,19 @@ export default function ExitIntentModal({ isOpen, onClose }: ExitIntentModalProp
       recommendationRating: quickRating, // Use same rating for quick exit
       userIntent: "",
       experienceRating: quickRating, // Use same rating for quick exit
+    });
+  };
+
+  const handleDetailedSubmitWithLogout = () => {
+    if (rating === 0 || recommendationRating === 0 || experienceRating === 0) return;
+    
+    feedbackMutation.mutate({
+      rating,
+      message: message.trim(),
+      category: "exit_intent",
+      recommendationRating,
+      userIntent: userIntent.trim(),
+      experienceRating,
     });
   };
 
@@ -205,14 +240,14 @@ export default function ExitIntentModal({ isOpen, onClose }: ExitIntentModalProp
           <div className="flex gap-3">
             <Button
               variant="ghost"
-              onClick={handleClose}
+              onClick={handleExitWithoutFeedback}
               className="flex-1"
               disabled={feedbackMutation.isPending}
             >
-              Skip
+              {onProceedWithLogout ? "Leave Without Feedback" : "Skip"}
             </Button>
             <Button
-              onClick={handleDetailedSubmit}
+              onClick={handleDetailedSubmitWithLogout}
               className="flex-1"
               disabled={rating === 0 || feedbackMutation.isPending}
             >

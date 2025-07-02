@@ -18,29 +18,32 @@ import AdminFeedback from "@/pages/admin-feedback";
 import NotFound from "@/pages/not-found";
 import FloatingFeedbackButton from "@/components/feedback/floating-feedback-button";
 import ExitIntentModal from "@/components/feedback/exit-intent-modal";
-import { useState, useEffect } from "react";
+import { ExitIntentProvider, useExitIntent } from "@/contexts/exit-intent-context";
+import { useEffect } from "react";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
-  const [showExitIntent, setShowExitIntent] = useState(false);
-  const [hasShownExitIntent, setHasShownExitIntent] = useState(false);
+  const { showExitIntent, hasShownExitIntent, triggerExitIntent, closeExitIntent, proceedWithLogout } = useExitIntent();
 
-  // Exit intent detection
+  // Exit intent detection - only on browser close attempts
   useEffect(() => {
-    const handleMouseLeave = (e: MouseEvent) => {
-      if (
-        !hasShownExitIntent &&
-        e.clientY <= 0 &&
-        e.relatedTarget === null
-      ) {
-        setShowExitIntent(true);
-        setHasShownExitIntent(true);
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!hasShownExitIntent && isAuthenticated) {
+        // Show exit intent modal instead of browser's default dialog
+        e.preventDefault();
+        triggerExitIntent();
+        return e.returnValue = '';
       }
     };
 
-    document.addEventListener('mouseleave', handleMouseLeave);
-    return () => document.removeEventListener('mouseleave', handleMouseLeave);
-  }, [hasShownExitIntent]);
+    if (isAuthenticated) {
+      window.addEventListener('beforeunload', handleBeforeUnload);
+    }
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [hasShownExitIntent, isAuthenticated, triggerExitIntent]);
 
   if (isLoading) {
     return (
@@ -70,7 +73,8 @@ function Router() {
       <FloatingFeedbackButton />
       <ExitIntentModal 
         isOpen={showExitIntent} 
-        onClose={() => setShowExitIntent(false)} 
+        onClose={closeExitIntent}
+        onProceedWithLogout={proceedWithLogout}
       />
     </div>
   );
@@ -80,10 +84,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <TooltipProvider>
-          <Router />
-          <Toaster />
-        </TooltipProvider>
+        <ExitIntentProvider>
+          <TooltipProvider>
+            <Router />
+            <Toaster />
+          </TooltipProvider>
+        </ExitIntentProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
