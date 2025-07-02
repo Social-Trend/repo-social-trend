@@ -87,13 +87,14 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       // Immediately invalidate and refetch auth queries to trigger context update
       console.log("LOGIN SUCCESS - Invalidating auth queries");
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-      queryClient.refetchQueries({ queryKey: ["/api/auth/me"] });
       
-      // Navigate and close modal
-      console.log("LOGIN SUCCESS - Navigating to dashboard");
+      // Close modal and reset form immediately  
       setOpen(false);
       loginForm.reset();
-      setLocation("/");
+      
+      // Force a page reload to ensure proper authentication state
+      console.log("LOGIN SUCCESS - Forcing page reload to ensure proper auth state");
+      window.location.href = "/";
     },
     onError: (error: any) => {
       console.error("Login failed:", error);
