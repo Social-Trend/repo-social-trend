@@ -63,11 +63,21 @@ export default function Professionals() {
   const { data: professionals = [], isLoading, error } = useQuery({
     queryKey: ['/api/professionals', searchTerm, locationFilter, effectiveServiceFilter, priceRangeMin, priceRangeMax],
     queryFn: async () => {
-      const response = await fetch(queryUrl);
-      if (!response.ok) {
-        throw new Error("Failed to fetch professionals");
+      console.log("Professionals page - fetching from:", queryUrl);
+      try {
+        const response = await fetch(queryUrl);
+        console.log("Response status:", response.status);
+        if (!response.ok) {
+          console.error("Response not OK:", response.status, response.statusText);
+          throw new Error(`Failed to fetch professionals: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        console.log("Professionals data received:", data.length, "profiles");
+        return data as ProfessionalProfile[];
+      } catch (error) {
+        console.error("Fetch error:", error);
+        throw error;
       }
-      return response.json() as Promise<ProfessionalProfile[]>;
     }
   });
 
