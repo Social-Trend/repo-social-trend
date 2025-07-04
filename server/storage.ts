@@ -889,8 +889,32 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Service request methods
-  async getServiceRequests(professionalId?: string | number, organizerId?: string | number): Promise<ServiceRequest[]> {
-    let query = db.select().from(serviceRequests);
+  async getServiceRequests(professionalId?: string | number, organizerId?: string | number): Promise<any[]> {
+    let query = db
+      .select({
+        id: serviceRequests.id,
+        organizerId: serviceRequests.organizerId,
+        professionalId: serviceRequests.professionalId,
+        eventTitle: serviceRequests.eventTitle,
+        eventDate: serviceRequests.eventDate,
+        eventLocation: serviceRequests.eventLocation,
+        eventDescription: serviceRequests.eventDescription,
+        requestMessage: serviceRequests.requestMessage,
+        status: serviceRequests.status,
+        responseMessage: serviceRequests.responseMessage,
+        respondedAt: serviceRequests.respondedAt,
+        expiresAt: serviceRequests.expiresAt,
+        depositAmount: serviceRequests.depositAmount,
+        totalAmount: serviceRequests.totalAmount,
+        stripePaymentIntentId: serviceRequests.stripePaymentIntentId,
+        paymentStatus: serviceRequests.paymentStatus,
+        paidAt: serviceRequests.paidAt,
+        createdAt: serviceRequests.createdAt,
+        // Join organizer email from users table
+        organizerEmail: users.email
+      })
+      .from(serviceRequests)
+      .leftJoin(users, eq(serviceRequests.organizerId, users.id));
     
     if (professionalId) {
       // Convert to string to match the text field in database

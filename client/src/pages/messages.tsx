@@ -96,8 +96,8 @@ export default function Messages() {
         method: "POST",
         body: JSON.stringify({
           professionalId: serviceRequest.professionalId,
-          organizerName: user.email || 'Unknown',
-          organizerEmail: user.email || '',
+          organizerName: (serviceRequest as any).organizerEmail || 'Unknown',
+          organizerEmail: (serviceRequest as any).organizerEmail || '',
           eventTitle: serviceRequest.eventTitle,
           eventDate: serviceRequest.eventDate,
           eventLocation: serviceRequest.eventLocation,
@@ -128,9 +128,12 @@ export default function Messages() {
 
 
   const handleStartConversation = (serviceRequest: ServiceRequest) => {
-    // Check if conversation already exists
+    // Check if conversation already exists for this specific request
+    // Match by professional ID, organizer email, AND event title for specificity
     const existingConversation = conversations.find((conv: Conversation) => 
-      conv.professionalId === serviceRequest.professionalId
+      conv.professionalId === serviceRequest.professionalId &&
+      conv.organizerEmail === (serviceRequest as any).organizerEmail &&
+      conv.eventTitle === serviceRequest.eventTitle
     );
     
     if (existingConversation) {
