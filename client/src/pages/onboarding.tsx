@@ -20,6 +20,7 @@ import { loginUserSchema, registerUserSchema, type LoginUser, type RegisterUser 
 
 export default function Onboarding() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const { hasProfile, isLoading: profileLoading } = useProfile();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("login");
   const [showPassword, setShowPassword] = useState(false);
@@ -119,13 +120,20 @@ export default function Onboarding() {
     registerMutation.mutate(data);
   };
 
-  if (isLoading) {
+  if (isLoading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
+
+  // Redirect authenticated users with existing profiles to dashboard
+  useEffect(() => {
+    if (isAuthenticated && user && hasProfile && !profileLoading) {
+      setLocation("/");
+    }
+  }, [isAuthenticated, user, hasProfile, profileLoading, setLocation]);
 
   // Show authentication forms for non-authenticated users
   if (!isAuthenticated || !user) {

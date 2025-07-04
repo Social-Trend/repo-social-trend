@@ -28,7 +28,7 @@ const statusColors = {
 
 export default function ProfessionalDashboard() {
   const { user, isAuthenticated } = useAuth();
-  const { hasProfile } = useProfile();
+  const { hasProfile, isLoading: profileLoading } = useProfile();
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
   const [responseMessage, setResponseMessage] = useState("");
   const [showResponseDialog, setShowResponseDialog] = useState(false);
@@ -95,7 +95,19 @@ export default function ProfessionalDashboard() {
     });
   };
 
-  if (!hasProfile) {
+  // Show loading state while profile is being fetched
+  if (profileLoading) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+        </div>
+      </div>
+    );
+  }
+
+  // Only show profile setup if profile is definitely not found (not loading)
+  if (!profileLoading && !hasProfile) {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
