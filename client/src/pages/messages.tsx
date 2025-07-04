@@ -108,9 +108,9 @@ export default function Messages() {
     },
     onSuccess: (conversation) => {
       queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
-      // Scroll to conversations section
-      const conversationsSection = document.getElementById("conversations-section");
-      conversationsSection?.scrollIntoView({ behavior: "smooth" });
+      // Open the newly created conversation directly
+      setSelectedConversation(conversation);
+      setIsChatOpen(true);
       toast({
         title: "Conversation Started",
         description: "You can now message about this service request.",
@@ -134,15 +134,16 @@ export default function Messages() {
     );
     
     if (existingConversation) {
-      // Scroll to existing conversation
-      const conversationsSection = document.getElementById("conversations-section");
-      conversationsSection?.scrollIntoView({ behavior: "smooth" });
+      // Open existing conversation directly
+      setSelectedConversation(existingConversation);
+      setIsChatOpen(true);
+      clearNotificationForConversation(existingConversation.id);
       toast({
-        title: "Conversation Found",
-        description: "Scrolling to your existing conversation.",
+        title: "Conversation Opened",
+        description: "Continue your conversation about this service request.",
       });
     } else {
-      // Create new conversation
+      // Create new conversation and open it
       createConversation.mutate(serviceRequest);
     }
   };
@@ -315,7 +316,19 @@ export default function Messages() {
         ) : (
           <div className="grid gap-4 mb-8">
             {serviceRequests.map((request: ServiceRequest) => (
-              <Card key={request.id} className="hover:shadow-md transition-shadow">
+              <Card 
+                key={request.id} 
+                className={`transition-all duration-200 ${
+                  request.status === 'accepted' 
+                    ? 'hover:shadow-md hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer' 
+                    : 'hover:shadow-md'
+                }`}
+                onClick={() => {
+                  if (request.status === 'accepted') {
+                    handleStartConversation(request);
+                  }
+                }}
+              >
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
@@ -357,7 +370,7 @@ export default function Messages() {
 
                   {/* Action Buttons for Professionals */}
                   {user.role === 'professional' && request.status === 'pending' && (
-                    <div className="flex gap-2 mt-4">
+                    <div className="flex gap-2 mt-4" onClick={(e) => e.stopPropagation()}>
                       <Button 
                         size="sm" 
                         variant="default"
@@ -387,7 +400,7 @@ export default function Messages() {
                   
                   {/* Payment and Message Actions for Accepted Requests */}
                   {request.status === 'accepted' && (
-                    <div className="flex gap-2 mt-4">
+                    <div className="flex gap-2 mt-4" onClick={(e) => e.stopPropagation()}>
                       {user.role === 'organizer' && (
                         <>
                           {request.paymentStatus !== 'paid' && request.paymentStatus !== 'pending' && (
@@ -424,15 +437,10 @@ export default function Messages() {
                           )}
                         </>
                       )}
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="flex items-center gap-2"
-                        onClick={() => handleStartConversation(request)}
-                      >
+                      <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                         <MessageCircle className="h-4 w-4" />
-                        Continue Conversation
-                      </Button>
+                        <span>Click to open conversation</span>
+                      </div>
                     </div>
                   )}
                   
