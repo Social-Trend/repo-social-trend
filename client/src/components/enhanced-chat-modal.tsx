@@ -116,9 +116,9 @@ export default function EnhancedChatModal({ conversation, isOpen, onClose }: Enh
 
   const getOtherPartyName = () => {
     if ((user as any)?.role === 'professional') {
-      return conversation?.organizerName || 'Event Organizer';
+      return (conversation as any)?.organizerDisplayName || conversation?.organizerName || 'Event Organizer';
     } else {
-      return 'Professional Tender';
+      return (conversation as any)?.professionalDisplayName || 'Professional Tender';
     }
   };
 

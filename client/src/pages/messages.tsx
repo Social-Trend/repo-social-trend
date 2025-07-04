@@ -247,7 +247,7 @@ export default function Messages() {
                       <div className="flex items-center justify-between">
                         <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                           {user.role === 'professional' 
-                            ? conversation.organizerName
+                            ? (conversation as any).organizerDisplayName || conversation.organizerName
                             : (conversation as any).professionalDisplayName
                           }
                         </h3>

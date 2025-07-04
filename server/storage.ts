@@ -775,7 +775,7 @@ export class DatabaseStorage implements IStorage {
   // Messaging methods
   async getConversations(professionalId?: string, organizerEmail?: string): Promise<any[]> {
     let query = db
-      .select({
+      .selectDistinct({
         id: conversations.id,
         professionalId: conversations.professionalId,
         organizerName: conversations.organizerName,
@@ -784,14 +784,19 @@ export class DatabaseStorage implements IStorage {
         eventLocation: conversations.eventLocation,
         status: conversations.status,
         createdAt: conversations.createdAt,
-        // Join professional profile data
+        // Join professional profile data - prioritize one profile
         professionalName: professionalProfiles.displayName,
         professionalFirstName: professionalProfiles.firstName,
         professionalLastName: professionalProfiles.lastName,
-        professionalServices: professionalProfiles.services
+        professionalServices: professionalProfiles.services,
+        // Join organizer profile data - prioritize most recent profile
+        organizerFirstName: organizerProfiles.firstName,
+        organizerLastName: organizerProfiles.lastName,
+        organizerCompanyName: organizerProfiles.companyName
       })
       .from(conversations)
-      .leftJoin(professionalProfiles, eq(conversations.professionalId, professionalProfiles.userId));
+      .leftJoin(professionalProfiles, eq(conversations.professionalId, professionalProfiles.userId))
+      .leftJoin(organizerProfiles, eq(conversations.organizerEmail, organizerProfiles.email));
     
     if (professionalId) {
       query = query.where(eq(conversations.professionalId, professionalId));
@@ -803,14 +808,19 @@ export class DatabaseStorage implements IStorage {
     
     const results = await query.orderBy(desc(conversations.createdAt));
     
-    // Transform results to include computed professional display name
+    // Transform results to include computed display names
     return results.map(row => ({
       ...row,
       professionalDisplayName: row.professionalName || 
                               (row.professionalFirstName && row.professionalLastName 
                                 ? `${row.professionalFirstName} ${row.professionalLastName}`
                                 : '') ||
-                              `Professional ${row.professionalId}`
+                              `Professional ${row.professionalId}`,
+      organizerDisplayName: row.organizerCompanyName ||
+                           (row.organizerFirstName && row.organizerLastName 
+                             ? `${row.organizerFirstName} ${row.organizerLastName} - Event Organizer`
+                             : row.organizerName) ||
+                           row.organizerEmail
     }));
   }
 
