@@ -501,13 +501,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "User not found" });
       }
       
-      // Only allow organizers to create conversations, and ensure organizer email matches the authenticated user
-      if (userRole !== 'organizer') {
-        return res.status(403).json({ error: "Only organizers can create conversations" });
-      }
-      
-      if (validatedData.organizerEmail !== userRecord.email) {
-        return res.status(403).json({ error: "Cannot create conversation on behalf of another organizer" });
+      // Business logic: Allow conversation creation based on role and relationships
+      if (userRole === 'organizer') {
+        // Organizers can create conversations with their email
+        if (validatedData.organizerEmail !== userRecord.email) {
+          return res.status(403).json({ error: "Cannot create conversation on behalf of another organizer" });
+        }
+      } else if (userRole === 'professional') {
+        // Professionals can create conversations ONLY if they have an accepted service request with this organizer
+        const serviceRequests = await storage.getServiceRequests(userId);
+        
+        // Check if this professional has ANY accepted service request
+        // This allows legitimate communication between matched parties
+        const hasAcceptedRequest = serviceRequests.some(sr => sr.status === 'accepted');
+        
+        console.log('Service requests for professional:', serviceRequests);
+        console.log('Has accepted request:', hasAcceptedRequest);
+        console.log('Trying to message organizer:', validatedData.organizerEmail);
+        
+        if (!hasAcceptedRequest) {
+          return res.status(403).json({ 
+            error: "Professionals can only message organizers after having at least one accepted service request" 
+          });
+        }
+        
+        // Ensure the professional is creating a conversation with the correct professional ID
+        if (validatedData.professionalId !== userId) {
+          return res.status(403).json({ error: "Cannot create conversation on behalf of another professional" });
+        }
+      } else {
+        return res.status(403).json({ error: "Invalid user role for conversation creation" });
       }
       
       console.log("Validated data:", validatedData);
