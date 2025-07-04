@@ -436,17 +436,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // Conversation routes
-  app.get("/api/conversations", async (req, res) => {
+  app.get("/api/conversations", authenticateToken, async (req: any, res) => {
     try {
-      const { professionalId, organizerEmail } = req.query;
-      const conversations = await storage.getConversations(
-        professionalId as string,
-        organizerEmail as string
-      );
+      const userId = req.user.id;
+      const userRole = req.user.role;
+      
+      console.log(`Fetching conversations for user ${userId} with role ${userRole}`);
+      
+      let conversations;
+      if (userRole === 'professional') {
+        // For professionals, get conversations where they are the professional
+        conversations = await storage.getConversations(userId);
+      } else {
+        // For organizers, get conversations where they are the organizer (by email)
+        const userRecord = await storage.getUser(userId);
+        if (!userRecord) {
+          return res.status(404).json({ error: "User not found" });
+        }
+        conversations = await storage.getConversations(undefined, userRecord.email);
+      }
+      
       // Filter out closed conversations
       const activeConversations = conversations.filter(conv => conv.status !== "closed");
+      
+      console.log(`Found ${activeConversations.length} active conversations for user ${userId}`);
       res.json(activeConversations);
     } catch (error) {
+      console.error("Error fetching conversations:", error);
       res.status(500).json({ error: "Failed to fetch conversations" });
     }
   });
@@ -469,10 +485,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/conversations", async (req, res) => {
+  app.post("/api/conversations", authenticateToken, async (req: any, res) => {
     try {
-      console.log("Creating conversation with data:", req.body);
+      const userId = req.user.id;
+      const userRole = req.user.role;
+      
+      console.log(`Creating conversation for user ${userId} with role ${userRole}:`, req.body);
+      
+      // Validate conversation data
       const validatedData = insertConversationSchema.parse(req.body);
+      
+      // Verify user authorization to create this conversation
+      const userRecord = await storage.getUser(userId);
+      if (!userRecord) {
+        return res.status(401).json({ error: "User not found" });
+      }
+      
+      // Only allow organizers to create conversations, and ensure organizer email matches the authenticated user
+      if (userRole !== 'organizer') {
+        return res.status(403).json({ error: "Only organizers can create conversations" });
+      }
+      
+      if (validatedData.organizerEmail !== userRecord.email) {
+        return res.status(403).json({ error: "Cannot create conversation on behalf of another organizer" });
+      }
+      
       console.log("Validated data:", validatedData);
       const conversation = await storage.createConversation(validatedData);
       console.log("Created conversation:", conversation);
@@ -512,52 +549,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Message routes
-  app.get("/api/messages/:conversationId", async (req, res) => {
+  app.get("/api/messages/:conversationId", authenticateToken, async (req: any, res) => {
     try {
       const conversationId = parseInt(req.params.conversationId);
       if (isNaN(conversationId)) {
         return res.status(400).json({ error: "Invalid conversation ID" });
       }
       
+      const userId = req.user.id;
+      const userRole = req.user.role;
+      
+      // First verify the user has access to this conversation
+      const conversation = await storage.getConversation(conversationId);
+      if (!conversation) {
+        return res.status(404).json({ error: "Conversation not found" });
+      }
+      
+      // Check if user is authorized to access this conversation
+      const userRecord = await storage.getUser(userId);
+      if (!userRecord) {
+        return res.status(401).json({ error: "User not found" });
+      }
+      
+      const hasAccess = (userRole === 'professional' && conversation.professionalId === userId) ||
+                       (userRole === 'organizer' && conversation.organizerEmail === userRecord.email);
+      
+      if (!hasAccess) {
+        return res.status(403).json({ error: "Access denied to this conversation" });
+      }
+      
       const messages = await storage.getMessages(conversationId);
       res.json(messages);
     } catch (error) {
+      console.error("Error fetching messages:", error);
       res.status(500).json({ error: "Failed to fetch messages" });
     }
   });
 
-  app.post("/api/messages", messageRateLimit, async (req, res) => {
+  app.post("/api/messages", authenticateToken, messageRateLimit, async (req: any, res) => {
     try {
+      const userId = req.user.id;
+      const userRole = req.user.role;
+      
       const validatedData = insertMessageSchema.parse(req.body);
+      
+      // Verify user has access to this conversation
+      const conversation = await storage.getConversation(validatedData.conversationId);
+      if (!conversation) {
+        return res.status(404).json({ error: "Conversation not found" });
+      }
+      
+      // Check if user is authorized to post in this conversation
+      const userRecord = await storage.getUser(userId);
+      if (!userRecord) {
+        return res.status(401).json({ error: "User not found" });
+      }
+      
+      const hasAccess = (userRole === 'professional' && conversation.professionalId === userId) ||
+                       (userRole === 'organizer' && conversation.organizerEmail === userRecord.email);
+      
+      if (!hasAccess) {
+        return res.status(403).json({ error: "Access denied to this conversation" });
+      }
+      
       const message = await storage.createMessage(validatedData);
       res.status(201).json(message);
     } catch (error) {
       if (error instanceof Error && error.name === "ZodError") {
         return res.status(400).json({ error: "Invalid message data", details: error });
       }
+      console.error("Error creating message:", error);
       res.status(500).json({ error: "Failed to create message" });
     }
   });
 
-  app.get("/api/conversations/:id/messages", async (req, res) => {
+  app.get("/api/conversations/:id/messages", authenticateToken, async (req: any, res) => {
     try {
       const conversationId = parseInt(req.params.id);
       if (isNaN(conversationId)) {
         return res.status(400).json({ error: "Invalid conversation ID" });
       }
       
+      const userId = req.user.id;
+      const userRole = req.user.role;
+      
+      // Verify user has access to this conversation
+      const conversation = await storage.getConversation(conversationId);
+      if (!conversation) {
+        return res.status(404).json({ error: "Conversation not found" });
+      }
+      
+      const userRecord = await storage.getUser(userId);
+      if (!userRecord) {
+        return res.status(401).json({ error: "User not found" });
+      }
+      
+      const hasAccess = (userRole === 'professional' && conversation.professionalId === userId) ||
+                       (userRole === 'organizer' && conversation.organizerEmail === userRecord.email);
+      
+      if (!hasAccess) {
+        return res.status(403).json({ error: "Access denied to this conversation" });
+      }
+      
       const messages = await storage.getMessages(conversationId);
       res.json(messages);
     } catch (error) {
+      console.error("Error fetching conversation messages:", error);
       res.status(500).json({ error: "Failed to fetch messages" });
     }
   });
 
-  app.post("/api/conversations/:id/messages", messageRateLimit, async (req, res) => {
+  app.post("/api/conversations/:id/messages", authenticateToken, messageRateLimit, async (req: any, res) => {
     try {
       const conversationId = parseInt(req.params.id);
       if (isNaN(conversationId)) {
         return res.status(400).json({ error: "Invalid conversation ID" });
+      }
+      
+      const userId = req.user.id;
+      const userRole = req.user.role;
+      
+      // Verify user has access to this conversation
+      const conversation = await storage.getConversation(conversationId);
+      if (!conversation) {
+        return res.status(404).json({ error: "Conversation not found" });
+      }
+      
+      const userRecord = await storage.getUser(userId);
+      if (!userRecord) {
+        return res.status(401).json({ error: "User not found" });
+      }
+      
+      const hasAccess = (userRole === 'professional' && conversation.professionalId === userId) ||
+                       (userRole === 'organizer' && conversation.organizerEmail === userRecord.email);
+      
+      if (!hasAccess) {
+        return res.status(403).json({ error: "Access denied to this conversation" });
       }
       
       const messageData = { ...req.body, conversationId };
@@ -568,6 +695,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof Error && error.name === "ZodError") {
         return res.status(400).json({ error: "Invalid message data", details: error });
       }
+      console.error("Error creating conversation message:", error);
       res.status(500).json({ error: "Failed to create message" });
     }
   });
