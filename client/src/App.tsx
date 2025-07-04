@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider, useAuth } from "@/contexts/auth-context";
+import { SimpleAuthProvider, useSimpleAuth } from "@/contexts/simple-auth-context";
 import Navigation from "@/components/navigation";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -22,7 +22,7 @@ import { ExitIntentProvider, useExitIntent } from "@/contexts/exit-intent-contex
 import { useEffect } from "react";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useSimpleAuth();
   
   // Direct token check for debugging
   const hasToken = localStorage.getItem("token");
@@ -87,14 +87,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
+      <SimpleAuthProvider>
         <ExitIntentProvider>
           <TooltipProvider>
             <Router />
             <Toaster />
           </TooltipProvider>
         </ExitIntentProvider>
-      </AuthProvider>
+      </SimpleAuthProvider>
     </QueryClientProvider>
   );
 }

@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +12,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { loginUserSchema, registerUserSchema, type LoginUser, type RegisterUser } from "@shared/schema";
+import { useSimpleAuth } from "@/contexts/simple-auth-context";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 
 interface AuthModalProps {
@@ -50,53 +50,29 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
     },
   });
 
-  const loginMutation = useMutation({
-    mutationFn: async (data: LoginUser) => {
-      console.log("LOGIN MUTATION STARTING with data:", data);
-      try {
-        const result = await apiRequest("/api/auth/login", {
-          method: "POST",
-          body: JSON.stringify(data),
-        });
-        console.log("LOGIN MUTATION SUCCESS:", result);
-        return result;
-      } catch (error) {
-        console.error("LOGIN MUTATION ERROR:", error);
-        throw error;
-      }
-    },
-    onSuccess: async (data) => {
-      console.log("LOGIN SUCCESS - Token received:", data.token ? "Present" : "None");
-      console.log("LOGIN SUCCESS - User data:", data.user);
+  // Login handler using simple auth
+  const handleLogin = async (data: LoginUser) => {
+    try {
+      console.log("LOGIN STARTING with data:", data);
+      await login(data.email, data.password);
       
-      // Set auth data in localStorage
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      console.log("LOGIN SUCCESS - Token and user saved to localStorage");
-      
-      // Show success message
+      // Success toast and close modal - login function handles redirect
       toast({
         title: "Welcome back!",
-        description: `Successfully signed in as ${data.user.email}`,
+        description: `Successfully signed in as ${data.email}`,
       });
       
-      // Close modal and reset form
       setOpen(false);
       loginForm.reset();
-      
-      // Force immediate page reload to ensure clean authentication state
-      console.log("LOGIN SUCCESS - Forcing page reload for clean auth state");
-      window.location.href = "/";
-    },
-    onError: (error: any) => {
-      console.error("Login failed:", error);
+    } catch (error: any) {
+      console.error("LOGIN ERROR:", error);
       toast({
         title: "Sign in failed",
         description: error.message || "Please check your email and password",
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterUser) => {
@@ -174,7 +150,7 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
                 <CardTitle>Sign In</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
                     <Input
