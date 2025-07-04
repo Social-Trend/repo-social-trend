@@ -34,7 +34,7 @@ export default function Requests() {
 
   // Get current role from user context
   const currentRole = user?.role || 'organizer';
-  
+
   console.log('Requests page - User:', user, 'Current role:', currentRole);
 
   const { data: requests = [], isLoading, error } = useQuery({
@@ -73,7 +73,7 @@ export default function Requests() {
 
   const handleRespond = (status: 'accepted' | 'declined') => {
     if (!selectedRequest) return;
-    
+
     respondMutation.mutate({
       id: selectedRequest.id,
       status,
@@ -156,7 +156,7 @@ export default function Requests() {
                       <span>{new Date(request.eventDate).toLocaleDateString()}</span>
                     </div>
                   )}
-                  
+
                   {request.eventLocation && (
                     <div className="flex items-center text-gray-600">
                       <MapPin className="h-4 w-4 mr-2" />
