@@ -13,8 +13,7 @@ import { apiRequest } from "@/lib/queryClient";
 import AuthModal from "@/components/auth/auth-modal";
 import RoleSwitcher from "@/components/role-switcher";
 import { Badge } from "@/components/ui/badge";
-import ChatModal from "@/components/chat-modal";
-import type { Conversation } from "@shared/schema";
+
 
 interface NavigationProps {}
 
@@ -23,16 +22,9 @@ export default function Navigation({}: NavigationProps) {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const { triggerExitIntent, setPendingLogout } = useExitIntent();
   const { hasProfile, profileCompletion, hasOrganizerProfile } = useProfile();
-  const { unreadCount, hasUnreadMessages, resetNotifications, clearNotificationForConversation } = useUnreadMessages();
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const { unreadCount, hasUnreadMessages, resetNotifications } = useUnreadMessages();
 
-  // Fetch conversations for the Messages button
-  const { data: conversations = [] } = useQuery({
-    queryKey: ["/api/conversations", { userId: user?.id }],
-    queryFn: () => apiRequest("/api/conversations"),
-    enabled: isAuthenticated && !!user,
-  });
+
 
   // Fetch current profile based on role
   const { data: professionalProfile } = useQuery({
@@ -118,33 +110,24 @@ export default function Navigation({}: NavigationProps) {
                 </Link>
               )}
               
-              <Button 
-                variant="ghost"
-                size="sm"
-                className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 relative"
-                onClick={() => {
-                  if (conversations.length > 0) {
-                    const firstConversation = conversations[0];
-                    setSelectedConversation(firstConversation);
-                    setIsChatOpen(true);
-                    clearNotificationForConversation(firstConversation.id);
-                  } else {
-                    // If no conversations, navigate to messages page
-                    window.location.href = '/messages';
-                  }
-                }}
-              >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Messages
-                {hasUnreadMessages && (
-                  <Badge 
-                    variant="destructive" 
-                    className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-                  >
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </Badge>
-                )}
-              </Button>
+              <Link href="/messages">
+                <Button 
+                  variant={location === "/messages" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 relative"
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Messages
+                  {hasUnreadMessages && (
+                    <Badge 
+                      variant="destructive" 
+                      className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                    >
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
             </div>
 
             {/* Auth Section */}
@@ -251,17 +234,7 @@ export default function Navigation({}: NavigationProps) {
         </div>
       </header>
 
-      {/* Chat Modal */}
-      {isAuthenticated && (
-        <ChatModal
-          conversation={selectedConversation}
-          isOpen={isChatOpen}
-          onClose={() => {
-            setIsChatOpen(false);
-            setSelectedConversation(null);
-          }}
-        />
-      )}
+
     </>
   );
 }

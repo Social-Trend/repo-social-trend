@@ -74,6 +74,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- July 4, 2025: **COMPLETED** iPhone-style Messages navigation and inbox interface
+  - ✓ Fixed Messages button to navigate to inbox instead of opening last conversation directly
+  - ✓ Created clean iPhone-style conversation list with avatar, contact name, and preview
+  - ✓ Redesigned messages page with conversations prioritized over service requests
+  - ✓ Added hover states and smooth interaction animations for conversation rows
+  - ✓ Implemented proper navigation flow: Messages button → Inbox view → Individual conversation
+
 - July 4, 2025: **COMPLETED** Fixed duplicate profile creation issue
   - ✓ Added proper profile existence checking in professional dashboard with loading state handling
   - ✓ Fixed onboarding page to redirect users with existing profiles to dashboard

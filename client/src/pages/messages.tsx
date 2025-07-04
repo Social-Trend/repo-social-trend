@@ -187,13 +187,102 @@ export default function Messages() {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">
-          Messages & Requests
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+          Messages
         </h1>
-        <p className="text-lg text-slate-600 dark:text-slate-400">
-          All your communications in one place - manage conversations and service requests
+        <p className="text-gray-600 dark:text-gray-300">
+          Your conversations and service requests
         </p>
+      </div>
+
+      {/* Conversations Section */}
+      <div id="conversations-section" className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
+            Conversations
+          </h2>
+          <Badge variant="secondary" className="text-sm">
+            {conversations.length} active
+          </Badge>
+        </div>
+
+        {conversationsLoading ? (
+          <div className="text-center py-8">Loading conversations...</div>
+        ) : conversations.length === 0 ? (
+          <Card>
+            <CardContent className="py-8">
+              <div className="text-center">
+                <User className="mx-auto h-10 w-10 text-gray-400 mb-3" />
+                <p className="text-gray-500">
+                  No active conversations. Start by sending a service request or responding to incoming requests.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 divide-y divide-slate-200 dark:divide-slate-700">
+            {conversations.map((conversation: Conversation) => (
+              <div 
+                key={conversation.id} 
+                className="p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer group"
+                onClick={() => {
+                  setSelectedConversation(conversation);
+                  setIsChatOpen(true);
+                  clearNotificationForConversation(conversation.id);
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3 flex-1 min-w-0">
+                    {/* Avatar/Icon */}
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 bg-slate-100 dark:bg-slate-600 rounded-full flex items-center justify-center">
+                        <User className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+                      </div>
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
+                          {user.role === 'professional' 
+                            ? conversation.organizerName
+                            : `Professional ${conversation.professionalId}`
+                          }
+                        </h3>
+                        <span className="text-xs text-slate-500 dark:text-slate-400 flex-shrink-0 ml-2">
+                          {new Date(conversation.createdAt).toLocaleDateString('en', { month: 'short', day: 'numeric' })}
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-600 dark:text-slate-300 truncate mt-1">
+                        {conversation.eventTitle}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        {conversation.eventLocation}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Actions */}
+                  <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteConversation.mutate(conversation.id);
+                      }}
+                      disabled={deleteConversation.isPending}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Service Requests Section */}
@@ -371,89 +460,7 @@ export default function Messages() {
         )}
       </div>
 
-      {/* Conversations Section */}
-      <div id="conversations-section">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
-            Ongoing Conversations
-          </h2>
-          <Badge variant="secondary" className="text-sm">
-            {conversations.length} active
-          </Badge>
-        </div>
 
-        {conversationsLoading ? (
-          <div className="text-center py-8">Loading conversations...</div>
-        ) : conversations.length === 0 ? (
-          <Card>
-            <CardContent className="py-8">
-              <div className="text-center">
-                <User className="mx-auto h-10 w-10 text-gray-400 mb-3" />
-                <p className="text-gray-500">
-                  No active conversations. Start by sending a service request or responding to incoming requests.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {conversations.map((conversation: Conversation) => (
-              <Card key={conversation.id} className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-slate-800 dark:text-slate-100 mb-1">
-                            {user.role === 'professional' 
-                              ? `${conversation.organizerName} - ${conversation.eventTitle}`
-                              : `Professional ID ${conversation.professionalId} - ${conversation.eventTitle}`
-                            }
-                          </h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                            {conversation.status}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            Created: {new Date(conversation.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteConversation.mutate(conversation.id);
-                          }}
-                          disabled={deleteConversation.isPending}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => {
-                        setSelectedConversation(conversation);
-                        setIsChatOpen(true);
-                        // Clear notification badge for this conversation
-                        clearNotificationForConversation(conversation.id);
-                      }}
-                      className="w-full"
-                    >
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      Open Chat
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
 
       {/* Enhanced Chat Modal */}
       <EnhancedChatModal 
