@@ -22,12 +22,18 @@ export async function apiRequest(
     defaultHeaders["Authorization"] = `Bearer ${token}`;
   }
 
+  // Handle body serialization
+  const finalOptions = { ...options };
+  if (finalOptions.body && typeof finalOptions.body === 'object') {
+    finalOptions.body = JSON.stringify(finalOptions.body);
+  }
+
   const res = await fetch(url, {
     credentials: "include", // This ensures session cookies are sent with Replit Auth
-    ...options,
+    ...finalOptions,
     headers: {
       ...defaultHeaders,
-      ...options.headers,
+      ...finalOptions.headers,
     },
   });
 

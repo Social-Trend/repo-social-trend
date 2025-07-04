@@ -30,12 +30,12 @@ export default function ExitIntentModal({ isOpen, onClose, onProceedWithLogout }
     mutationFn: async (data: { rating: number; message: string; category: string; recommendationRating: number; userIntent: string; experienceRating: number }) => {
       return apiRequest("/api/feedback", {
         method: "POST",
-        body: JSON.stringify({
+        body: {
           ...data,
           userAgent: navigator.userAgent,
           currentPage: window.location.pathname,
           sessionDuration: Math.floor((Date.now() - performance.timing.navigationStart) / 60000),
-        }),
+        },
       });
     },
     onSuccess: () => {

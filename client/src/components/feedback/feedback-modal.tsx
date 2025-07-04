@@ -36,12 +36,12 @@ export default function FeedbackModal({ isOpen, onClose, category }: FeedbackMod
     }) => {
       return apiRequest("/api/feedback", {
         method: "POST",
-        body: JSON.stringify({
+        body: {
           ...data,
           userAgent: navigator.userAgent,
           currentPage: window.location.pathname,
           sessionDuration: Math.floor((Date.now() - performance.timing.navigationStart) / 60000), // minutes
-        }),
+        },
       });
     },
     onSuccess: () => {

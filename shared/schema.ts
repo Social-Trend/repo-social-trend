@@ -214,17 +214,17 @@ export const payments = pgTable("payments", {
 // Feedback table
 export const feedback = pgTable("feedback", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id),
   rating: integer("rating"), // 1-5 star rating
   message: text("message"),
   category: varchar("category", { length: 50 }), // 'general', 'onboarding', 'messaging', 'search', etc.
   recommendationRating: integer("recommendation_rating"), // 1-5 scale: Would you recommend SocialTend to others?
   userIntent: text("user_intent"), // optional: What brought you here today?
   experienceRating: integer("experience_rating"), // 1-5 scale: How satisfied are you with the user experience?
-  userAgent: text("user_agent"),
-  currentPage: varchar("current_page", { length: 255 }),
-  sessionDuration: integer("session_duration"), // in minutes
-  createdAt: timestamp("created_at").defaultNow(),
+  userAgent: text("useragent"), // Note: actual column name in DB is lowercase
+  currentPage: varchar("currentpage", { length: 255 }), // Note: actual column name in DB is lowercase
+  sessionDuration: integer("sessionduration"), // Note: actual column name in DB is lowercase
+  createdAt: timestamp("createdat").defaultNow(), // Note: actual column name in DB is lowercase
+  updatedAt: timestamp("updatedat").defaultNow(), // Note: actual column name in DB is lowercase
 });
 
 export const insertProfessionalSchema = createInsertSchema(professionals).omit({
@@ -259,6 +259,7 @@ export const insertPaymentSchema = createInsertSchema(payments).omit({
 export const insertFeedbackSchema = createInsertSchema(feedback).omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
