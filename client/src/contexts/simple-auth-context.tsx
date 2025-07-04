@@ -33,12 +33,12 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const hasToken = !!localStorage.getItem('authToken');
+  const hasToken = !!localStorage.getItem('token');
   const isAuthenticated = !!user;
 
   // Simple auth check function
   const checkAuth = async () => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     
     if (!token) {
       setUser(null);
@@ -47,7 +47,6 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
     }
 
     try {
-      console.log('Checking auth with token:', token.substring(0, 20) + '...');
       const response = await fetch('/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -55,29 +54,20 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
         },
       });
 
-      console.log('Auth check response:', response.status);
-      
       if (response.ok) {
         const userData = await response.json();
-        console.log('Auth successful, user:', userData);
         setUser(userData);
       } else {
-        // Clear invalid tokens immediately
-        console.log('Auth check failed, clearing token:', response.status);
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        setUser(null);
-        // Force page reload to clear all cached state
-        window.location.reload();
+        // Only clear token on auth errors
+        if (response.status === 401 || response.status === 403) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setUser(null);
+        }
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      // Also clear token on network errors to be safe
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-      setUser(null);
-      // Force page reload to clear all cached state
-      window.location.reload();
+      // Don't clear token on network errors
     } finally {
       setIsLoading(false);
     }
@@ -99,7 +89,7 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
     const { token, user } = await response.json();
     
     // Store auth data
-    localStorage.setItem('authToken', token);
+    localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
     
     // Set user state
@@ -111,7 +101,7 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
 
   // Logout function
   const logout = () => {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
     window.location.href = '/';
@@ -119,7 +109,7 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
 
   // Switch role function
   const switchRole = async (role: 'organizer' | 'professional') => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     if (!token) return;
 
     const response = await fetch('/api/auth/switch-role', {
@@ -133,7 +123,7 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
 
     if (response.ok) {
       const { token: newToken, user: updatedUser } = await response.json();
-      localStorage.setItem('authToken', newToken);
+      localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
     }
@@ -141,24 +131,6 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
 
   // Check auth on mount
   useEffect(() => {
-    // Force clear any existing bad tokens first
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      console.log('Found existing token:', token);
-      // Check if token looks valid (JWT format)
-      const parts = token.split('.');
-      if (parts.length !== 3) {
-        console.log('Invalid token format, clearing immediately...');
-        localStorage.clear(); // Clear all localStorage
-        sessionStorage.clear(); // Clear all sessionStorage
-        setUser(null);
-        setIsLoading(false);
-        // Force page reload to ensure clean state
-        window.location.reload();
-        return;
-      }
-    }
-    
     checkAuth();
   }, []);
 

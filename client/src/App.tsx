@@ -4,20 +4,6 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SimpleAuthProvider, useSimpleAuth } from "@/contexts/simple-auth-context";
-
-// Force clear invalid tokens on app initialization
-const clearInvalidTokens = () => {
-  const token = localStorage.getItem('authToken');
-  if (token && token.split('.').length !== 3) {
-    console.log('App initialization: Clearing invalid token format');
-    localStorage.clear();
-    sessionStorage.clear();
-    window.location.reload();
-  }
-};
-
-// Run token cleanup immediately
-clearInvalidTokens();
 import { AuthProvider } from "@/contexts/auth-context";
 import Navigation from "@/components/navigation";
 import Landing from "@/pages/landing";

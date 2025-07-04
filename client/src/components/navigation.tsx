@@ -10,7 +10,7 @@ import { useExitIntent } from "@/contexts/exit-intent-context";
 import { useProfile } from "@/hooks/useProfile";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { apiRequest } from "@/lib/queryClient";
-import AuthModal from "@/components/auth/simple-auth-modal";
+import AuthModal from "@/components/auth/auth-modal";
 import RoleSwitcher from "@/components/role-switcher";
 import { Badge } from "@/components/ui/badge";
 import ChatModal from "@/components/chat-modal";

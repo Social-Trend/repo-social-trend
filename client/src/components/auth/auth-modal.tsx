@@ -13,7 +13,6 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { loginUserSchema, registerUserSchema, type LoginUser, type RegisterUser } from "@shared/schema";
 import { useSimpleAuth } from "@/contexts/simple-auth-context";
-import { useLocation } from "wouter";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 
 interface AuthModalProps {
@@ -30,7 +29,6 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { login } = useSimpleAuth();
 
   const loginForm = useForm<LoginUser>({
     resolver: zodResolver(loginUserSchema),

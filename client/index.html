@@ -3,21 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <script>
-      // Force clear invalid tokens before React app loads
-      (function() {
-        try {
-          const token = localStorage.getItem('authToken');
-          if (token && token.split('.').length !== 3) {
-            console.log('HTML: Clearing invalid token format');
-            localStorage.clear();
-            sessionStorage.clear();
-          }
-        } catch (e) {
-          console.log('Token cleanup error:', e);
-        }
-      })();
-    </script>
   </head>
   <body>
     <div id="root"></div>
