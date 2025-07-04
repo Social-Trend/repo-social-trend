@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,12 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { loginUserSchema, registerUserSchema, type LoginUser, type RegisterUser } from "@shared/schema";
 import { useSimpleAuth } from "@/contexts/simple-auth-context";
-import { useLocation } from "wouter";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 
 interface AuthModalProps {
@@ -27,9 +26,7 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const { login } = useSimpleAuth();
 
   const loginForm = useForm<LoginUser>({
@@ -46,8 +43,6 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       email: "",
       password: "",
       confirmPassword: "",
-      firstName: "",
-      lastName: "",
       role: defaultRole,
     },
   });
@@ -69,64 +64,56 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
     } catch (error: any) {
       console.error("LOGIN ERROR:", error);
       toast({
-        title: "Sign in failed",
-        description: error.message || "Please check your email and password",
+        title: "Login failed",
+        description: error.message || "Please check your credentials and try again.",
         variant: "destructive",
       });
     }
   };
 
+  // Register mutation
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterUser) => {
-      return await apiRequest("/api/auth/register", {
+      return apiRequest("/api/auth/register", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: data,
       });
     },
-    onSuccess: (data) => {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    onSuccess: async (data, variables) => {
+      console.log("REGISTER SUCCESS:", data);
+      
       toast({
-        title: "Account created!",
-        description: `Welcome to SocialTend, ${data.user.firstName || data.user.email}`,
+        title: "Account created successfully!",
+        description: `Welcome to SocialTend, ${variables.email}!`,
       });
-      setOpen(false);
-      registerForm.reset();
-      // Trigger a storage event to update auth context immediately
-      window.dispatchEvent(new Event('storage'));
-      // Redirect to onboarding for profile creation
-      window.location.href = "/onboarding";
+      
+      // Auto-login after successful registration
+      try {
+        await login(variables.email, variables.password);
+        setOpen(false);
+        registerForm.reset();
+      } catch (loginError: any) {
+        console.error("AUTO-LOGIN ERROR:", loginError);
+        toast({
+          title: "Registration successful, but auto-login failed",
+          description: "Please log in manually with your new credentials.",
+          variant: "destructive",
+        });
+        setActiveTab("login");
+      }
     },
     onError: (error: any) => {
+      console.error("REGISTER ERROR:", error);
       toast({
         title: "Registration failed",
-        description: error.message || "Please try again",
+        description: error.message || "Please try again with different details.",
         variant: "destructive",
       });
     },
   });
 
-  const onLoginSubmit = (data: LoginUser) => {
-    console.log("LOGIN FORM SUBMITTED with:", data);
-    loginMutation.mutate(data);
-  };
-
-  // Reset form with default role when modal opens
-  useEffect(() => {
-    if (open) {
-      registerForm.reset({
-        email: "",
-        password: "",
-        confirmPassword: "",
-        firstName: "",
-        lastName: "",
-        role: defaultRole,
-      });
-    }
-  }, [open, defaultRole, registerForm]);
-
-  const onRegisterSubmit = (data: RegisterUser) => {
+  const handleRegister = (data: RegisterUser) => {
+    console.log("REGISTER STARTING with data:", data);
     registerMutation.mutate(data);
   };
 
@@ -135,9 +122,11 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Welcome to SocialTend</DialogTitle>
+          <DialogTitle>
+            {activeTab === "login" ? "Sign In" : "Create Account"}
+          </DialogTitle>
         </DialogHeader>
         
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "login" | "register")}>
@@ -149,16 +138,16 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
           <TabsContent value="login">
             <Card>
               <CardHeader>
-                <CardTitle>Sign In</CardTitle>
+                <CardTitle>Welcome Back</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent>
                 <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
                     <Input
                       id="login-email"
                       type="email"
-                      placeholder="your@email.com"
+                      placeholder="Enter your email"
                       {...loginForm.register("email")}
                     />
                     {loginForm.formState.errors.email && (
@@ -192,13 +181,13 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
                   
                   <Button 
                     type="submit" 
-                    className="w-full" 
-                    disabled={loginMutation.isPending}
+                    className="w-full"
+                    disabled={loginForm.formState.isSubmitting}
                   >
-                    {loginMutation.isPending ? (
+                    {loginForm.formState.isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Signing In...
+                        Signing in...
                       </>
                     ) : (
                       "Sign In"
@@ -214,45 +203,14 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
               <CardHeader>
                 <CardTitle>Create Account</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="register-firstName">First Name</Label>
-                      <Input
-                        id="register-firstName"
-                        placeholder="John"
-                        {...registerForm.register("firstName")}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="register-lastName">Last Name</Label>
-                      <Input
-                        id="register-lastName"
-                        placeholder="Doe"
-                        {...registerForm.register("lastName")}
-                      />
-                    </div>
-                  </div>
-                  
+              <CardContent>
+                <form onSubmit={registerForm.handleSubmit(handleRegister)} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="register-email">Email</Label>
-                    <Input
-                      id="register-email"
-                      type="email"
-                      placeholder="your@email.com"
-                      {...registerForm.register("email")}
-                    />
-                    {registerForm.formState.errors.email && (
-                      <p className="text-sm text-red-500">{registerForm.formState.errors.email.message}</p>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>I am a...</Label>
+                    <Label htmlFor="register-role">I am a:</Label>
                     <RadioGroup
                       value={registerForm.watch("role")}
                       onValueChange={(value) => registerForm.setValue("role", value as "organizer" | "professional")}
+                      className="flex space-x-4"
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="organizer" id="organizer" />
@@ -260,9 +218,22 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="professional" id="professional" />
-                        <Label htmlFor="professional">Hospitality Professional</Label>
+                        <Label htmlFor="professional">Professional Tender</Label>
                       </div>
                     </RadioGroup>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="register-email">Email</Label>
+                    <Input
+                      id="register-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      {...registerForm.register("email")}
+                    />
+                    {registerForm.formState.errors.email && (
+                      <p className="text-sm text-red-500">{registerForm.formState.errors.email.message}</p>
+                    )}
                   </div>
                   
                   <div className="space-y-2">
@@ -290,10 +261,10 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="register-confirmPassword">Confirm Password</Label>
+                    <Label htmlFor="register-confirm-password">Confirm Password</Label>
                     <div className="relative">
                       <Input
-                        id="register-confirmPassword"
+                        id="register-confirm-password"
                         type={showConfirmPassword ? "text" : "password"}
                         placeholder="Confirm your password"
                         {...registerForm.register("confirmPassword")}
@@ -315,13 +286,13 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
                   
                   <Button 
                     type="submit" 
-                    className="w-full" 
+                    className="w-full"
                     disabled={registerMutation.isPending}
                   >
                     {registerMutation.isPending ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating Account...
+                        Creating account...
                       </>
                     ) : (
                       "Create Account"

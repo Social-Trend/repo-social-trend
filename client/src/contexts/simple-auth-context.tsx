@@ -58,16 +58,18 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
         const userData = await response.json();
         setUser(userData);
       } else {
-        // Only clear token on auth errors
-        if (response.status === 401 || response.status === 403) {
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('user');
-          setUser(null);
-        }
+        // Clear invalid tokens immediately
+        console.log('Auth check failed, clearing token:', response.status);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        setUser(null);
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      // Don't clear token on network errors
+      // Also clear token on network errors to be safe
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
