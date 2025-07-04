@@ -775,7 +775,7 @@ export class DatabaseStorage implements IStorage {
   // Messaging methods
   async getConversations(professionalId?: string, organizerEmail?: string): Promise<any[]> {
     let query = db
-      .selectDistinct({
+      .select({
         id: conversations.id,
         professionalId: conversations.professionalId,
         organizerName: conversations.organizerName,
@@ -784,12 +784,12 @@ export class DatabaseStorage implements IStorage {
         eventLocation: conversations.eventLocation,
         status: conversations.status,
         createdAt: conversations.createdAt,
-        // Join professional profile data - prioritize one profile
+        // Join professional profile data
         professionalName: professionalProfiles.displayName,
         professionalFirstName: professionalProfiles.firstName,
         professionalLastName: professionalProfiles.lastName,
         professionalServices: professionalProfiles.services,
-        // Join organizer profile data - prioritize most recent profile
+        // Join organizer profile data
         organizerFirstName: organizerProfiles.firstName,
         organizerLastName: organizerProfiles.lastName,
         organizerCompanyName: organizerProfiles.companyName
@@ -808,8 +808,19 @@ export class DatabaseStorage implements IStorage {
     
     const results = await query.orderBy(desc(conversations.createdAt));
     
+    // Remove duplicates by conversation ID (can happen due to multiple organizer profiles for same email)
+    const uniqueResults = [];
+    const seenIds = new Set();
+    
+    for (const row of results) {
+      if (!seenIds.has(row.id)) {
+        seenIds.add(row.id);
+        uniqueResults.push(row);
+      }
+    }
+    
     // Transform results to include computed display names
-    return results.map(row => ({
+    return uniqueResults.map(row => ({
       ...row,
       professionalDisplayName: row.professionalName || 
                               (row.professionalFirstName && row.professionalLastName 
