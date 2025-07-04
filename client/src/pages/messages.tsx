@@ -437,10 +437,7 @@ export default function Messages() {
                           )}
                         </>
                       )}
-                      <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                        <MessageCircle className="h-4 w-4" />
-                        <span>Click to open conversation</span>
-                      </div>
+                      
                     </div>
                   )}
                   
