@@ -773,8 +773,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Messaging methods
-  async getConversations(professionalId?: string, organizerEmail?: string): Promise<Conversation[]> {
-    let query = db.select().from(conversations);
+  async getConversations(professionalId?: string, organizerEmail?: string): Promise<any[]> {
+    let query = db
+      .select({
+        id: conversations.id,
+        professionalId: conversations.professionalId,
+        organizerName: conversations.organizerName,
+        organizerEmail: conversations.organizerEmail,
+        eventTitle: conversations.eventTitle,
+        eventLocation: conversations.eventLocation,
+        status: conversations.status,
+        createdAt: conversations.createdAt,
+        // Join professional profile data
+        professionalName: professionalProfiles.displayName,
+        professionalFirstName: professionalProfiles.firstName,
+        professionalLastName: professionalProfiles.lastName,
+        professionalServices: professionalProfiles.services
+      })
+      .from(conversations)
+      .leftJoin(professionalProfiles, eq(conversations.professionalId, professionalProfiles.userId));
     
     if (professionalId) {
       query = query.where(eq(conversations.professionalId, professionalId));
@@ -784,7 +801,17 @@ export class DatabaseStorage implements IStorage {
       query = query.where(eq(conversations.organizerEmail, organizerEmail));
     }
     
-    return await query.orderBy(desc(conversations.createdAt));
+    const results = await query.orderBy(desc(conversations.createdAt));
+    
+    // Transform results to include computed professional display name
+    return results.map(row => ({
+      ...row,
+      professionalDisplayName: row.professionalName || 
+                              (row.professionalFirstName && row.professionalLastName 
+                                ? `${row.professionalFirstName} ${row.professionalLastName}`
+                                : '') ||
+                              `Professional ${row.professionalId}`
+    }));
   }
 
   async getConversation(id: number): Promise<Conversation | undefined> {

@@ -248,7 +248,7 @@ export default function Messages() {
                         <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                           {user.role === 'professional' 
                             ? conversation.organizerName
-                            : `Professional ${conversation.professionalId}`
+                            : (conversation as any).professionalDisplayName
                           }
                         </h3>
                         <span className="text-xs text-slate-500 dark:text-slate-400 flex-shrink-0 ml-2">
