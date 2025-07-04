@@ -42,7 +42,7 @@ export default function EnhancedChatModal({ conversation, isOpen, onClose }: Enh
         body: JSON.stringify({
           conversationId: messageData.conversationId,
           senderType: (user as any).role === 'professional' ? 'professional' : 'organizer',
-          senderName: (user as any).firstName ? `${(user as any).firstName} ${(user as any).lastName || ''}`.trim() : (user as any).email || 'Unknown',
+          senderName: (user as any).email || 'Unknown',
           content: messageData.content,
         }),
       });
