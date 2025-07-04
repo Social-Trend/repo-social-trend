@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
 
@@ -9,76 +9,66 @@ interface AuthContextType {
   isLoading: boolean;
   logout: () => void;
   switchRole: (newRole: "organizer" | "professional") => Promise<void>;
+  refreshAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const queryClient = useQueryClient();
 
+  // Check authentication on mount and whenever token changes
+  const checkAuth = async () => {
+    const token = localStorage.getItem("token");
+    console.log("AuthProvider - Checking auth with token:", token ? "Present" : "None");
+    
+    if (!token) {
+      setUser(null);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const userData = await apiRequest("/api/auth/me");
+      console.log("AuthProvider - User authenticated:", userData);
+      setUser(userData);
+    } catch (error: any) {
+      console.error("AuthProvider - Auth check failed:", error);
+      // Clear invalid token
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    console.log("AuthProvider - Initial token from localStorage:", storedToken ? "Present" : "None");
-    setToken(storedToken);
-
-    // Listen for storage events to update token when it changes
-    const handleStorageChange = () => {
-      const newToken = localStorage.getItem("token");
-      console.log("AuthProvider - Storage change detected, new token:", newToken ? "Present" : "None");
-      setToken(newToken);
+    checkAuth();
+    
+    // Listen for auth token changes
+    const handleAuthChange = () => {
+      console.log("AuthProvider - Auth token changed, rechecking...");
+      checkAuth();
     };
 
-    // Listen for custom storage events (for same-tab changes)
-    const handleCustomStorageChange = () => {
-      const newToken = localStorage.getItem("token");
-      console.log("AuthProvider - Custom storage change detected, new token:", newToken ? "Present" : "None");
-      setToken(newToken);
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('auth-token-changed', handleCustomStorageChange);
+    window.addEventListener('auth-token-changed', handleAuthChange);
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('auth-token-changed', handleCustomStorageChange);
+      window.removeEventListener('auth-token-changed', handleAuthChange);
     };
   }, []);
 
-  const { data: user, isLoading } = useQuery({
-    queryKey: ["/api/auth/me"],
-    queryFn: async () => {
-      console.log("AuthProvider - Fetching user with token:", token ? "Present" : "None");
-      if (!token) return null;
-      
-      try {
-        const userData = await apiRequest("/api/auth/me");
-        console.log("AuthProvider - User data fetched:", userData);
-        return userData;
-      } catch (error: any) {
-        console.error("AuthProvider - Error fetching user:", error);
-        console.error("AuthProvider - Error details:", {
-          message: error.message,
-          status: error.status,
-          hasAuth: error.message.includes("401") || error.message.includes("403")
-        });
-        // Only clear token on specific auth errors, not network issues
-        if (error.message.includes("401") || error.message.includes("403")) {
-          console.warn("AuthProvider - Clearing token due to auth error");
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-          setToken(null);
-        }
-        return null;
-      }
-    },
-    enabled: !!token,
-    retry: false
-  });
+  const refreshAuth = async () => {
+    await checkAuth();
+  };
 
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    setToken(null);
+    setUser(null);
     window.location.reload();
   };
 
@@ -89,34 +79,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await apiRequest("/api/auth/switch-role", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: newRole })
+        body: JSON.stringify({ role: newRole }),
       });
       
-      // Update the token with the new one from the response
-      if (response.token) {
-        localStorage.setItem("token", response.token);
-        setToken(response.token);
-        
-        // Dispatch custom event to notify other components
-        window.dispatchEvent(new Event('auth-token-changed'));
-        
-        // Small delay to ensure token is properly set before invalidating
-        setTimeout(() => {
-          queryClient.invalidateQueries();
-        }, 100);
-      }
-    } catch (error) {
-      console.error("Failed to switch role:", error);
+      // Update the token in localStorage
+      localStorage.setItem("token", response.token);
+      
+      // Refresh auth to get updated user data
+      await refreshAuth();
+      
+    } catch (error: any) {
+      console.error("Role switch failed:", error);
       throw error;
     }
   };
 
   const value = {
-    user: user || null,
-    isAuthenticated: !!user && !!token,
-    isLoading: isLoading && !!token,
+    user,
+    isAuthenticated: !!user,
+    isLoading,
     logout,
     switchRole,
+    refreshAuth,
   };
 
   return (

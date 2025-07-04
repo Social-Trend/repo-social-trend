@@ -65,7 +65,7 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
         throw error;
       }
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log("LOGIN SUCCESS - Token received:", data.token ? "Present" : "None");
       console.log("LOGIN SUCCESS - User data:", data.user);
       
@@ -80,23 +80,19 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
         description: `Successfully signed in as ${data.user.email}`,
       });
       
-      // Dispatch custom event to trigger auth context update
-      console.log("LOGIN SUCCESS - Dispatching auth-token-changed event");
-      window.dispatchEvent(new Event('auth-token-changed'));
-      
-      // Immediately invalidate and refetch auth queries to trigger context update
-      console.log("LOGIN SUCCESS - Invalidating auth queries");
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-      
-      // Close modal and reset form immediately  
+      // Close modal and reset form
       setOpen(false);
       loginForm.reset();
       
-      // Force a complete app refresh to ensure auth state is properly updated
-      console.log("LOGIN SUCCESS - Forcing page reload to ensure proper authentication");
+      // Trigger auth context refresh
+      console.log("LOGIN SUCCESS - Refreshing auth context");
+      window.dispatchEvent(new Event('auth-token-changed'));
+      
+      // Small delay then navigate
       setTimeout(() => {
-        window.location.href = "/";
-      }, 200);
+        console.log("LOGIN SUCCESS - Navigating to dashboard");
+        setLocation("/");
+      }, 100);
     },
     onError: (error: any) => {
       console.error("Login failed:", error);
