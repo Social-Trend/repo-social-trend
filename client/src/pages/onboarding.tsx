@@ -28,6 +28,13 @@ export default function Onboarding() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Redirect authenticated users with existing profiles to dashboard
+  useEffect(() => {
+    if (isAuthenticated && user && hasProfile && !profileLoading) {
+      setLocation("/");
+    }
+  }, [isAuthenticated, user, hasProfile, profileLoading, setLocation]);
+
   const handleProfileSuccess = () => {
     setLocation("/");
   };
@@ -127,13 +134,6 @@ export default function Onboarding() {
       </div>
     );
   }
-
-  // Redirect authenticated users with existing profiles to dashboard
-  useEffect(() => {
-    if (isAuthenticated && user && hasProfile && !profileLoading) {
-      setLocation("/");
-    }
-  }, [isAuthenticated, user, hasProfile, profileLoading, setLocation]);
 
   // Show authentication forms for non-authenticated users
   if (!isAuthenticated || !user) {
