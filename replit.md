@@ -74,6 +74,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- July 4, 2025: **COMPLETED** Fixed service request conversation routing bug
+  - ✓ Resolved issue where all service request cards opened the same conversation
+  - ✓ Enhanced backend service request API to include organizer email via database JOIN
+  - ✓ Updated conversation matching logic to use professional ID, organizer email, AND event title
+  - ✓ Fixed conversation creation to use correct organizer email from service request data
+  - ✓ Each service request card now opens its specific conversation thread with proper organizer
+  - ✓ Replaced generic matching (professional ID only) with precise multi-field matching
+  - ✓ Verified fix working with multiple conversations (IDs 9, 10, 11) opening correctly
+
 - July 4, 2025: **COMPLETED** Fixed duplicate conversation display issue in Messages interface
   - ✓ Identified root cause: Multiple organizer profiles for same email causing database duplicates
   - ✓ Implemented database-level deduplication logic in getConversations() method
