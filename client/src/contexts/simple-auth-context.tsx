@@ -33,12 +33,12 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const hasToken = !!localStorage.getItem('token');
+  const hasToken = !!localStorage.getItem('authToken');
   const isAuthenticated = !!user;
 
   // Simple auth check function
   const checkAuth = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     
     if (!token) {
       setUser(null);
@@ -60,7 +60,7 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
       } else {
         // Only clear token on auth errors
         if (response.status === 401 || response.status === 403) {
-          localStorage.removeItem('token');
+          localStorage.removeItem('authToken');
           localStorage.removeItem('user');
           setUser(null);
         }
@@ -89,7 +89,7 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
     const { token, user } = await response.json();
     
     // Store auth data
-    localStorage.setItem('token', token);
+    localStorage.setItem('authToken', token);
     localStorage.setItem('user', JSON.stringify(user));
     
     // Set user state
@@ -101,7 +101,7 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
 
   // Logout function
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('authToken');
     localStorage.removeItem('user');
     setUser(null);
     window.location.href = '/';
@@ -109,7 +109,7 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
 
   // Switch role function
   const switchRole = async (role: 'organizer' | 'professional') => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     if (!token) return;
 
     const response = await fetch('/api/auth/switch-role', {
@@ -123,7 +123,7 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
 
     if (response.ok) {
       const { token: newToken, user: updatedUser } = await response.json();
-      localStorage.setItem('token', newToken);
+      localStorage.setItem('authToken', newToken);
       localStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
     }
