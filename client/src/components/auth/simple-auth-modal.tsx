@@ -74,10 +74,20 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
   // Register mutation
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterUser) => {
-      return apiRequest("/api/auth/register", {
+      const response = await fetch("/api/auth/register", {
         method: "POST",
-        body: data,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Registration failed');
+      }
+      
+      return response.json();
     },
     onSuccess: async (data, variables) => {
       console.log("REGISTER SUCCESS:", data);

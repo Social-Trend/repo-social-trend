@@ -47,6 +47,7 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
     }
 
     try {
+      console.log('Checking auth with token:', token.substring(0, 20) + '...');
       const response = await fetch('/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -54,8 +55,11 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
         },
       });
 
+      console.log('Auth check response:', response.status);
+      
       if (response.ok) {
         const userData = await response.json();
+        console.log('Auth successful, user:', userData);
         setUser(userData);
       } else {
         // Clear invalid tokens immediately
@@ -63,6 +67,8 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
         setUser(null);
+        // Force page reload to clear all cached state
+        window.location.reload();
       }
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -70,6 +76,8 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
       setUser(null);
+      // Force page reload to clear all cached state
+      window.location.reload();
     } finally {
       setIsLoading(false);
     }
@@ -133,6 +141,24 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
 
   // Check auth on mount
   useEffect(() => {
+    // Force clear any existing bad tokens first
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      console.log('Found existing token:', token);
+      // Check if token looks valid (JWT format)
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        console.log('Invalid token format, clearing immediately...');
+        localStorage.clear(); // Clear all localStorage
+        sessionStorage.clear(); // Clear all sessionStorage
+        setUser(null);
+        setIsLoading(false);
+        // Force page reload to ensure clean state
+        window.location.reload();
+        return;
+      }
+    }
+    
     checkAuth();
   }, []);
 
