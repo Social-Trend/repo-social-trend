@@ -84,15 +84,9 @@ export default function AuthModal({ children, defaultTab = "login", defaultRole 
       setOpen(false);
       loginForm.reset();
       
-      // Trigger auth context refresh
-      console.log("LOGIN SUCCESS - Refreshing auth context");
-      window.dispatchEvent(new Event('auth-token-changed'));
-      
-      // Small delay then navigate
-      setTimeout(() => {
-        console.log("LOGIN SUCCESS - Navigating to dashboard");
-        setLocation("/");
-      }, 100);
+      // Force immediate page reload to ensure clean authentication state
+      console.log("LOGIN SUCCESS - Forcing page reload for clean auth state");
+      window.location.href = "/";
     },
     onError: (error: any) => {
       console.error("Login failed:", error);

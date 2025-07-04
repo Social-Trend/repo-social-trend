@@ -37,10 +37,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(userData);
     } catch (error: any) {
       console.error("AuthProvider - Auth check failed:", error);
-      // Clear invalid token
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      setUser(null);
+      console.error("AuthProvider - Error details:", {
+        message: error.message,
+        status: error.status,
+        response: error.response
+      });
+      
+      // Only clear token on actual auth errors, not network issues
+      if (error.message?.includes("401") || error.message?.includes("403") || error.status === 401 || error.status === 403) {
+        console.warn("AuthProvider - Clearing token due to authentication error");
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        setUser(null);
+      } else {
+        console.warn("AuthProvider - Network or other error, keeping token for retry");
+        // Don't clear the token for network errors
+        setUser(null);
+      }
     } finally {
       setIsLoading(false);
     }
