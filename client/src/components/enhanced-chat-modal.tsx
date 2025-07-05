@@ -37,17 +37,29 @@ export default function EnhancedChatModal({ conversation, isOpen, onClose }: Enh
   // Send message mutation
   const sendMessage = useMutation({
     mutationFn: async (messageData: { conversationId: number; content: string }) => {
+      console.log("🔥 MUTATION - Starting with user:", user);
       if (!user) throw new Error("User not authenticated");
       
-      return await apiRequest("/api/messages", {
-        method: "POST",
-        body: {
-          conversationId: messageData.conversationId,
-          senderType: (user as any).role === 'professional' ? 'professional' : 'organizer',
-          senderName: (user as any).email || 'Unknown',
-          content: messageData.content,
-        },
-      });
+      const payload = {
+        conversationId: messageData.conversationId,
+        senderType: (user as any).role === 'professional' ? 'professional' : 'organizer',
+        senderName: (user as any).email || 'Unknown',
+        content: messageData.content,
+      };
+      
+      console.log("🔥 MUTATION - Sending payload:", payload);
+      
+      try {
+        const result = await apiRequest("/api/messages", {
+          method: "POST",
+          body: payload,
+        });
+        console.log("🔥 MUTATION - Success:", result);
+        return result;
+      } catch (error) {
+        console.error("🔥 MUTATION - Error:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       setMessageText("");
@@ -78,11 +90,15 @@ export default function EnhancedChatModal({ conversation, isOpen, onClose }: Enh
   }, [conversation?.id, isOpen, messages?.length, clearNotificationForConversation]);
 
   const handleSendMessage = () => {
+    console.log("🚀 SEND MESSAGE - Starting:", { messageText: messageText.trim(), conversation: conversation?.id });
     if (messageText.trim() && conversation) {
+      console.log("🚀 SEND MESSAGE - Triggering mutation");
       sendMessage.mutate({
         conversationId: conversation.id,
         content: messageText.trim(),
       });
+    } else {
+      console.log("🚀 SEND MESSAGE - Validation failed:", { hasMessage: !!messageText.trim(), hasConversation: !!conversation });
     }
   };
 
