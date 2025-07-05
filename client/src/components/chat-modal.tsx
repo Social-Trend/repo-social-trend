@@ -51,7 +51,7 @@ export default function ChatModal({ conversation, isOpen, onClose }: ChatModalPr
       try {
         const result = await apiRequest("/api/messages", {
           method: "POST",
-          body: JSON.stringify(payload),
+          body: payload,
         });
         console.log("ChatModal - Message sent successfully:", result);
         return result;

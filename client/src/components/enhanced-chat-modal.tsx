@@ -39,12 +39,12 @@ export default function EnhancedChatModal({ conversation, isOpen, onClose }: Enh
       
       return await apiRequest("/api/messages", {
         method: "POST",
-        body: JSON.stringify({
+        body: {
           conversationId: messageData.conversationId,
           senderType: (user as any).role === 'professional' ? 'professional' : 'organizer',
           senderName: (user as any).email || 'Unknown',
           content: messageData.content,
-        }),
+        },
       });
     },
     onSuccess: () => {
