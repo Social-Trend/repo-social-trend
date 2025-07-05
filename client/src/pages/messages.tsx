@@ -411,7 +411,7 @@ export default function Messages() {
                               serviceRequest={request}
                               onPaymentSuccess={() => {
                                 // Refresh the requests list after payment
-                                window.location.reload();
+                                refetchServiceRequests();
                               }}
                               size="sm"
                             />

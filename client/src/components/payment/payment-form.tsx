@@ -47,11 +47,11 @@ export default function PaymentForm({ serviceRequest, onSuccess, onCancel }: Pay
     mutationFn: async (data: PaymentForm) => {
       const response = await apiRequest("/api/create-payment-intent", {
         method: "POST",
-        body: JSON.stringify({
+        body: {
           serviceRequestId: serviceRequest.id,
           amount: data.depositAmount * 100,
           totalAmount: data.totalAmount * 100,
-        })
+        }
       });
       return response;
     },
