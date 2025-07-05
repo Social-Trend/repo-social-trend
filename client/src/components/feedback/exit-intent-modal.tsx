@@ -101,28 +101,28 @@ export default function ExitIntentModal({ isOpen, onClose, onProceedWithLogout }
   };
 
   const handleDetailedSubmitWithLogout = () => {
-    if (rating === 0 || recommendationRating === 0 || experienceRating === 0) return;
+    if (rating === 0) return;
     
     feedbackMutation.mutate({
       rating,
       message: message.trim(),
       category: "exit_intent",
-      recommendationRating,
+      recommendationRating: rating, // Use the main rating for all fields
       userIntent: userIntent.trim(),
-      experienceRating,
+      experienceRating: rating, // Use the main rating for all fields
     });
   };
 
   const handleDetailedSubmit = () => {
-    if (rating === 0 || recommendationRating === 0 || experienceRating === 0) return;
+    if (rating === 0) return;
     
     feedbackMutation.mutate({
       rating,
       message: message.trim(),
       category: "exit_intent",
-      recommendationRating,
+      recommendationRating: rating, // Use the main rating for all fields
       userIntent: userIntent.trim(),
-      experienceRating,
+      experienceRating: rating, // Use the main rating for all fields
     });
   };
 
