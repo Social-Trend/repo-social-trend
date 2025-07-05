@@ -51,6 +51,8 @@ export default function EnhancedChatModal({ conversation, isOpen, onClose }: Enh
       setMessageText("");
       refetchMessages();
       queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
+      // Invalidate unread count to update notifications for other users
+      queryClient.invalidateQueries({ queryKey: ["/api/unread-conversations-count"] });
     },
   });
 

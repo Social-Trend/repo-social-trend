@@ -411,7 +411,7 @@ export default function Messages() {
                               serviceRequest={request}
                               onPaymentSuccess={() => {
                                 // Refresh the requests list after payment
-                                refetchServiceRequests();
+                                queryClient.invalidateQueries({ queryKey: ["/api/service-requests"] });
                               }}
                               size="sm"
                             />
