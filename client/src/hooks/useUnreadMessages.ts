@@ -42,14 +42,15 @@ export const hasNewMessagesInConversation = (conversationId: number, lastMessage
     const lastViewKey = `lastView_${conversationId}`;
     const lastViewTime = localStorage.getItem(lastViewKey);
     
+    const messageTime = new Date(lastMessageTime).getTime();
+    const viewTime = lastViewTime ? parseInt(lastViewTime) : 0;
+    const hasNew = messageTime > viewTime;
+    
     if (!lastViewTime) {
       return true; // No previous view time, consider it new
     }
     
-    const messageTime = new Date(lastMessageTime).getTime();
-    const viewTime = parseInt(lastViewTime);
-    
-    return messageTime > viewTime;
+    return hasNew;
   } catch (error) {
     return true; // Error checking, consider it new
   }
