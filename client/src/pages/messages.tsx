@@ -233,7 +233,7 @@ export default function Messages() {
                 onClick={() => {
                   setSelectedConversation(conversation);
                   setIsChatOpen(true);
-                  clearNotificationForConversation(conversation.id);
+                  // Don't clear notification immediately - let the chat modal handle it when user actually views messages
                 }}
               >
                 <div className="flex items-center justify-between">

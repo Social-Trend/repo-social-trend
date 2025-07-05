@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Send, X, Phone, Video, MoreVertical, Smile } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/contexts/auth-context";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import type { Conversation, Message } from "@shared/schema";
 
 interface EnhancedChatModalProps {
@@ -19,6 +20,7 @@ interface EnhancedChatModalProps {
 
 export default function EnhancedChatModal({ conversation, isOpen, onClose }: EnhancedChatModalProps) {
   const { user } = useAuth();
+  const { clearNotificationForConversation } = useUnreadMessages();
   const [messageText, setMessageText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -61,12 +63,19 @@ export default function EnhancedChatModal({ conversation, isOpen, onClose }: Enh
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Track when conversation is viewed
+  // Track when conversation is viewed and clear notifications
   useEffect(() => {
-    if (conversation?.id && isOpen) {
-      console.log(`Updated view time for conversation ${conversation.id}`);
+    if (conversation?.id && isOpen && messages?.length > 0) {
+      // Clear notifications after a short delay to allow user to see the messages
+      const timer = setTimeout(() => {
+        if (clearNotificationForConversation) {
+          clearNotificationForConversation(conversation.id);
+        }
+      }, 1000); // 1 second delay
+      
+      return () => clearTimeout(timer);
     }
-  }, [conversation?.id, isOpen]);
+  }, [conversation?.id, isOpen, messages?.length, clearNotificationForConversation]);
 
   const handleSendMessage = () => {
     if (messageText.trim() && conversation) {
