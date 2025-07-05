@@ -74,6 +74,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- July 5, 2025: **COMPLETED** Fixed bidirectional notification system for messaging interface
+  - ✓ Identified root cause: View time was being updated immediately when conversations were clicked, preventing notifications from showing
+  - ✓ Fixed timing issue by removing premature notification clearing in messages page onClick handler
+  - ✓ Updated enhanced chat modal to clear notifications only after users actually view messages (1-second delay)
+  - ✓ Tested both directions: organizer-to-professional and professional-to-organizer notifications
+  - ✓ Verified notification badge appears correctly on Messages button for both user roles
+  - ✓ System now properly tracks when messages are newer than last view time with 5-second polling
+  - ✓ Notification clearing works correctly when users open and view conversation threads
+  - ✓ Complete bidirectional messaging notification system now functional across all user roles
+
 - July 4, 2025: **COMPLETED** Fixed service request conversation routing bug
   - ✓ Resolved issue where all service request cards opened the same conversation
   - ✓ Enhanced backend service request API to include organizer email via database JOIN

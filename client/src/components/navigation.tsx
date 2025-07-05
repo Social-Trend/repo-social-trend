@@ -23,7 +23,6 @@ export default function Navigation({}: NavigationProps) {
   const { triggerExitIntent, setPendingLogout } = useExitIntent();
   const { hasProfile, profileCompletion, hasOrganizerProfile } = useProfile();
   const { unreadCount, hasUnreadMessages, resetNotifications } = useUnreadMessages();
-  
 
 
 
