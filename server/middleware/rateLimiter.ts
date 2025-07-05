@@ -9,6 +9,11 @@ interface RateLimitStore {
 
 const store: RateLimitStore = {};
 
+// Function to reset rate limit for a specific IP (useful for development)
+export function resetRateLimit(ip: string) {
+  delete store[ip];
+}
+
 // Clean up expired entries every 10 minutes
 setInterval(() => {
   const now = Date.now();
@@ -46,6 +51,6 @@ export function createRateLimit(windowMs: number, max: number) {
 }
 
 // Common rate limiters
-export const authRateLimit = createRateLimit(15 * 60 * 1000, 5); // 5 attempts per 15 minutes
+export const authRateLimit = createRateLimit(15 * 60 * 1000, process.env.NODE_ENV === 'development' ? 50 : 5); // 50 attempts per 15 minutes in dev, 5 in production
 export const apiRateLimit = createRateLimit(15 * 60 * 1000, process.env.NODE_ENV === 'development' ? 1000 : 100); // Higher limit for dev
 export const messageRateLimit = createRateLimit(60 * 1000, process.env.NODE_ENV === 'development' ? 200 : 60); // Much higher limit for development, reasonable for production

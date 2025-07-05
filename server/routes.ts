@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { authRateLimit, messageRateLimit } from "./middleware/rateLimiter";
+import { authRateLimit, messageRateLimit, resetRateLimit } from "./middleware/rateLimiter";
 import { 
   loginUserSchema, 
   registerUserSchema, 
@@ -964,6 +964,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch feedback" });
     }
   });
+
+  // Development only: Reset rate limit endpoint
+  if (process.env.NODE_ENV === 'development') {
+    app.post("/api/dev/reset-rate-limit", (req, res) => {
+      const ip = req.ip || 'unknown';
+      resetRateLimit(ip);
+      res.json({ message: "Rate limit reset for your IP", ip });
+    });
+  }
 
   const httpServer = createServer(app);
   return httpServer;
