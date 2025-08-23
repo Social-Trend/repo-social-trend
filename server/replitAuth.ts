@@ -1,5 +1,5 @@
 import * as client from "openid-client";
-import { Strategy, type VerifyFunction } from "openid-client/passport";
+import { Strategy, type VerifyFunction, type AuthenticateOptions as OIDCAuthOptions } from "openid-client/passport";
 
 import passport from "passport";
 import session from "express-session";
@@ -8,28 +8,27 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-if (!process.env.REPLIT_DOMAINS) {
-  throw new Error("Environment variable REPLIT_DOMAINS not provided");
-}
+const isProd = process.env.NODE_ENV === "production";
 
 const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
       new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
-      process.env.REPL_ID!
+      process.env.REPL_ID!,
+      process.env.REPL_SECRET
     );
   },
   { maxAge: 3600 * 1000 }
 );
 
 export function getSession() {
-  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  const sessionTtlMs = 7 * 24 * 60 * 60 * 1000;
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
-    ttl: sessionTtl,
+    createTableIfMissing: true,
     tableName: "sessions",
+    ttl: Math.floor(sessionTtlMs / 1000),
   });
   return session({
     secret: process.env.SESSION_SECRET!,
@@ -38,8 +37,9 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
-      maxAge: sessionTtl,
+      secure: isProd,
+      sameSite: "lax",
+      maxAge: sessionTtlMs,
     },
   });
 }
@@ -54,9 +54,7 @@ function updateUserSession(
   user.expires_at = user.claims?.exp;
 }
 
-async function upsertUser(
-  claims: any,
-) {
+async function upsertUser(claims: any) {
   await storage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
@@ -78,49 +76,49 @@ export async function setupAuth(app: Express) {
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
     verified: passport.AuthenticateCallback
   ) => {
-    const user = {};
+    const user: any = {};
     updateUserSession(user, tokens);
     await upsertUser(tokens.claims());
     verified(null, user);
   };
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
-    const strategy = new Strategy(
-      {
-        name: `replitauth:${domain}`,
-        config,
-        scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
-      },
-      verify,
-    );
-    passport.use(strategy);
-  }
+  passport.use(new Strategy(
+    {
+      name: "replitauth",
+      config,
+      scope: "openid email profile offline_access",
+    },
+    verify
+  ));
 
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      prompt: "login consent",
-      scope: ["openid", "email", "profile", "offline_access"],
-    })(req, res, next);
-  });
+  const options: OIDCAuthOptions = {
+    prompt: "login consent",
+    scope: ["openid", "email", "profile", "offline_access"],
+    callbackURL: `${req.protocol}://${req.get("host")}/api/callback`,
+  };
+  passport.authenticate("replitauth", options)(req, res, next);
+});
 
-  app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
-    })(req, res, next);
-  });
+app.get("/api/callback", (req, res, next) => {
+  const options: OIDCAuthOptions = {
+    callbackURL: `${req.protocol}://${req.get("host")}/api/callback`,
+    successReturnToOrRedirect: "/",
+    failureRedirect: "/api/login",
+  };
+  passport.authenticate("replitauth", options)(req, res, next);
+});
 
   app.get("/api/logout", (req, res) => {
     req.logout(() => {
+      const postLogout = `${req.protocol}://${req.get("host")}`;
       res.redirect(
         client.buildEndSessionUrl(config, {
           client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+          post_logout_redirect_uri: postLogout,
         }).href
       );
     });

@@ -1,15 +1,18 @@
 import { MailService } from '@sendgrid/mail';
 import { logger } from './middleware/logger';
 
+const emailEnabled = process.env.ENABLE_EMAIL !== 'false' && !!process.env.SENDGRID_API_KEY;
+
 let mailService: MailService | null = null;
 
-// Initialize SendGrid if API key is available
-if (process.env.SENDGRID_API_KEY) {
+if (emailEnabled) {
   mailService = new MailService();
-  mailService.setApiKey(process.env.SENDGRID_API_KEY);
+  mailService.setApiKey(process.env.SENDGRID_API_KEY!);
   logger.info('SendGrid email service initialized');
 } else {
-  logger.warn('SENDGRID_API_KEY not provided - email functionality disabled');
+  // Only warn in production; be quieter in dev
+  const msg = 'Email service disabled (missing SENDGRID_API_KEY or ENABLE_EMAIL=false)';
+  process.env.NODE_ENV === 'production' ? logger.warn(msg) : logger.info(msg);
 }
 
 interface EmailParams {
@@ -21,17 +24,25 @@ interface EmailParams {
 
 export async function sendEmail(params: EmailParams): Promise<boolean> {
   if (!mailService) {
-    logger.warn('Email service not available - skipping email send', { to: params.to, subject: params.subject });
+    logger.info('DEV email preview (not sent)', {
+      to: params.to,
+      subject: params.subject,
+      text: params.text,
+      htmlSnippet: params.html.slice(0, 200) + (params.html.length > 200 ? '…' : ''),
+    });
     return false;
   }
 
   try {
     await mailService.send({
       to: params.to,
-      from: 'noreply@socialtend.com', // You'll need to verify this domain in SendGrid
+      from: process.env.SENDGRID_FROM || 'noreply@socialtend.com',
       subject: params.subject,
       html: params.html,
-      text: params.text || params.html.replace(/<[^>]*>/g, '') // Strip HTML for text version
+      text: params.text || params.html.replace(/<[^>]*>/g, ''),
+      ...(process.env.SENDGRID_SANDBOX === 'true'
+        ? { mailSettings: { sandboxMode: { enable: true } } }
+        : {}),
     });
     
     logger.info('Email sent successfully', { to: params.to, subject: params.subject });
