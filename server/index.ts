@@ -8,21 +8,21 @@ import { apiRateLimit, authRateLimit } from "./middleware/rateLimiter";
 const app = express();
 
 // Security and logging middleware
-app.set('trust proxy', 1); // Trust first proxy for rate limiting
+app.set("trust proxy", 1); // Trust first proxy for rate limiting
 app.use(requestLogger);
 
 // Apply rate limiting selectively - exclude auth routes
 app.use((req, res, next) => {
   // Skip rate limiting for authentication routes
-  if (req.path.startsWith('/api/auth/')) {
+  if (req.path.startsWith("/api/auth/")) {
     return next();
   }
   // Apply general API rate limiting to other routes
   return apiRateLimit(req, res, next);
 });
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: false, limit: "10mb" }));
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -57,7 +57,7 @@ app.use((req, res, next) => {
 (async () => {
   // Setup health check routes first
   setupHealthRoutes(app);
-  
+
   const server = await registerRoutes(app);
 
   // Error handling middleware
@@ -81,12 +81,16 @@ app.use((req, res, next) => {
 
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
-  // It is the only port that is not firewalled.
+  // It is the only port that is not fire walled.
   const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-  }, () => {
-    log(`serving on port ${port}`);
-  });
+  app.get('/healthz', (_req, res) => res.status(200).send('ok'));
+  app.listen(
+    {
+      port,
+      host: "0.0.0.0",
+    },
+    () => {
+      log(`serving on port ${port}`);
+    }
+  );
 })();
